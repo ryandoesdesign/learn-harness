@@ -1,0 +1,237 @@
+{
+	"default": {
+		"totalDollars": 0.02115310356,
+		"unpricedRuns": 0,
+		"stages": {
+			"extraction": {
+				"dollars": 0.013426987032,
+				"unpricedRuns": 0,
+				"runs": 8,
+				"tokens": {
+					"inputTokens": 71193,
+					"outputTokens": 80854,
+					"cacheReadTokens": 2048,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 64175
+				}
+			},
+			"audit": {
+				"dollars": 0.007726116528,
+				"unpricedRuns": 0,
+				"runs": 8,
+				"tokens": {
+					"inputTokens": 111675,
+					"outputTokens": 42617,
+					"cacheReadTokens": 187392,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 36018
+				}
+			}
+		},
+		"runs": [
+			{
+				"startedAt": 1790780690483,
+				"at": "2026-09-30T15:07:24.186Z",
+				"durationMs": 153703,
+				"kind": "extraction",
+				"title": "learning libertarianism.md",
+				"dollars": 0.0021220224480000003,
+				"tokens": {
+					"inputTokens": 18437,
+					"outputTokens": 12134,
+					"cacheReadTokens": 35072,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 9188
+				},
+				"merged": {
+					"nodes": 13,
+					"chains": 10
+				}
+			},
+			{
+				"startedAt": 1790780506325,
+				"at": "2026-09-30T15:04:50.482Z",
+				"durationMs": 184157,
+				"kind": "extraction",
+				"title": "learning libertarianism.md",
+				"dollars": 0.004554582264,
+				"tokens": {
+					"inputTokens": 33582,
+					"outputTokens": 28433,
+					"cacheReadTokens": 20096,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 25058
+				},
+				"merged": {
+					"nodes": 15,
+					"chains": 11
+				}
+			},
+			{
+				"startedAt": 1790780457181,
+				"at": "2026-09-30T15:01:46.324Z",
+				"durationMs": 49143,
+				"kind": "extraction",
+				"title": "learning libertarianism.md",
+				"dollars": 0.00193832604,
+				"tokens": {
+					"inputTokens": 26049,
+					"outputTokens": 8859,
+					"cacheReadTokens": 15360,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 5977
+				},
+				"merged": {
+					"nodes": 20,
+					"chains": 9
+				}
+			},
+			{
+				"startedAt": 1790780331640,
+				"at": "2026-09-30T15:00:14.763Z",
+				"durationMs": 83123,
+				"kind": "extraction",
+				"title": "learning software architecture.md",
+				"dollars": 0.002262755448,
+				"tokens": {
+					"inputTokens": 17579,
+					"outputTokens": 13847,
+					"cacheReadTokens": 35072,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 10917
+				},
+				"merged": {
+					"nodes": 20,
+					"chains": 12
+				}
+			},
+			{
+				"startedAt": 1790780267734,
+				"at": "2026-09-30T14:58:30.139Z",
+				"durationMs": 42404,
+				"kind": "extraction",
+				"title": "learn computer.md",
+				"dollars": 0.0009754441919999999,
+				"tokens": {
+					"inputTokens": 16550,
+					"outputTokens": 5482,
+					"cacheReadTokens": 28288,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 3396
+				},
+				"merged": {
+					"nodes": 13,
+					"chains": 9
+				}
+			},
+			{
+				"startedAt": 1790779976141,
+				"at": "2026-09-30T14:54:52.659Z",
+				"durationMs": 116517,
+				"kind": "extraction",
+				"title": "learn database.md",
+				"dollars": 0.0030854145600000002,
+				"tokens": {
+					"inputTokens": 29459,
+					"outputTokens": 18603,
+					"cacheReadTokens": 26240,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 14988
+				},
+				"merged": {
+					"nodes": 19,
+					"chains": 14
+				}
+			},
+			{
+				"startedAt": 1790779872468,
+				"at": "2026-09-30T14:52:56.141Z",
+				"durationMs": 103672,
+				"kind": "extraction",
+				"title": "learn database.md",
+				"dollars": 0.003892412808,
+				"tokens": {
+					"inputTokens": 24045,
+					"outputTokens": 23430,
+					"cacheReadTokens": 29312,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 20461
+				},
+				"merged": {
+					"nodes": 21,
+					"chains": 12
+				}
+			},
+			{
+				"startedAt": 1790779691113,
+				"at": "2026-09-30T14:51:12.468Z",
+				"durationMs": 181354,
+				"kind": "extraction",
+				"title": "learn database.md",
+				"dollars": 0.0023221457999999997,
+				"tokens": {
+					"inputTokens": 17167,
+					"outputTokens": 12683,
+					"cacheReadTokens": 0,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 10208
+				},
+				"merged": {
+					"nodes": 30,
+					"chains": 14
+				}
+			}
+		]
+	},
+	"capped": {
+		"totalDollars": 0.02115310356,
+		"unpricedRuns": 0,
+		"stages": {
+			"extraction": {
+				"dollars": 0.013426987032,
+				"unpricedRuns": 0,
+				"runs": 8,
+				"tokens": {
+					"inputTokens": 71193,
+					"outputTokens": 80854,
+					"cacheReadTokens": 2048,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 64175
+				}
+			},
+			"audit": {
+				"dollars": 0.007726116528,
+				"unpricedRuns": 0,
+				"runs": 8,
+				"tokens": {
+					"inputTokens": 111675,
+					"outputTokens": 42617,
+					"cacheReadTokens": 187392,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 36018
+				}
+			}
+		},
+		"runs": [
+			{
+				"startedAt": 1790780690483,
+				"at": "2026-09-30T15:07:24.186Z",
+				"durationMs": 153703,
+				"kind": "extraction",
+				"title": "learning libertarianism.md",
+				"dollars": 0.0021220224480000003,
+				"tokens": {
+					"inputTokens": 18437,
+					"outputTokens": 12134,
+					"cacheReadTokens": 35072,
+					"cacheWriteTokens": 0,
+					"reasoningTokens": 9188
+				},
+				"merged": {
+					"nodes": 13,
+					"chains": 10
+				}
+			}
+		]
+	}
+}

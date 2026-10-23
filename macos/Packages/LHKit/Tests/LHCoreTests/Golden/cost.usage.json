@@ -1,0 +1,561 @@
+{
+	"prices": {
+		"openrouter:deepseek/deepseek-v4.1-flash": {
+			"input": 0.0342,
+			"output": 0.1368,
+			"cacheRead": 0.000684,
+			"cacheWrite": 0
+		},
+		"openrouter:qwen/qwen3.8-max-0902": {
+			"input": 2,
+			"output": 6,
+			"cacheRead": 0.25,
+			"cacheWrite": 0
+		}
+	},
+	"contextWindow": 131072,
+	"chats": [
+		{
+			"id": "chat_mv27rrra_feff23b6",
+			"turns": [
+				{
+					"id": "4aac282d-90a0-4366-abb2-c6b8e8391abe",
+					"cost": 0.000408116808,
+					"sum": {
+						"inputTokens": 8839,
+						"outputTokens": 1327,
+						"cacheReadTokens": 13312,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 634
+					}
+				},
+				{
+					"id": "fce5080a-1b0e-4757-aeeb-46a5bf593311",
+					"cost": 0.0005030136000000001,
+					"sum": {
+						"inputTokens": 10388,
+						"outputTokens": 1080,
+						"cacheReadTokens": 0,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 554
+					}
+				},
+				{
+					"id": "ab7c3352-8406-4a7b-a7de-67f551fe1924",
+					"cost": 0.00005023296,
+					"sum": {
+						"inputTokens": 1289,
+						"outputTokens": 316,
+						"cacheReadTokens": 10240,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 130
+					}
+				},
+				{
+					"id": "cae162be-f477-4332-b65c-f5b7e1d6cf3a",
+					"cost": 0.000173320128,
+					"sum": {
+						"inputTokens": 467,
+						"outputTokens": 1210,
+						"cacheReadTokens": 11392,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 503
+					}
+				},
+				{
+					"id": "1e881441-0aa5-4e42-a648-e8ababff9742",
+					"cost": 0.000047863584,
+					"sum": {
+						"inputTokens": 1391,
+						"outputTokens": 291,
+						"cacheReadTokens": 11776,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 0
+					}
+				},
+				{
+					"id": "99a977c3-fafc-431d-9328-93072adb1bf7",
+					"cost": 0.0005750046,
+					"sum": {
+						"inputTokens": 13089,
+						"outputTokens": 931,
+						"cacheReadTokens": 0,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 391
+					}
+				},
+				{
+					"id": "ad6782e0-91aa-4d1b-aa6e-929b5847273f",
+					"cost": 0.000088186752,
+					"sum": {
+						"inputTokens": 1142,
+						"outputTokens": 580,
+						"cacheReadTokens": 12928,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 219
+					}
+				},
+				{
+					"id": "95504e94-7eb0-44b0-a4d6-996c4087b1cf",
+					"cost": 0.00030447849600000003,
+					"sum": {
+						"inputTokens": 4282,
+						"outputTokens": 2003,
+						"cacheReadTokens": 44544,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 772
+					}
+				},
+				{
+					"id": "f73ad6ea-6ce6-41ea-b2fe-d60f794000fc",
+					"cost": 0.0018144125999999998,
+					"sum": {
+						"inputTokens": 28689,
+						"outputTokens": 7495,
+						"cacheReadTokens": 22400,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 6376
+					}
+				},
+				{
+					"id": "e11457b4-9a39-4373-9e95-ba7fb913f03c",
+					"cost": 0.00047444428800000007,
+					"sum": {
+						"inputTokens": 5133,
+						"outputTokens": 3024,
+						"cacheReadTokens": 88832,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 1239
+					}
+				},
+				{
+					"id": "cb32919e-4f84-4cac-bf2a-1bdf88b5364e",
+					"cost": 0.00037354608,
+					"sum": {
+						"inputTokens": 2635,
+						"outputTokens": 2225,
+						"cacheReadTokens": 101120,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 1096
+					}
+				},
+				{
+					"id": "f833a453-db32-4c0d-857b-6b0eaeda85f5",
+					"cost": 0.0017102394,
+					"sum": {
+						"inputTokens": 38267,
+						"outputTokens": 2936,
+						"cacheReadTokens": 35200,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 1395
+					}
+				},
+				{
+					"id": "5fa72de9-e213-4c95-8743-28209ba5225e",
+					"cost": 0.000143076384,
+					"sum": {
+						"inputTokens": 638,
+						"outputTokens": 859,
+						"cacheReadTokens": 37376,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 158
+					}
+				},
+				{
+					"id": "88fa9eec-8a39-4d23-a4fd-31b67a53bf61",
+					"cost": 0.000096640992,
+					"sum": {
+						"inputTokens": 1073,
+						"outputTokens": 517,
+						"cacheReadTokens": 37888,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 192
+					}
+				},
+				{
+					"id": "56619f06-805a-4bb8-89e6-90c8dbfa0924",
+					"cost": 0.00019109865600000001,
+					"sum": {
+						"inputTokens": 708,
+						"outputTokens": 1203,
+						"cacheReadTokens": 38784,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 548
+					}
+				},
+				{
+					"id": "a7d93404-b3e6-4594-909f-5572b460a20a",
+					"cost": 0.000219848544,
+					"sum": {
+						"inputTokens": 6258,
+						"outputTokens": 1225,
+						"cacheReadTokens": 76416,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 680
+					}
+				},
+				{
+					"id": "ccd96879-36ed-4945-886d-cf4789699661",
+					"cost": 0.0016673909040000002,
+					"sum": {
+						"inputTokens": 41409,
+						"outputTokens": 1899,
+						"cacheReadTokens": 256,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 1145
+					}
+				},
+				{
+					"id": "eb8d8102-1243-4e14-8e77-483c610b1cab",
+					"cost": 0.000216740448,
+					"sum": {
+						"inputTokens": 2156,
+						"outputTokens": 1377,
+						"cacheReadTokens": 41472,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 504
+					}
+				},
+				{
+					"id": "54f69851-59a1-46ab-a64a-c368f41c54e1",
+					"cost": 0.000134058528,
+					"sum": {
+						"inputTokens": 1715,
+						"outputTokens": 763,
+						"cacheReadTokens": 43392,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 309
+					}
+				},
+				{
+					"id": "90bbcdb9-bc78-42ea-954b-6eb5abf26cbe",
+					"cost": 0.000248724288,
+					"sum": {
+						"inputTokens": 2295,
+						"outputTokens": 1134,
+						"cacheReadTokens": 136832,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 437
+					}
+				},
+				{
+					"id": "3eee6320-f985-4ead-ad1d-e0402b564b39",
+					"cost": 0.00012999283199999998,
+					"sum": {
+						"inputTokens": 561,
+						"outputTokens": 716,
+						"cacheReadTokens": 46848,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 417
+					}
+				},
+				{
+					"id": "e44ba594-c0ee-4ca4-8f78-1ab533a0a15d",
+					"cost": 0.000328150368,
+					"sum": {
+						"inputTokens": 2843,
+						"outputTokens": 1433,
+						"cacheReadTokens": 193152,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 601
+					}
+				},
+				{
+					"id": "a7ff2e64-0f4f-48ee-9a5f-90551a3abd58",
+					"cost": 0.000064722816,
+					"sum": {
+						"inputTokens": 10841,
+						"outputTokens": 276,
+						"cacheReadTokens": 39424,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 157
+					}
+				},
+				{
+					"id": "60146b8c-906d-4636-bc4b-b21275d6e1f8",
+					"cost": 0.0009388242000000001,
+					"sum": {
+						"inputTokens": 8763,
+						"outputTokens": 4672,
+						"cacheReadTokens": 0,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 2095
+					}
+				},
+				{
+					"id": "cade78c7-4110-4f27-a3b9-c45dee182e64",
+					"cost": 0.0013030884,
+					"sum": {
+						"inputTokens": 36434,
+						"outputTokens": 417,
+						"cacheReadTokens": 0,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 219
+					}
+				}
+			],
+			"sessionCost": {
+				"cost": 0.012205216656,
+				"unpriced": 0
+			},
+			"contextWindow": {
+				"model": "openrouter:deepseek/deepseek-v4.1-flash",
+				"usedTokens": 36851,
+				"limit": 131072
+			},
+			"contextWindowZeroedTail": {
+				"model": "openrouter:deepseek/deepseek-v4.1-flash",
+				"usedTokens": 36851,
+				"limit": 131072
+			},
+			"allSteps": {
+				"inputTokens": 231305,
+				"outputTokens": 39909,
+				"cacheReadTokens": 1043584,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 20771
+			}
+		},
+		{
+			"id": "chat_mv293wv5_10656952",
+			"turns": [
+				{
+					"id": "031aac25-c507-4ed3-b575-d015e673d804",
+					"cost": 0.0004887521999999999,
+					"sum": {
+						"inputTokens": 10587,
+						"outputTokens": 926,
+						"cacheReadTokens": 0,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 616
+					}
+				},
+				{
+					"id": "631c611f-5b2d-434b-b4c4-534fbc9b31e0",
+					"cost": 0.000082495872,
+					"sum": {
+						"inputTokens": 568,
+						"outputTokens": 548,
+						"cacheReadTokens": 11008,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 220
+					}
+				},
+				{
+					"id": "73ad0089-b3ca-475d-9771-f6c58e27b198",
+					"cost": 0.00019537228800000001,
+					"sum": {
+						"inputTokens": 820,
+						"outputTokens": 1304,
+						"cacheReadTokens": 24832,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 1060
+					}
+				},
+				{
+					"id": "91e2bea3-abeb-474e-b305-66807e2fba94",
+					"cost": 0.000192691008,
+					"sum": {
+						"inputTokens": 347,
+						"outputTokens": 1342,
+						"cacheReadTokens": 13312,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 770
+					}
+				},
+				{
+					"id": "55e8600a-cf3a-4d9d-8b39-61c2f2ad22b6",
+					"cost": 0.000029269728000000002,
+					"sum": {
+						"inputTokens": 570,
+						"outputTokens": 141,
+						"cacheReadTokens": 14592,
+						"cacheWriteTokens": 0,
+						"reasoningTokens": 63
+					}
+				}
+			],
+			"sessionCost": {
+				"cost": 0.000988581096,
+				"unpriced": 0
+			},
+			"contextWindow": {
+				"model": "openrouter:deepseek/deepseek-v4.1-flash",
+				"usedTokens": 15303,
+				"limit": 131072
+			},
+			"contextWindowZeroedTail": {
+				"model": "openrouter:deepseek/deepseek-v4.1-flash",
+				"usedTokens": 15303,
+				"limit": 131072
+			},
+			"allSteps": {
+				"inputTokens": 12892,
+				"outputTokens": 4261,
+				"cacheReadTokens": 63744,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 2729
+			}
+		}
+	],
+	"jobs": [
+		{
+			"id": "job_murepie2_9d791321",
+			"cost": 0.002059321536
+		},
+		{
+			"id": "job_mux5xn7v_b49f3458",
+			"cost": null
+		},
+		{
+			"id": "job_mv282vv0_e7b89c9b",
+			"cost": 0.00014344848
+		},
+		{
+			"id": "job_mv28p0fs_0a16b76e",
+			"cost": 0.029220000000000003
+		},
+		{
+			"id": "job_mv28tfii_2a54290a",
+			"cost": null
+		}
+	],
+	"stageSums": [
+		{
+			"startedAt": 1790779691113,
+			"extractor": {
+				"inputTokens": 9299,
+				"outputTokens": 12570,
+				"cacheReadTokens": 0,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 10182
+			},
+			"auditor": {
+				"inputTokens": 7868,
+				"outputTokens": 113,
+				"cacheReadTokens": 0,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 26
+			}
+		},
+		{
+			"startedAt": 1790779872468,
+			"extractor": {
+				"inputTokens": 12110,
+				"outputTokens": 11792,
+				"cacheReadTokens": 0,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 9596
+			},
+			"auditor": {
+				"inputTokens": 11935,
+				"outputTokens": 11638,
+				"cacheReadTokens": 29312,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 10865
+			}
+		},
+		{
+			"startedAt": 1790779976141,
+			"extractor": {
+				"inputTokens": 9400,
+				"outputTokens": 12855,
+				"cacheReadTokens": 2048,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 10237
+			},
+			"auditor": {
+				"inputTokens": 20059,
+				"outputTokens": 5748,
+				"cacheReadTokens": 24192,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 4751
+			}
+		},
+		{
+			"startedAt": 1790780267734,
+			"extractor": {
+				"inputTokens": 3609,
+				"outputTokens": 3957,
+				"cacheReadTokens": 0,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 2693
+			},
+			"auditor": {
+				"inputTokens": 12941,
+				"outputTokens": 1525,
+				"cacheReadTokens": 28288,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 703
+			}
+		},
+		{
+			"startedAt": 1790780331640,
+			"extractor": {
+				"inputTokens": 7042,
+				"outputTokens": 8814,
+				"cacheReadTokens": 0,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 6981
+			},
+			"auditor": {
+				"inputTokens": 10537,
+				"outputTokens": 5033,
+				"cacheReadTokens": 35072,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 3936
+			}
+		},
+		{
+			"startedAt": 1790780457181,
+			"extractor": {
+				"inputTokens": 9013,
+				"outputTokens": 8220,
+				"cacheReadTokens": 0,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 5811
+			},
+			"auditor": {
+				"inputTokens": 17036,
+				"outputTokens": 639,
+				"cacheReadTokens": 15360,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 166
+			}
+		},
+		{
+			"startedAt": 1790780506325,
+			"extractor": {
+				"inputTokens": 11539,
+				"outputTokens": 15465,
+				"cacheReadTokens": 0,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 13164
+			},
+			"auditor": {
+				"inputTokens": 22043,
+				"outputTokens": 12968,
+				"cacheReadTokens": 20096,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 11894
+			}
+		},
+		{
+			"startedAt": 1790780690483,
+			"extractor": {
+				"inputTokens": 9181,
+				"outputTokens": 7181,
+				"cacheReadTokens": 0,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 5511
+			},
+			"auditor": {
+				"inputTokens": 9256,
+				"outputTokens": 4953,
+				"cacheReadTokens": 35072,
+				"cacheWriteTokens": 0,
+				"reasoningTokens": 3677
+			}
+		}
+	]
+}

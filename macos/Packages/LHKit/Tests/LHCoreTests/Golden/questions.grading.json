@@ -1,0 +1,2334 @@
+{
+	"debris": [
+		{
+			"value": ":parmenides",
+			"stripped": "parmenides"
+		},
+		{
+			"value": "\"predict\"",
+			"stripped": "predict"
+		},
+		{
+			"value": ": \"primary-external\" ",
+			"stripped": "primary-external"
+		},
+		{
+			"value": "`value`",
+			"stripped": "value"
+		},
+		{
+			"value": "a:b",
+			"stripped": "a:b"
+		},
+		{
+			"value": "[\"x\"]",
+			"stripped": "[\"x\"]"
+		},
+		{
+			"value": "  .:x. ",
+			"stripped": "x"
+		},
+		{
+			"value": "...",
+			"stripped": ""
+		},
+		{
+			"value": "",
+			"stripped": ""
+		},
+		{
+			"value": "﻿y　",
+			"stripped": "y"
+		}
+	],
+	"coerce": [
+		{
+			"answer": "mercury",
+			"values": [
+				"mercury"
+			],
+			"coerced": [
+				"mercury"
+			]
+		},
+		{
+			"answer": [
+				"a",
+				"b"
+			],
+			"values": [
+				"a"
+			],
+			"coerced": [
+				"a",
+				"b"
+			]
+		},
+		{
+			"answer": "[\"a\", \"b\"]",
+			"values": [],
+			"coerced": [
+				"a",
+				"b"
+			]
+		},
+		{
+			"answer": "[not json",
+			"values": [],
+			"coerced": [
+				"[not json"
+			]
+		},
+		{
+			"answer": "[\"a\", \"b\"]",
+			"values": [
+				"[\"a\", \"b\"]"
+			],
+			"coerced": [
+				"[\"a\", \"b\"]"
+			]
+		},
+		{
+			"answer": "[]",
+			"values": [
+				"[]"
+			],
+			"coerced": [
+				"[]"
+			]
+		},
+		{
+			"answer": "[]",
+			"values": [],
+			"coerced": []
+		},
+		{
+			"answer": [
+				":parmenides"
+			],
+			"values": [
+				"parmenides"
+			],
+			"coerced": [
+				"parmenides"
+			]
+		},
+		{
+			"answer": "[1, true, null, [1, null], {\"a\":1}, 1.0, 1e21]",
+			"values": [],
+			"coerced": [
+				"1",
+				"true",
+				"null",
+				"1,",
+				"[object Object]",
+				"1",
+				"1e+21"
+			]
+		},
+		{
+			"answer": " value. ",
+			"values": [
+				"value."
+			],
+			"coerced": [
+				"value."
+			]
+		},
+		{
+			"answer": " value. ",
+			"values": [],
+			"coerced": [
+				"value"
+			]
+		},
+		{
+			"answer": "  [\" x \", \":y\"]  ",
+			"values": [
+				"x"
+			],
+			"coerced": [
+				"x",
+				"y"
+			]
+		}
+	],
+	"problems": [
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": [
+				"Mercury"
+			],
+			"multiSelect": null,
+			"problems": [],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": [
+				"Mercury"
+			],
+			"multiSelect": true,
+			"problems": [],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "Mercury",
+			"multiSelect": null,
+			"problems": [],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "Mercury",
+			"multiSelect": true,
+			"problems": [],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "",
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "[]",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "[]",
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"b"
+			],
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer \"a\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer lists 2 values but multiSelect is not true — a single-select question with several correct answers can never be answered correctly. Set multiSelect: true, or make exactly one option correct."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"b"
+			],
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer \"a\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "[\"a\",\"b\"]",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer \"a\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer lists 2 values but multiSelect is not true — a single-select question with several correct answers can never be answered correctly. Set multiSelect: true, or make exactly one option correct."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "[\"a\",\"b\"]",
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer \"a\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "x",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer \"x\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": "x",
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer \"x\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"a"
+			],
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer \"a\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "Venus"
+				},
+				{
+					"label": "Mercury"
+				},
+				{
+					"label": "Mars"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"a"
+			],
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer \"a\" does not match any option value. Valid values: \"Venus\", \"Mercury\", \"Mars\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": [
+				"Mercury"
+			],
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"a\", \"b\", \"c\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": [
+				"Mercury"
+			],
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"a\", \"b\", \"c\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "Mercury",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"a\", \"b\", \"c\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "Mercury",
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"a\", \"b\", \"c\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "",
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "[]",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "[]",
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"b"
+			],
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer lists 2 values but multiSelect is not true — a single-select question with several correct answers can never be answered correctly. Set multiSelect: true, or make exactly one option correct."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"b"
+			],
+			"multiSelect": true,
+			"problems": [],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "[\"a\",\"b\"]",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer lists 2 values but multiSelect is not true — a single-select question with several correct answers can never be answered correctly. Set multiSelect: true, or make exactly one option correct."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "[\"a\",\"b\"]",
+			"multiSelect": true,
+			"problems": [],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "x",
+			"multiSelect": null,
+			"problems": [
+				"correctAnswer \"x\" does not match any option value. Valid values: \"a\", \"b\", \"c\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": "x",
+			"multiSelect": true,
+			"problems": [
+				"correctAnswer \"x\" does not match any option value. Valid values: \"a\", \"b\", \"c\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"a"
+			],
+			"multiSelect": null,
+			"problems": [],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "a"
+				},
+				{
+					"label": "B",
+					"value": "b"
+				},
+				{
+					"label": "C",
+					"value": "c"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"a"
+			],
+			"multiSelect": true,
+			"problems": [],
+			"askProblems": []
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": [
+				"Mercury"
+			],
+			"multiSelect": null,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": [
+				"Mercury"
+			],
+			"multiSelect": true,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "Mercury",
+			"multiSelect": null,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "Mercury",
+			"multiSelect": true,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "",
+			"multiSelect": null,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "",
+			"multiSelect": true,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "[]",
+			"multiSelect": null,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "[]",
+			"multiSelect": true,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"b"
+			],
+			"multiSelect": null,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer lists 2 values but multiSelect is not true — a single-select question with several correct answers can never be answered correctly. Set multiSelect: true, or make exactly one option correct."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"b"
+			],
+			"multiSelect": true,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "[\"a\",\"b\"]",
+			"multiSelect": null,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer lists 2 values but multiSelect is not true — a single-select question with several correct answers can never be answered correctly. Set multiSelect: true, or make exactly one option correct."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "[\"a\",\"b\"]",
+			"multiSelect": true,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "x",
+			"multiSelect": null,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": "x",
+			"multiSelect": true,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"a"
+			],
+			"multiSelect": null,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "  "
+				},
+				{
+					"label": "x",
+					"value": " "
+				},
+				{
+					"label": "x"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"a"
+			],
+			"multiSelect": true,
+			"problems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"x\", \"x\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"options[0].label is empty — every option needs a label.",
+				"Two options resolve to the same value \"x\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": [
+				"Mercury"
+			],
+			"multiSelect": null,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": [
+				"Mercury"
+			],
+			"multiSelect": true,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "Mercury",
+			"multiSelect": null,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "Mercury",
+			"multiSelect": true,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"Mercury\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "",
+			"multiSelect": null,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "",
+			"multiSelect": true,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "[]",
+			"multiSelect": null,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "[]",
+			"multiSelect": true,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer is required — provide the value (or label) of the correct option(s)."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"b"
+			],
+			"multiSelect": null,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer lists 2 values but multiSelect is not true — a single-select question with several correct answers can never be answered correctly. Set multiSelect: true, or make exactly one option correct."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"b"
+			],
+			"multiSelect": true,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "[\"a\",\"b\"]",
+			"multiSelect": null,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer lists 2 values but multiSelect is not true — a single-select question with several correct answers can never be answered correctly. Set multiSelect: true, or make exactly one option correct."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "[\"a\",\"b\"]",
+			"multiSelect": true,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug.",
+				"correctAnswer \"b\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "x",
+			"multiSelect": null,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"x\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": "x",
+			"multiSelect": true,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"x\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"a"
+			],
+			"multiSelect": null,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		},
+		{
+			"options": [
+				{
+					"label": "A",
+					"value": "same"
+				},
+				{
+					"label": "B",
+					"value": "same"
+				}
+			],
+			"correctAnswer": [
+				"a",
+				"a"
+			],
+			"multiSelect": true,
+			"problems": [
+				"Two options resolve to the same value \"same\" — options must be distinct.",
+				"correctAnswer \"a\" does not match any option value. Valid values: \"same\", \"same\". Copy the exact value (or label) of the intended option — never a paraphrase or slug."
+			],
+			"askProblems": [
+				"Two options resolve to the same value \"same\" — options must be distinct."
+			]
+		}
+	],
+	"explainProblems": [
+		{
+			"correctAnswer": "Full speed is c.",
+			"problems": []
+		},
+		{
+			"correctAnswer": "   ",
+			"problems": [
+				"correctAnswer is required — commit to the full correct answer BEFORE posing the question."
+			]
+		},
+		{
+			"correctAnswer": "",
+			"problems": [
+				"correctAnswer is required — commit to the full correct answer BEFORE posing the question."
+			]
+		}
+	],
+	"resolve": [
+		{
+			"answer": "mercury",
+			"indices": [],
+			"error": "correctAnswer \"mercury\" does not match any option value (\"a\", \"b\", \"x\", \"parmenides\", \"value.\")"
+		},
+		{
+			"answer": [
+				"a",
+				"b"
+			],
+			"indices": [
+				1,
+				2
+			]
+		},
+		{
+			"answer": "[\"a\", \"b\"]",
+			"indices": [
+				1,
+				2
+			]
+		},
+		{
+			"answer": "[not json",
+			"indices": [],
+			"error": "correctAnswer \"[not json\" does not match any option value (\"a\", \"b\", \"x\", \"parmenides\", \"value.\")"
+		},
+		{
+			"answer": "[\"a\", \"b\"]",
+			"indices": [
+				1,
+				2
+			]
+		},
+		{
+			"answer": "[]",
+			"indices": [],
+			"error": "correctAnswer is required"
+		},
+		{
+			"answer": "[]",
+			"indices": [],
+			"error": "correctAnswer is required"
+		},
+		{
+			"answer": [
+				":parmenides"
+			],
+			"indices": [
+				4
+			]
+		},
+		{
+			"answer": "[1, true, null, [1, null], {\"a\":1}, 1.0, 1e21]",
+			"indices": [],
+			"error": "correctAnswer \"1\" does not match any option value (\"a\", \"b\", \"x\", \"parmenides\", \"value.\")"
+		},
+		{
+			"answer": " value. ",
+			"indices": [
+				5
+			]
+		},
+		{
+			"answer": " value. ",
+			"indices": [
+				5
+			]
+		},
+		{
+			"answer": "  [\" x \", \":y\"]  ",
+			"indices": [],
+			"error": "correctAnswer \"y\" does not match any option value (\"a\", \"b\", \"x\", \"parmenides\", \"value.\")"
+		}
+	],
+	"quizType": [
+		{
+			"raw": "\"predict\"",
+			"type": "predict"
+		},
+		{
+			"raw": "check",
+			"type": "check"
+		},
+		{
+			"raw": ": check.",
+			"type": "check"
+		},
+		{
+			"raw": "prediction",
+			"type": null
+		},
+		{
+			"raw": "",
+			"type": null
+		},
+		{
+			"raw": 42,
+			"type": null
+		},
+		{
+			"raw": null,
+			"type": null
+		}
+	],
+	"reveal": [
+		{
+			"tool": "quiz",
+			"input": null,
+			"phase": "teach",
+			"reveal": true
+		},
+		{
+			"tool": "quiz",
+			"input": null,
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": null,
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "check"
+			},
+			"phase": "teach",
+			"reveal": true
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "check"
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "check"
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": 7
+			},
+			"phase": "teach",
+			"reveal": true
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": 7
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"type": 7
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": "raw",
+			"phase": "teach",
+			"reveal": true
+		},
+		{
+			"tool": "quiz",
+			"input": "raw",
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "quiz",
+			"input": "raw",
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": null,
+			"phase": "teach",
+			"reveal": true
+		},
+		{
+			"tool": "explain",
+			"input": null,
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": null,
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "check"
+			},
+			"phase": "teach",
+			"reveal": true
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "check"
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "check"
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": 7
+			},
+			"phase": "teach",
+			"reveal": true
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": 7
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"type": 7
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": "raw",
+			"phase": "teach",
+			"reveal": true
+		},
+		{
+			"tool": "explain",
+			"input": "raw",
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "explain",
+			"input": "raw",
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": null,
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": null,
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": null,
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "check"
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "check"
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "check"
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": 7
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": 7
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": {
+				"type": 7
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": "raw",
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": "raw",
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "probe",
+			"input": "raw",
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": null,
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": null,
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": null,
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "check"
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "check"
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "check"
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "predict"
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": "\"predict\""
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": 7
+			},
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": 7
+			},
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"type": 7
+			},
+			"phase": "plan",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": "raw",
+			"phase": "teach",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": "raw",
+			"phase": "probe",
+			"reveal": false
+		},
+		{
+			"tool": "ask_user_question",
+			"input": "raw",
+			"phase": "plan",
+			"reveal": false
+		}
+	],
+	"normalize": [
+		{
+			"options": [
+				{
+					"label": "  Mercury  "
+				},
+				{
+					"label": "Venus",
+					"value": " v "
+				},
+				{
+					"label": "",
+					"value": "x"
+				},
+				{
+					"label": "D",
+					"description": " d "
+				}
+			],
+			"normalized": [
+				{
+					"label": "Mercury",
+					"value": "Mercury"
+				},
+				{
+					"label": "Venus",
+					"value": "v"
+				},
+				{
+					"label": "D",
+					"value": "D",
+					"description": "d"
+				}
+			]
+		},
+		{
+			"options": "[{\"label\":\"Slope\",\"value\":\"slope\"}]",
+			"normalized": [
+				{
+					"label": "Slope",
+					"value": "slope"
+				}
+			]
+		},
+		{
+			"options": "not json",
+			"normalized": []
+		},
+		{
+			"options": [
+				{
+					"label": "a",
+					"value": "x"
+				},
+				{
+					"label": "b",
+					"value": "x"
+				}
+			],
+			"error": "duplicate option value \"x\""
+		},
+		{
+			"options": null,
+			"normalized": []
+		}
+	]
+}

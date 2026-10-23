@@ -1,0 +1,162 @@
+{
+	"rows": [
+		{
+			"schema": "quizInputObject",
+			"args": {
+				"type": "\"predict\""
+			},
+			"healed": {
+				"type": "predict"
+			}
+		},
+		{
+			"schema": "quizInputObject",
+			"args": {
+				"type": "predict",
+				"multiSelect": "true",
+				"options": "[{\"label\":\"Venus\"},{\"label\":\"Mercury\"}]"
+			},
+			"healed": {
+				"type": "predict",
+				"multiSelect": true,
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				]
+			}
+		},
+		{
+			"schema": "quizInputObject",
+			"args": {
+				"type": "\"bogus\"",
+				"multiSelect": "yes",
+				"options": "not json",
+				"correctAnswer": "[\"a\"]"
+			},
+			"healed": {
+				"type": "\"bogus\"",
+				"multiSelect": "yes",
+				"options": "not json",
+				"correctAnswer": "[\"a\"]"
+			}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"args": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"healed": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			}
+		},
+		{
+			"schema": "askInputSchema",
+			"args": {
+				"options": "{}",
+				"multiSelect": "false"
+			},
+			"healed": {
+				"options": "{}",
+				"multiSelect": false
+			}
+		},
+		{
+			"schema": "healSchema",
+			"args": {
+				"mode": "\"recall\"",
+				"maybe": "null",
+				"flag": "false",
+				"n": "1.50",
+				"i": "7",
+				"list": "[\"x\"]",
+				"bare": "3",
+				"nothing": "null"
+			},
+			"healed": {
+				"mode": "recall",
+				"maybe": null,
+				"flag": false,
+				"n": 1.5,
+				"i": 7,
+				"list": [
+					"x"
+				],
+				"bare": 3,
+				"nothing": null
+			}
+		},
+		{
+			"schema": "healSchema",
+			"args": {
+				"mode": "recall",
+				"maybe": "\"a\"",
+				"flag": "1",
+				"n": "x",
+				"i": "\"7\"",
+				"list": "[1",
+				"bare": "4"
+			},
+			"healed": {
+				"mode": "recall",
+				"maybe": "a",
+				"flag": "1",
+				"n": "x",
+				"i": "\"7\"",
+				"list": "[1",
+				"bare": 4
+			}
+		},
+		{
+			"schema": "healSchema",
+			"args": "not an object",
+			"healed": "not an object"
+		},
+		{
+			"schema": "healSchema",
+			"args": [
+				1,
+				2
+			],
+			"healed": [
+				1,
+				2
+			]
+		}
+	]
+}

@@ -1,0 +1,748 @@
+[
+	{
+		"input": [
+			{
+				"id": "arg_1",
+				"premises": [
+					"a",
+					"b"
+				],
+				"conclusion": "x",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_2",
+				"premises": [
+					"a"
+				],
+				"conclusion": "x",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_3",
+				"premises": [
+					"a",
+					"b",
+					"c"
+				],
+				"conclusion": "x",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_2",
+				"premises": [
+					"a"
+				],
+				"conclusion": "x",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [
+			{
+				"id": "arg_ab",
+				"premises": [
+					"A",
+					"B"
+				],
+				"conclusion": "X",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_xc",
+				"premises": [
+					"X",
+					"C"
+				],
+				"conclusion": "Y",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_abc",
+				"premises": [
+					"A",
+					"B",
+					"C"
+				],
+				"conclusion": "Y",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_ab",
+				"premises": [
+					"A",
+					"B"
+				],
+				"conclusion": "X",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_xc",
+				"premises": [
+					"X",
+					"C"
+				],
+				"conclusion": "Y",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [
+			{
+				"id": "arg_k",
+				"premises": [
+					"p",
+					"q"
+				],
+				"conclusion": "z",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_k",
+				"premises": [
+					"q",
+					"p"
+				],
+				"conclusion": "z",
+				"createdAt": "2026-09-30T00:00:01.000Z",
+				"provenance": [
+					{
+						"chatId": "c2",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_s",
+				"premises": [
+					"p"
+				],
+				"conclusion": "z",
+				"createdAt": "2026-10-01T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_s",
+				"premises": [
+					"p"
+				],
+				"conclusion": "z",
+				"createdAt": "2026-10-01T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [
+			{
+				"id": "arg_t1",
+				"premises": [
+					"B"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_t2",
+				"premises": [
+					"a"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_t3",
+				"premises": [
+					"_"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_t4",
+				"premises": [
+					"5"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_t5",
+				"premises": [
+					"a",
+					"B"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_t1",
+				"premises": [
+					"B"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_t2",
+				"premises": [
+					"a"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_t3",
+				"premises": [
+					"_"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_t4",
+				"premises": [
+					"5"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [
+			{
+				"id": "arg_v1",
+				"premises": [
+					"B"
+				],
+				"conclusion": "a",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_v2",
+				"premises": [
+					"a"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_v3",
+				"premises": [
+					"B"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_v1",
+				"premises": [
+					"B"
+				],
+				"conclusion": "a",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_v2",
+				"premises": [
+					"a"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [
+			{
+				"id": "arg_w1",
+				"premises": [
+					"5"
+				],
+				"conclusion": "_",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_w2",
+				"premises": [
+					"_"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_w3",
+				"premises": [
+					"5"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_w1",
+				"premises": [
+					"5"
+				],
+				"conclusion": "_",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_w2",
+				"premises": [
+					"_"
+				],
+				"conclusion": "r",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [
+			{
+				"id": "arg_u1",
+				"premises": [
+					"n>"
+				],
+				"conclusion": "s",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_u2",
+				"premises": [
+					"n5"
+				],
+				"conclusion": "s",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_u3",
+				"premises": [
+					"n5",
+					"n>"
+				],
+				"conclusion": "s",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_u4",
+				"premises": [
+					"n5",
+					"zz"
+				],
+				"conclusion": "t",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_u1",
+				"premises": [
+					"n>"
+				],
+				"conclusion": "s",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_u2",
+				"premises": [
+					"n5"
+				],
+				"conclusion": "s",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_u4",
+				"premises": [
+					"n5",
+					"zz"
+				],
+				"conclusion": "t",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [
+			{
+				"id": "arg_c1",
+				"premises": [
+					"m"
+				],
+				"conclusion": "w",
+				"createdAt": "2026-10-02T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_c2",
+				"premises": [
+					"w"
+				],
+				"conclusion": "m",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_c3",
+				"premises": [
+					"m",
+					"w"
+				],
+				"conclusion": "v",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_c4",
+				"premises": [
+					"m"
+				],
+				"conclusion": "v",
+				"createdAt": "2026-10-03T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_c1",
+				"premises": [
+					"m"
+				],
+				"conclusion": "w",
+				"createdAt": "2026-10-02T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_c2",
+				"premises": [
+					"w"
+				],
+				"conclusion": "m",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			},
+			{
+				"id": "arg_c4",
+				"premises": [
+					"m"
+				],
+				"conclusion": "v",
+				"createdAt": "2026-10-03T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [
+			{
+				"id": "arg_one",
+				"premises": [
+					"a"
+				],
+				"conclusion": "b",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		],
+		"output": [
+			{
+				"id": "arg_one",
+				"premises": [
+					"a"
+				],
+				"conclusion": "b",
+				"createdAt": "2026-09-30T00:00:00.000Z",
+				"provenance": [
+					{
+						"chatId": "c1",
+						"messageId": ""
+					}
+				]
+			}
+		]
+	},
+	{
+		"input": [],
+		"output": []
+	}
+]

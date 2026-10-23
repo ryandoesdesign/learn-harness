@@ -1,0 +1,4687 @@
+{
+	"rows": [
+		{
+			"schema": "quizInputBase",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "quizInputBase",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "quizInputBase",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "quizInputBase",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "quizInputBase",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "quizInputBase",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "quizInputBase",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "quizInputBase",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "quizInputBase",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "quizInputBase",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "quizInputBase",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "quizInputBase",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "quizInputBase",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "quizInputBase",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": true,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				]
+			}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {
+				"question": "q",
+				"correctAnswer": "a"
+			}
+		},
+		{
+			"schema": "quizInputBase",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A"
+					},
+					{
+						"label": "B"
+					}
+				]
+			}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "quizInputObject",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "quizInputObject",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "quizInputObject",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "quizInputObject",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "quizInputObject",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "quizInputObject",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "quizInputObject",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "quizInputObject",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "quizInputObject",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "quizInputObject",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "quizInputObject",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "quizInputObject",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "quizInputObject",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": false,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {
+				"question": "q",
+				"correctAnswer": "a"
+			}
+		},
+		{
+			"schema": "quizInputObject",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A"
+					},
+					{
+						"label": "B"
+					}
+				]
+			}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": true,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				]
+			}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {
+				"question": "q",
+				"correctAnswer": "a"
+			}
+		},
+		{
+			"schema": "probeQuizInputSchema",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A"
+					},
+					{
+						"label": "B"
+					}
+				]
+			}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "predict"
+			}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope"
+			}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": true,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\""
+			}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {
+				"question": "q",
+				"correctAnswer": "a"
+			}
+		},
+		{
+			"schema": "quizDisplayInputSchema",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A"
+					},
+					{
+						"label": "B"
+					}
+				]
+			}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "explainInputBase",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "explainInputBase",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "explainInputBase",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "explainInputBase",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "explainInputBase",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "explainInputBase",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "explainInputBase",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "explainInputBase",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "explainInputBase",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "explainInputBase",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "explainInputBase",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "explainInputBase",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "explainInputBase",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury"
+			}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury"
+			}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury"
+			}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": false,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {
+				"question": "What was Parmenides' claim?",
+				"correctAnswer": [
+					":parmenides"
+				]
+			}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": true,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {
+				"question": "q",
+				"correctAnswer": "a"
+			}
+		},
+		{
+			"schema": "explainInputBase",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {
+				"question": "q"
+			}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "explainInputObject",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "explainInputObject",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "explainInputObject",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "explainInputObject",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "explainInputObject",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "explainInputObject",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "explainInputObject",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "explainInputObject",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "explainInputObject",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "explainInputObject",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "explainInputObject",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "explainInputObject",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "explainInputObject",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury"
+			}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury",
+				"nodeId": "n",
+				"type": "predict"
+			}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury",
+				"type": "nope",
+				"nodeId": "n"
+			}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": false,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {
+				"question": "What was Parmenides' claim?",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {
+				"question": "q",
+				"correctAnswer": "a"
+			}
+		},
+		{
+			"schema": "explainInputObject",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {
+				"question": "q"
+			}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury"
+			}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury",
+				"type": "predict"
+			}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"correctAnswer": "Mercury",
+				"type": "nope"
+			}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": false,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {
+				"question": "What was Parmenides' claim?",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\""
+			}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": true,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {
+				"question": "q",
+				"correctAnswer": "a"
+			}
+		},
+		{
+			"schema": "explainDisplayInputSchema",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {
+				"question": "q"
+			}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "askInputSchema",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "askInputSchema",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "askInputSchema",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "askInputSchema",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "askInputSchema",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "askInputSchema",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "askInputSchema",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "askInputSchema",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "askInputSchema",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "askInputSchema",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "askInputSchema",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "askInputSchema",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "askInputSchema",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				]
+			}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				]
+			}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": true,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				]
+			}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": true,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				]
+			}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": true,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {
+				"question": "q"
+			}
+		},
+		{
+			"schema": "askInputSchema",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": true,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": false,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": true,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "probeDoneInputSchema",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": null,
+			"check": false,
+			"converted": null,
+			"clean": null
+		},
+		{
+			"schema": "healSchema",
+			"value": true,
+			"check": false,
+			"converted": true,
+			"clean": true
+		},
+		{
+			"schema": "healSchema",
+			"value": 0,
+			"check": false,
+			"converted": 0,
+			"clean": 0
+		},
+		{
+			"schema": "healSchema",
+			"value": 1,
+			"check": false,
+			"converted": 1,
+			"clean": 1
+		},
+		{
+			"schema": "healSchema",
+			"value": 17,
+			"check": false,
+			"converted": 17,
+			"clean": 17
+		},
+		{
+			"schema": "healSchema",
+			"value": 1.5,
+			"check": false,
+			"converted": 1.5,
+			"clean": 1.5
+		},
+		{
+			"schema": "healSchema",
+			"value": "",
+			"check": false,
+			"converted": "",
+			"clean": ""
+		},
+		{
+			"schema": "healSchema",
+			"value": "x",
+			"check": false,
+			"converted": "x",
+			"clean": "x"
+		},
+		{
+			"schema": "healSchema",
+			"value": "true",
+			"check": false,
+			"converted": "true",
+			"clean": "true"
+		},
+		{
+			"schema": "healSchema",
+			"value": "0",
+			"check": false,
+			"converted": "0",
+			"clean": "0"
+		},
+		{
+			"schema": "healSchema",
+			"value": "null",
+			"check": false,
+			"converted": "null",
+			"clean": "null"
+		},
+		{
+			"schema": "healSchema",
+			"value": [],
+			"check": false,
+			"converted": [],
+			"clean": []
+		},
+		{
+			"schema": "healSchema",
+			"value": [
+				"a"
+			],
+			"check": false,
+			"converted": [
+				"a"
+			],
+			"clean": [
+				"a"
+			]
+		},
+		{
+			"schema": "healSchema",
+			"value": [
+				1,
+				"b"
+			],
+			"check": false,
+			"converted": [
+				1,
+				"b"
+			],
+			"clean": [
+				1,
+				"b"
+			]
+		},
+		{
+			"schema": "healSchema",
+			"value": {},
+			"check": false,
+			"converted": {},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"label": "L"
+			},
+			"check": false,
+			"converted": {
+				"label": "L"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"check": false,
+			"converted": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "nope",
+				"nodeId": "n"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"check": false,
+			"converted": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"check": false,
+			"converted": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"check": true,
+			"converted": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			},
+			"clean": {
+				"mode": "apply",
+				"maybe": null,
+				"flag": false,
+				"n": 2,
+				"i": 3,
+				"list": [],
+				"bare": 3,
+				"nothing": null
+			}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": 1,
+				"n": "2",
+				"i": 3.7,
+				"list": "solo",
+				"bare": "3",
+				"nothing": 0,
+				"extra": 1
+			},
+			"check": false,
+			"converted": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": true,
+				"n": 2,
+				"i": 3,
+				"list": [
+					"solo"
+				],
+				"bare": 3,
+				"nothing": null,
+				"extra": 1
+			},
+			"clean": {
+				"mode": "apply",
+				"maybe": "a",
+				"flag": true,
+				"n": 2,
+				"i": 3,
+				"list": [
+					"solo"
+				],
+				"bare": 3,
+				"nothing": null
+			}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"mode": 1,
+				"maybe": false,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"check": false,
+			"converted": {
+				"mode": 1,
+				"maybe": null,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			},
+			"clean": {
+				"mode": 1,
+				"maybe": null,
+				"flag": 5,
+				"n": [],
+				"i": "x",
+				"list": [
+					{}
+				],
+				"bare": true,
+				"nothing": 7
+			}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"correctAnswer": "a"
+			},
+			"clean": {}
+		},
+		{
+			"schema": "healSchema",
+			"value": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"check": false,
+			"converted": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"description": "d"
+					},
+					{
+						"label": "B"
+					}
+				]
+			},
+			"clean": {}
+		}
+	]
+}

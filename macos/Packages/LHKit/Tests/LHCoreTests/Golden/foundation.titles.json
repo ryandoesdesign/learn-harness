@@ -1,0 +1,26 @@
+[
+	{
+		"input": "short",
+		"output": "short"
+	},
+	{
+		"input": "  many   spaces\n\tand lines  ",
+		"output": "many spaces and lines"
+	},
+	{
+		"input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+		"output": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…"
+	},
+	{
+		"input": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word ",
+		"output": "word word word word word word word word word word word word word word…"
+	},
+	{
+		"input": "a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 ",
+		"output": "a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀 a😀…"
+	},
+	{
+		"input": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy tail",
+		"output": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy…"
+	}
+]

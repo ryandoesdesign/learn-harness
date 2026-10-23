@@ -1,0 +1,259 @@
+{
+	"prefixes": [
+		{
+			"n": 0,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 1,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 2,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 3,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 4,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": {
+				"toolCallId": "call_3413e7014ab74b0383cc1024",
+				"input": {
+					"statement": "Knowledge tracing is standardly characterized by **three load-bearing features**: features such that removing any one of them makes the problem *dissolve* — there would be nothing left to solve.\n\nName the three features, and for each, state in one sentence **why** removing it dissolves the problem (i.e., what the situation collapses into instead).",
+					"mode": "recall",
+					"modelSolution": "The three features:\n\n1. **The state is hidden.** The student's knowledge state \\(z_t\\) cannot be read off directly — you never observe it, only responses. Remove this (state directly observable): there is nothing to *infer*; you would simply measure the state and be done. The inferential problem dissolves.\n\n2. **The state moves over time.** The hidden state changes as the student learns (and in richer models, forgets). Remove this (state fixed): the problem degenerates to estimating one static quantity from many noisy observations — static measurement (the IRT-flavored problem), with no dynamics and no \"changes over time\" to track.\n\n3. **It must be inferred from indirect evidence.** Observations (responses) are noisy, downstream consequences of the state, not the state itself. Remove this (evidence is a direct/deterministic readout of the state): the responses would reveal the state exactly, so inference again collapses — no need for a probabilistic correction.\n\nTogether: hidden + evolving + only-indirectly-observed = knowledge tracing.",
+					"target": [
+						"n_9b19474daaf7"
+					]
+				}
+			},
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 5,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": {
+				"toolCallId": "call_3413e7014ab74b0383cc1024",
+				"input": {
+					"statement": "Knowledge tracing is standardly characterized by **three load-bearing features**: features such that removing any one of them makes the problem *dissolve* — there would be nothing left to solve.\n\nName the three features, and for each, state in one sentence **why** removing it dissolves the problem (i.e., what the situation collapses into instead).",
+					"mode": "recall",
+					"modelSolution": "The three features:\n\n1. **The state is hidden.** The student's knowledge state \\(z_t\\) cannot be read off directly — you never observe it, only responses. Remove this (state directly observable): there is nothing to *infer*; you would simply measure the state and be done. The inferential problem dissolves.\n\n2. **The state moves over time.** The hidden state changes as the student learns (and in richer models, forgets). Remove this (state fixed): the problem degenerates to estimating one static quantity from many noisy observations — static measurement (the IRT-flavored problem), with no dynamics and no \"changes over time\" to track.\n\n3. **It must be inferred from indirect evidence.** Observations (responses) are noisy, downstream consequences of the state, not the state itself. Remove this (evidence is a direct/deterministic readout of the state): the responses would reveal the state exactly, so inference again collapses — no need for a probabilistic correction.\n\nTogether: hidden + evolving + only-indirectly-observed = knowledge tracing.",
+					"target": [
+						"n_9b19474daaf7"
+					]
+				}
+			},
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 6,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": {
+				"toolCallId": "call_3413e7014ab74b0383cc1024",
+				"input": {
+					"statement": "Knowledge tracing is standardly characterized by **three load-bearing features**: features such that removing any one of them makes the problem *dissolve* — there would be nothing left to solve.\n\nName the three features, and for each, state in one sentence **why** removing it dissolves the problem (i.e., what the situation collapses into instead).",
+					"mode": "recall",
+					"modelSolution": "The three features:\n\n1. **The state is hidden.** The student's knowledge state \\(z_t\\) cannot be read off directly — you never observe it, only responses. Remove this (state directly observable): there is nothing to *infer*; you would simply measure the state and be done. The inferential problem dissolves.\n\n2. **The state moves over time.** The hidden state changes as the student learns (and in richer models, forgets). Remove this (state fixed): the problem degenerates to estimating one static quantity from many noisy observations — static measurement (the IRT-flavored problem), with no dynamics and no \"changes over time\" to track.\n\n3. **It must be inferred from indirect evidence.** Observations (responses) are noisy, downstream consequences of the state, not the state itself. Remove this (evidence is a direct/deterministic readout of the state): the responses would reveal the state exactly, so inference again collapses — no need for a probabilistic correction.\n\nTogether: hidden + evolving + only-indirectly-observed = knowledge tracing.",
+					"target": [
+						"n_9b19474daaf7"
+					]
+				}
+			},
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 7,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": {
+				"toolCallId": "call_3413e7014ab74b0383cc1024",
+				"input": {
+					"statement": "Knowledge tracing is standardly characterized by **three load-bearing features**: features such that removing any one of them makes the problem *dissolve* — there would be nothing left to solve.\n\nName the three features, and for each, state in one sentence **why** removing it dissolves the problem (i.e., what the situation collapses into instead).",
+					"mode": "recall",
+					"modelSolution": "The three features:\n\n1. **The state is hidden.** The student's knowledge state \\(z_t\\) cannot be read off directly — you never observe it, only responses. Remove this (state directly observable): there is nothing to *infer*; you would simply measure the state and be done. The inferential problem dissolves.\n\n2. **The state moves over time.** The hidden state changes as the student learns (and in richer models, forgets). Remove this (state fixed): the problem degenerates to estimating one static quantity from many noisy observations — static measurement (the IRT-flavored problem), with no dynamics and no \"changes over time\" to track.\n\n3. **It must be inferred from indirect evidence.** Observations (responses) are noisy, downstream consequences of the state, not the state itself. Remove this (evidence is a direct/deterministic readout of the state): the responses would reveal the state exactly, so inference again collapses — no need for a probabilistic correction.\n\nTogether: hidden + evolving + only-indirectly-observed = knowledge tracing.",
+					"target": [
+						"n_9b19474daaf7"
+					]
+				}
+			},
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 8,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": {
+				"toolCallId": "call_3413e7014ab74b0383cc1024",
+				"input": {
+					"statement": "Knowledge tracing is standardly characterized by **three load-bearing features**: features such that removing any one of them makes the problem *dissolve* — there would be nothing left to solve.\n\nName the three features, and for each, state in one sentence **why** removing it dissolves the problem (i.e., what the situation collapses into instead).",
+					"mode": "recall",
+					"modelSolution": "The three features:\n\n1. **The state is hidden.** The student's knowledge state \\(z_t\\) cannot be read off directly — you never observe it, only responses. Remove this (state directly observable): there is nothing to *infer*; you would simply measure the state and be done. The inferential problem dissolves.\n\n2. **The state moves over time.** The hidden state changes as the student learns (and in richer models, forgets). Remove this (state fixed): the problem degenerates to estimating one static quantity from many noisy observations — static measurement (the IRT-flavored problem), with no dynamics and no \"changes over time\" to track.\n\n3. **It must be inferred from indirect evidence.** Observations (responses) are noisy, downstream consequences of the state, not the state itself. Remove this (evidence is a direct/deterministic readout of the state): the responses would reveal the state exactly, so inference again collapses — no need for a probabilistic correction.\n\nTogether: hidden + evolving + only-indirectly-observed = knowledge tracing.",
+					"target": [
+						"n_9b19474daaf7"
+					]
+				}
+			},
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 9,
+			"dangling": null,
+			"needsContinuation": true,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 10,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 11,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 12,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 13,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": {
+				"toolCallId": "call_4346ebc77ffd408997a78857",
+				"input": {
+					"statement": "A tutor is running a one-skill tutor and wants to reason about *what a single response tells her about the student's knowledge state* \\(z_t \\in \\{0,1\\}\\).\n\nShe watches the student answer one problem **correctly** and is tempted to conclude \"the student knows this skill.\"\n\n**(a)** Write down the two error parameters of the observation model, giving each one's *exact* conditional definition — state explicitly which knowledge state each is conditioned on.\n\n**(b)** Using those parameters, explain in one or two sentences why the tutor's conclusion (\"she answered correctly, so she knows\") is not licensed — i.e., why a correct response is *evidence* about the state rather than *proof* of it.\n\n**(c)** Which direction of error does each parameter govern — correctly-answer-when-you-don't-know, or wrongly-answer-when-you-do? Attach each parameter to the right direction.",
+					"mode": "recall",
+					"modelSolution": "**(a)** The two error parameters of the BKT observation model are:\n\n- **Guess** \\(g = P(\\text{correct} \\mid \\text{doesn't know}) = P(x_t = \\text{correct} \\mid z_t = 0)\\).\n- **Slip** \\(s = P(\\text{wrong} \\mid \\text{knows}) = P(x_t = \\text{wrong} \\mid z_t = 1)\\).\n\nThe response \\(x_t\\) is generated *from* the current state \\(z_t\\), so both conditionals are \\(P(x_t \\mid z_t)\\).\n\n**(b)** The response is a noisy readout of the state, not the state itself. Because \\(g > 0\\), a student who does **not** know the skill can still answer correctly (guessing, lucky pattern-matching, partial recall). So a correct response is more *likely* under \\(z_t = 1\\) than under \\(z_t = 0\\), but it does not rule out \\(z_t = 0\\). Formally, \"correct\" is a likelihood, not a certainty: \\(P(\\text{correct} \\mid z_t = 0) = g > 0\\) means correctness has non-zero probability in the not-knowing state. Hence evidence, never proof — this is exactly the false-positive of the observation model.\n\n**(c)**\n- Guess \\(g\\) governs the **false positive**: answering correctly when you don't know (\\(z_t = 0\\)).\n- Slip \\(s\\) governs the **false negative**: answering wrongly when you do know (\\(z_t = 1\\)).",
+					"target": [
+						"n_ed4b233efa54"
+					]
+				}
+			},
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 14,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": "call_4346ebc77ffd408997a78857",
+			"hasProbeDone": false
+		},
+		{
+			"n": 15,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": "call_4346ebc77ffd408997a78857",
+			"hasProbeDone": false
+		},
+		{
+			"n": 16,
+			"dangling": null,
+			"needsContinuation": true,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 17,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		},
+		{
+			"n": 18,
+			"dangling": null,
+			"needsContinuation": false,
+			"endsInDismissal": false,
+			"activeProblem": null,
+			"pendingDismissal": null,
+			"hasProbeDone": false
+		}
+	],
+	"problemInputs": [
+		{
+			"concludeCallId": "call_dc48d94de44c4ee4a3bf3a1c",
+			"input": {
+				"statement": "Knowledge tracing is standardly characterized by **three load-bearing features**: features such that removing any one of them makes the problem *dissolve* — there would be nothing left to solve.\n\nName the three features, and for each, state in one sentence **why** removing it dissolves the problem (i.e., what the situation collapses into instead).",
+				"mode": "recall",
+				"modelSolution": "The three features:\n\n1. **The state is hidden.** The student's knowledge state \\(z_t\\) cannot be read off directly — you never observe it, only responses. Remove this (state directly observable): there is nothing to *infer*; you would simply measure the state and be done. The inferential problem dissolves.\n\n2. **The state moves over time.** The hidden state changes as the student learns (and in richer models, forgets). Remove this (state fixed): the problem degenerates to estimating one static quantity from many noisy observations — static measurement (the IRT-flavored problem), with no dynamics and no \"changes over time\" to track.\n\n3. **It must be inferred from indirect evidence.** Observations (responses) are noisy, downstream consequences of the state, not the state itself. Remove this (evidence is a direct/deterministic readout of the state): the responses would reveal the state exactly, so inference again collapses — no need for a probabilistic correction.\n\nTogether: hidden + evolving + only-indirectly-observed = knowledge tracing.",
+				"target": [
+					"n_9b19474daaf7"
+				]
+			}
+		},
+		{
+			"concludeCallId": "call_conc_call_4346ebc77ffd408997a78857",
+			"input": {
+				"statement": "A tutor is running a one-skill tutor and wants to reason about *what a single response tells her about the student's knowledge state* \\(z_t \\in \\{0,1\\}\\).\n\nShe watches the student answer one problem **correctly** and is tempted to conclude \"the student knows this skill.\"\n\n**(a)** Write down the two error parameters of the observation model, giving each one's *exact* conditional definition — state explicitly which knowledge state each is conditioned on.\n\n**(b)** Using those parameters, explain in one or two sentences why the tutor's conclusion (\"she answered correctly, so she knows\") is not licensed — i.e., why a correct response is *evidence* about the state rather than *proof* of it.\n\n**(c)** Which direction of error does each parameter govern — correctly-answer-when-you-don't-know, or wrongly-answer-when-you-do? Attach each parameter to the right direction.",
+				"mode": "recall",
+				"modelSolution": "**(a)** The two error parameters of the BKT observation model are:\n\n- **Guess** \\(g = P(\\text{correct} \\mid \\text{doesn't know}) = P(x_t = \\text{correct} \\mid z_t = 0)\\).\n- **Slip** \\(s = P(\\text{wrong} \\mid \\text{knows}) = P(x_t = \\text{wrong} \\mid z_t = 1)\\).\n\nThe response \\(x_t\\) is generated *from* the current state \\(z_t\\), so both conditionals are \\(P(x_t \\mid z_t)\\).\n\n**(b)** The response is a noisy readout of the state, not the state itself. Because \\(g > 0\\), a student who does **not** know the skill can still answer correctly (guessing, lucky pattern-matching, partial recall). So a correct response is more *likely* under \\(z_t = 1\\) than under \\(z_t = 0\\), but it does not rule out \\(z_t = 0\\). Formally, \"correct\" is a likelihood, not a certainty: \\(P(\\text{correct} \\mid z_t = 0) = g > 0\\) means correctness has non-zero probability in the not-knowing state. Hence evidence, never proof — this is exactly the false-positive of the observation model.\n\n**(c)**\n- Guess \\(g\\) governs the **false positive**: answering correctly when you don't know (\\(z_t = 0\\)).\n- Slip \\(s\\) governs the **false negative**: answering wrongly when you do know (\\(z_t = 1\\)).",
+				"target": [
+					"n_ed4b233efa54"
+				]
+			}
+		}
+	]
+}

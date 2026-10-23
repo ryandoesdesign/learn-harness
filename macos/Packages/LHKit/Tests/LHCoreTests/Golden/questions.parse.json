@@ -1,0 +1,1003 @@
+{
+	"chat": [
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_3fb0fa4554344c1389fb15ec5b22ee14",
+			"tool": "ask_user_question",
+			"parsed": {
+				"question": "Which strand should the graded test question be drawn from?",
+				"options": [
+					{
+						"label": "Bayesian knowledge tracing",
+						"value": "bkt"
+					},
+					{
+						"label": "Relational databases / FDs and keys",
+						"value": "rdb"
+					},
+					{
+						"label": "Statistical learning theory (risk, ERM)",
+						"value": "ml"
+					},
+					{
+						"label": "Lacan",
+						"value": "lacan"
+					}
+				],
+				"details": "This is the non-graded question; the graded one follows from your pick."
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_b55e75640e3a414f801b2dcb0e0a8bfd",
+			"tool": "probe",
+			"parsed": {
+				"question": "In the standard (four-parameter) BKT model, what is assumed about **forgetting**?",
+				"details": "One correct option. Attach reasoning in the thinking field if you want it read.",
+				"options": [
+					{
+						"label": "Mastery is absorbing between items: the learning transition applies only to the unmastered state, so a mastered skill cannot regress.",
+						"value": "absorbing"
+					},
+					{
+						"label": "Mastery can regress to unmastered, but only on the transition between sessions rather than between items.",
+						"value": "session-reset"
+					},
+					{
+						"label": "Forgetting is modeled symmetrically, by a second transition probability that moves a mastered skill back to unmastered.",
+						"value": "symmetric"
+					},
+					{
+						"label": "Forgetting is absorbed into the slip parameter, which is refit upward as the time since practice grows.",
+						"value": "slip-absorbed"
+					}
+				],
+				"explanation": "The transition matrix in standard BKT has the mastered row equal to \\([0,\\ 1]\\): once the latent state is mastered it stays mastered. Learning is one-directional — the learn rate \\(T\\) (often \\(P(T)\\)) moves unmastered \\(\\to\\) mastered only.\n\nThe other three options are the natural repairs one reaches for, and each is a *different* model:\n\n- A separate mastered \\(\\to\\) unmastered transition is a five-parameter extension (\"decay\" / forgetting) — genuinely used in the literature, but not the standard four-parameter model.\n- Slip is a property of the **response**, not the state: \\(P(\\text{wrong} \\mid \\text{mastered})\\). It explains an incorrect answer from a skilled student; it does not move the state backward. Refitting it over time would be a modeling change, not part of BKT.\n- Session-level resets likewise are an extension, not the standard assumption.\n\nThat one-directional transition is what keeps the posterior a single number: with no forgetting, the state after each item is still binary and Markov, so the update stays exact.",
+				"correctAnswer": "absorbing"
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_0fd38fedc6314363a5542baeaa755df7",
+			"tool": "probe",
+			"parsed": {
+				"correctAnswer": "approx",
+				"details": "Graded half. One correct option; reasoning welcome in the thinking field.",
+				"explanation": "For an ERM learner, the true risk of the selected hypothesis splits into three terms:\n\n\\[\nR(\\hat h) \\;=\\; \\underbrace{R(h^\\star_{\\text{Bayes}})}_{\\text{Bayes risk}} \\;+\\; \\underbrace{\\big[R(h^\\star_{\\mathcal H}) - R(h^\\star_{\\text{Bayes}})\\big]}_{\\text{approximation error}} \\;+\\; \\underbrace{\\big[R(\\hat h) - R(h^\\star_{\\mathcal H})\\big]}_{\\text{estimation error}}\n\\]\n\n- **Approximation error** is the class's fault, not the data's: it is the gap between the *best* member of \\(\\mathcal H\\) and the Bayes-optimal predictor, and it shrinks as the class grows richer. It is not observable, since neither term is computable.\n- **Estimation error** is the same bracket but with ERM's *chosen* hypothesis instead of the class's best — that is the option naming \\(\\hat h\\) versus \\(h^\\star_{\\mathcal H}\\).\n- The empirical-minus-true-risk gap is the **generalization gap**, driven by the sample; it vanishes as \\(n \\to \\infty\\) for a fixed hypothesis but not uniformly over a growing class.\n- The irreducible risk of the data-generating distribution is just the **Bayes risk** — the floor the sum is measured against, not a component of the gap.",
+				"options": [
+					{
+						"label": "How far the best hypothesis in the class is from the Bayes-optimal predictor.",
+						"value": "approx"
+					},
+					{
+						"label": "How far ERM's chosen hypothesis is from the best hypothesis in the class.",
+						"value": "est"
+					},
+					{
+						"label": "How far the empirical risk on the training sample is from the true risk.",
+						"value": "gap"
+					},
+					{
+						"label": "The irreducible risk of the data-generating distribution itself.",
+						"value": "bayes"
+					}
+				],
+				"question": "In the approximation–estimation decomposition of the risk of an ERM learner, what does the **approximation error** measure?"
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_1a129ac0def046bab8ceb869d9cc40b1",
+			"tool": "ask_user_question",
+			"parsed": {
+				"details": "Non-graded half — no correct answer.",
+				"options": [
+					{
+						"label": "Keep probing the ML strand (risk/ERM)",
+						"value": "probe-ml"
+					},
+					{
+						"label": "Conclude the probe now with probe_done",
+						"value": "conclude"
+					},
+					{
+						"label": "Stop — test complete",
+						"value": "stop"
+					}
+				],
+				"question": "What should I do after this pair of questions?"
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_64145d968f4149d6b1fa44c7cf8fbce3",
+			"tool": "recall",
+			"parsed": {
+				"question": "In BKT, how is the belief that a skill is mastered updated after each observed response — and why is that update exact rather than an approximation?",
+				"correctAnswer": "**Setup.** Let \\(L_t \\in \\{0,1\\}\\) be the latent mastery state at item \\(t\\), with four parameters: prior \\(P(L_0)\\), learn rate \\(T\\), slip \\(S = P(\\text{incorrect} \\mid L=1)\\), guess \\(G = P(\\text{correct} \\mid L=0)\\).\n\n**Two-step update per item — predict, then correct.**\n\n1. *Predict (transition):* apply the learning transition to the belief carried in. Because the mastered row of the transition matrix is \\([0, 1]\\) (no forgetting), only the unmastered mass can move:\n\\[\nP(L_t = 1)^{-} \\;=\\; P(L_{t-1}=1) \\;+\\; \\big(1 - P(L_{t-1}=1)\\big)\\,T\n\\]\n\n2. *Correct (Bayes' rule on the observed response):* the response enters only through a likelihood, \\(1 - S\\) if mastered and \\(G\\) if unmastered:\n\\[\nP(L_t = 1 \\mid \\text{correct}) \\;=\\; \\frac{(1-S)\\,P(L_t=1)^{-}}{(1-S)\\,P(L_t=1)^{-} \\;+\\; G\\,\\big(1 - P(L_t=1)^{-}\\big)}\n\\]\nand symmetrically for an incorrect response, substituting \\(S\\) for \\(1-S\\) and \\(1-G\\) for \\(G\\).\n\n**Why it's exact.** The latent state is *binary* and the chain is *first-order Markov*: the state at the next step depends on the past only through the current state. Those two facts make the filtered belief a single scalar a sufficient statistic, so the recursion above is the true posterior at every step — nothing is truncated, sampled, or approximated. This is what separates BKT from methods that keep a distribution over latent state, or do deep/latent-vector tracing (DKT), where the belief is no longer a closed-form scalar.",
+				"details": "Free recall — write it in your own words, reasoning included; no options. Correct in your own words is not the bar; complete and correctly structured is."
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_83089b4dbb6a42b390962b1993528920",
+			"tool": "probe_done",
+			"parsed": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "BKT as binary-state Bayesian filtering",
+							"assessment": "FLOOR: solid on the frame — he holds that the belief is updated by Bayes' rule with a prior, a likelihood from the observed response, and a resulting posterior. That was clean in free recall. CEILING: breaks immediately below the frame. He omitted the predict/transition step (advancing the belief through the learn rate T before conditioning), could not name the likelihoods (1-S if mastered, G if unmastered) or write the update, and left the \"why exact\" half of the question unanswered entirely. MISCONCEPTION: none found — this is a gap, not a wrong model; he describes a generic single-step Bayesian update where BKT is a two-step predict-then-correct recursion. BUILD FROM: the correct Bayesian skeleton he already owns, then insert the prediction step ahead of the correction, then make the likelihoods explicit via slip/guess — and only then the exactness argument (binary latent state + first-order Markov yields a single scalar sufficient statistic, closed form; that is exactly what DKT gives up)."
+						},
+						{
+							"strand": "BKT's forgetting assumption / transition structure",
+							"assessment": "FLOOR: strong and confident (100). He selected mastery as absorbing — the transition applies to the unmastered state only — and correctly rejected three believable repairs (symmetric decay, session-level reset, slip-as-forgetting). He distinguishes state transitions from response noise. CEILING: not probed above this; whether he knows the decay/forgetting extension as a named five-parameter variant, or why slip cannot be repurposed as drift, is untested. BUILD FROM: this is the strongest anchor available. The transition matrix with mastered row [0, 1] is already his, so it is the natural entry point for the predict step that strand 1 shows is missing — same object, one step further."
+						},
+						{
+							"strand": "Risk, ERM, and the approximation-estimation decomposition",
+							"assessment": "FLOOR: identified approximation error correctly as the gap between the best hypothesis in the class and the Bayes-optimal predictor — he did not confuse it with estimation error, the generalization gap, or the Bayes risk itself, though distractors naming each were present. CEILING: uncertain, and the evidence is thin. Confidence was 70 rather than high, and the thinking channel carried no reasoning at all, so a correct pick plus a thin trace is either genuine recognition or a lucky match against a familiar phrase — the session cannot tell those apart. MISCONCEPTION: none found. BUILD FROM: confirm the three-term bracket explicitly, then push one notch to where H grows — the tension between shrinking approximation error and growing estimation error, and the uniform-vs-fixed-hypothesis distinction in the law of large numbers."
+						},
+						{
+							"strand": "Relational model: keys, functional dependencies, domains",
+							"assessment": "NO PROBE EVIDENCE THIS SESSION. The knowledge graph carries 17 propositions from 2026-10-05 plus the 70-proposition learn database.md file — key existence as a theorem, key as strongest FD, SQL cannot enforce general FDs, UNIQUE and NULL — so the material is likely not new to him, but nothing this session tested where his edge sits. Treat as 'map says covered, floor unknown' and probe before teaching into it."
+						},
+						{
+							"strand": "Lacan: signifier, mirror stage, Imaginary/Symbolic",
+							"assessment": "NO PROBE EVIDENCE THIS SESSION. 54 propositions in the graph, last active 2026-10-08 — the largest and most recently touched cluster. Nothing was probed or recalled here, so no floor, no ceiling, no misconceptions. If a lesson touches this strand, probe it fresh; prior coverage is not current evidence."
+						}
+					],
+					"summary": "GOAL: none was set. He explicitly instructed a test session — explore the graph, exercise the non-graded, graded, parallel, and recall instruments, dispatch a researcher — with no probing or teaching required, so there is no concrete learning goal to teach toward. Only three of the graph's strands received any evidence, and the session was deliberately shallow: one confident correct answer (BKT forgetting), one correct answer at 70 confidence with no visible reasoning (approximation error), and one partial free recall (BKT update — right engine, missing predict step, likelihoods, and exactness argument). The two largest clusters, Lacan and relational databases, were read from the map but not tested. WHERE TEACHING SHOULD ENTER: BKT, at the seam between the answer he already holds (mastery is absorbing, transition on the unmastered state) and the step he does not have (running that transition forward as an explicit prediction before Bayesian correction) — the second is derivable from the first, which makes it the exact edge. Note the caveat that he has asked to keep probing: if probing continues inside the teaching phase, it should go up from the two floors established here, not below them, since a confident correct answer is a floor and re-asking under it buys nothing."
+				}
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_d18bf2b61ed9472883ec4c085759d784",
+			"tool": "quiz",
+			"parsed": {
+				"type": "predict",
+				"question": "Your belief after item 1 is \\(p_1 = 0.70\\), formed by conditioning on that response. Item 2 is now in front of the student, unanswered. Before you condition on the item-2 response, is \\(p_1 = 0.70\\) the right number to hand to Bayes' rule — and if not, what has to happen to it first?",
+				"details": "Prediction — answer before the teaching. Not yet covered, so reason from what you already hold; the wrong attempts are as useful as the right one.",
+				"options": [
+					{
+						"value": "advance",
+						"label": "No — something has to happen to it first, because the state can change between the two items."
+					},
+					{
+						"value": "valid",
+						"label": "Yes — that posterior is the belief at the start of item 2, and every later response just corrects it again."
+					},
+					{
+						"value": "reset",
+						"label": "No — it has to be pulled back toward the starting prior, since a new item is a fresh occasion."
+					},
+					{
+						"value": "reestimate",
+						"label": "No — slip and guess must be re-estimated from the new response before the update can run."
+					}
+				],
+				"explanation": "Prediction recorded. The resolution is the next teaching step — I'll open that step by addressing your prediction explicitly and saying what actually has to happen to the number before the correction. Nothing is graded here; what I'm reading is the direction you reach for.",
+				"correctAnswer": "advance"
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_76af6ec5735347128c9bff1c72867e20",
+			"tool": "quiz",
+			"parsed": {
+				"correctAnswer": "advance",
+				"details": "Prediction — answer before the teaching. Not yet covered, so reason from what you already hold; a wrong attempt is as useful as a right one.",
+				"explanation": "Prediction recorded. The resolution is the next teaching step — I'll open that step by addressing your prediction explicitly and saying what actually has to happen to the number before the correction runs. Nothing graded here; what I'm reading is the direction you reach for.",
+				"options": [
+					{
+						"label": "No — something has to happen to it first, because the state can change between the two items.",
+						"value": "advance"
+					},
+					{
+						"label": "Yes — that posterior is the belief at the start of item 2, and every later response just corrects it again.",
+						"value": "valid"
+					},
+					{
+						"label": "No — it has to be pulled back toward the starting prior, since a new item is a fresh occasion.",
+						"value": "reset"
+					},
+					{
+						"label": "No — slip and guess must be re-estimated from the new response before the update can run.",
+						"value": "reestimate"
+					}
+				],
+				"question": "Your belief after item 1 is \\(p_1 = 0.70\\), formed by conditioning on that response. Item 2 is now in front of the student, unanswered. Before you condition on the item-2 response, is \\(p_1 = 0.70\\) the right number to hand to Bayes' rule — and if not, what has to happen to it first?",
+				"type": "predict"
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_f1ec47cb3eb94cc6b180ba2c318ee065",
+			"tool": "quiz",
+			"parsed": {
+				"correctAnswer": "a-further",
+				"details": "Applied check on the transition — compute it, don't recall it.",
+				"explanation": "The predict step moves only the unmastered mass, so the change in belief is \\(\\Delta p = (1-p)\\,T\\) — proportional to how much of the belief is still in the unmastered state, not to how confident you are.\n\n- Student A, \\(p = 0.20\\): \\(\\Delta p = 0.80 \\times 0.20 = 0.16\\), so \\(p^- = 0.36\\)\n- Student B, \\(p = 0.80\\): \\(\\Delta p = 0.20 \\times 0.20 = 0.04\\), so \\(p^- = 0.84\\)\n\nA moves four times as far. The further the belief is from mastery, the more mass there is that learning can act on — which is why the predict segment in the demo visibly shrinks as the belief climbs toward 1.\n\nThe other three options are the three concrete wrong models:\n\n- *Equal, \\(+0.20\\)*: treats \\(T\\) as the probability that the student learns, unconditionally. But \\(T\\) is the chance of learning **given** they haven't yet — the mastered are not candidates, so their mass is excluded from the transition entirely.\n- *B further*: grants movement proportional to \\(p\\), the opposite of the model. Nothing in the transition acts on already-mastered mass (that is the no-forgetting row \\([0,1]\\) in matrix form).\n- *Neither moves*: the belief not changing until a response arrives — the belief being frozen between items, i.e. no predict step at all. That is exactly the gap from your free recall, so if you picked it, that's the seam the arc starts at.",
+				"options": [
+					{
+						"label": "A, by +0.16 versus B's +0.04 — the change is proportional to the unmastered mass.",
+						"value": "a-further"
+					},
+					{
+						"label": "Both by +0.20 — T is the chance of learning, so it applies equally regardless of where belief stands.",
+						"value": "equal-20"
+					},
+					{
+						"label": "B, by +0.16 versus A's +0.04 — belief closer to 1 has more mastery available to be reinforced.",
+						"value": "b-further"
+					},
+					{
+						"label": "Neither — belief between items does not move until a response is observed.",
+						"value": "frozen"
+					}
+				],
+				"question": "Two students enter the gap between items. A's belief is \\(p = 0.20\\), B's is \\(p = 0.80\\); the learn rate is \\(T = 0.20\\) for both. After the gap, whose belief has moved further, and by how much?",
+				"type": "check"
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_d22d75f52cf34f29b0c7791a50f5b71e",
+			"tool": "quiz",
+			"parsed": {
+				"correctAnswer": "p70",
+				"details": "Applied check on the correction step — numbers only.",
+				"explanation": "Plug into the correction: with \\(p^- = 0.44\\), \\(S = 0.10\\), \\(G = 0.30\\), and an observed **correct** answer,\n\n\\[\np = \\frac{(1-S)\\,p^-}{(1-S)\\,p^- + G\\,(1-p^-)}\n= \\frac{0.90 \\times 0.44}{0.90 \\times 0.44 \\;+\\; 0.30 \\times 0.56}\n= \\frac{0.396}{0.396 + 0.168} = \\frac{0.396}{0.564} \\approx 0.70\n\\]\n\nThe posterior is a **weighted comparison of two explanations** of the same answer: mastery with \\(1-S = 0.90\\), versus non-mastery with \\(G = 0.30\\). The correct answer raises belief because it is three times more likely under mastery — but only three times, so the belief lands in the middle of the available room rather than at certainty.\n\nThe wrong options are each a specific broken model:\n\n- **\\(0.90\\)** — treating the likelihood \\((1-S)\\) as the answer, i.e. dropping the prior. The prior \\(p^- = 0.44\\) sets how much room the evidence has to move into; the likelihood alone cannot be the posterior unless belief started at \\(0.50\\).\n- **\\(0.50\\)** — swapping the likelihoods: using \\(1-G = 0.70\\) as the probability of a correct answer from an unmastered student. That inverts guess: \\(G\\) is the chance of correct *while unmastered*, so its complement \\(1-G\\) is the chance of *incorrect* while unmastered.\n- **\\(0.44\\)** — no movement: the correction step skipped, belief carried through unchanged.",
+				"options": [
+					{
+						"label": "\\(0.70\\)",
+						"value": "p70"
+					},
+					{
+						"label": "\\(0.90\\)",
+						"value": "p90"
+					},
+					{
+						"label": "\\(0.50\\)",
+						"value": "p50"
+					},
+					{
+						"label": "\\(0.44\\)",
+						"value": "p44"
+					}
+				],
+				"question": "After the predict step the belief stands at \\(p^- = 0.44\\), with \\(S = 0.10\\) and \\(G = 0.30\\). The student then answers **correctly**. What is the belief after conditioning on that response?",
+				"type": "check"
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_febbb60291364fc0aaf19bde9050e950",
+			"tool": "explain",
+			"parsed": {
+				"correctAnswer": "**What you would do:** advance the belief before conditioning — the belief handed to Bayes' rule is \\(p^- = p + (1-p)\\,T\\), not \\(p_1 = 0.70\\).\n\n**Why.** The belief of \\(0.70\\) was formed by conditioning on the *previous* response: it is \\(P(\\text{mastered} \\mid \\text{the item-1 response})\\), a statement about the student *as they were at item 1*. The moment to use it has passed. Between item 1 and item 2 there is a gap, and in that gap learning can happen: the student may have acquired the skill since. So \\(0.70\\) is a *stale* belief — it is not the belief at the start of item 2, it's the belief at the *end of item 1*.\n\n**The argument that forces it.** If you hand \\(0.70\\) straight to Bayes' rule, you are asserting that learning cannot occur between two items — the only way the state at item 2 could equal the state at item 1. But the entire purpose of tutoring is to change that state; a model that rules out learning between items cannot register the effect of instruction at all. So something must carry the belief from \"after item 1\" to \"before item 2,\" and the only thing that can do that is a step that lets unmastered mass become mastered:\n\n\\[\np^- = P(L_2 = 1) = p_1 + (1 - p_1)\\,T\n\\]\n\nwith \\(p_1 = 0.70\\) and, say, \\(T = 0.20\\): \\(p^- = 0.70 + 0.30 \\times 0.20 = 0.76\\). Bayes' rule then conditions *that* number on the item-2 response.\n\n**The consequence to hold onto:** the update is not one move but a **cycle** — predict, then correct — repeated per item. Removing the predict step does not merely make the model less accurate; it changes what the model claims about students.",
+				"details": "Prediction, free recall — attempt the discovery rather than the recall. The reasoning matters more than the verdict; a wrong attempt is still information about where the seam is.",
+				"question": "Item 2 is in front of the student, unanswered. Your belief is \\(p_1 = 0.70\\), formed by conditioning on the item-1 response. Before any item-2 response arrives: what, if anything, do you do to that number — and what is the argument that forces it?",
+				"type": "predict"
+			}
+		},
+		{
+			"chatId": "chat_mv27rrra_feff23b6",
+			"toolCallId": "call_a2d626327d7046e6ba28223916ebb271",
+			"tool": "explain",
+			"parsed": {
+				"correctAnswer": "**Four parameters — but not as a list to memorize; each one is forced by a distinct demand, and no fifth is needed.**\n\n1. **Prior \\(p_0 = P(L_0 = 1)\\)** — *demand: the recursion needs a starting point.* Before any response, the belief must come from somewhere. If the recursion were run with no starting value, there would be nothing to advance or correct. \\(p_0\\) is simply where the process is initialised — not a belief about the student derived from anything.\n\n2. **Learn rate \\(T\\)** — *demand: the state must be able to change between items.* The predict step \\(p^- = p + (1-p)T\\) is the only place the model can express that instruction has an effect. It is the probability that an **unmastered** student acquires the skill in the gap — conditional on not already having it, which is why it acts only on the mass \\((1-p)\\).\n\n3. **Slip \\(S = P(\\text{incorrect} \\mid L = 1)\\)** — *demand: a mastered student can still get it wrong.* Without \\(S\\), a single error would drive belief to zero, making mastery unrecoverable. This is the likelihood used for an incorrect response *from the mastered state*.\n\n4. **Guess \\(G = P(\\text{correct} \\mid L = 0)\\)** — *demand: an unmastered student can still get it right.* Without \\(G\\), a single correct answer would be treated as proof of mastery. This is the likelihood used for a correct response *from the unmastered state*.\n\n**Why the count is exactly four, not three or five.** Count the demands rather than the parameters. The transition needs one number (one-directional, so one row moves). The likelihood table has four cells — correct/incorrect × mastered/unmastered — but the two rows each sum to 1, which removes a degree of freedom per row, leaving **two** free numbers, not four. Add the initialisation: \\(1 + 2 + 1 = 4\\).\n\n**This is also where the model can be extended**, and the price is visible from the same count: allowing forgetting means the mastered row no longer sums to \\([0,1]\\) unchanged — a fifth parameter (a mastered \\(\\to\\) unmastered transition). Making the state non-binary, or letting the parameters depend on the item or the student, adds more structure still. Every one of those is a deliberate purchase, not a correction.\n\n**Consequences worth holding:** the four parameters are not independent facts about a student — they are the *only* things the model can express, which is exactly why the same trajectory can be produced by different parameter pairs. The parameter count and the identifiability problem are two views of one fact.",
+				"details": "Free recall, check. Reason it out — the demands that force each parameter, not the list.",
+				"question": "Standard BKT has exactly four parameters. Name them, and for each state the demand that forces it to exist — then say why the count comes out at four rather than three or five.",
+				"type": "check"
+			}
+		}
+	],
+	"synthetic": [
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"nodeId": "n",
+				"type": "check",
+				"extra": 1
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet.",
+				"type": "check"
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": "[{\"label\":\"Venus\"},{\"label\":\"Mercury\"}]",
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "17",
+						"value": "17"
+					},
+					{
+						"label": "27"
+					}
+				],
+				"correctAnswer": 17,
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "17",
+						"value": "17"
+					},
+					{
+						"label": "27"
+					}
+				],
+				"correctAnswer": "17",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "17"
+					},
+					{
+						"label": "27"
+					}
+				],
+				"correctAnswer": [
+					17,
+					"27"
+				],
+				"explanation": "Mercury is the innermost planet.",
+				"multiSelect": true
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "17"
+					},
+					{
+						"label": "27"
+					}
+				],
+				"correctAnswer": [
+					"17",
+					"27"
+				],
+				"explanation": "Mercury is the innermost planet.",
+				"multiSelect": true
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": {
+					"bad": true
+				},
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": null
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": [
+					"Venus",
+					"Mercury"
+				],
+				"explanation": "Mercury is the innermost planet.",
+				"multiSelect": "true"
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": [
+					"Venus",
+					"Mercury"
+				],
+				"explanation": "Mercury is the innermost planet.",
+				"multiSelect": true
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "[\"Venus\", \"Mercury\"]",
+				"explanation": "Mercury is the innermost planet.",
+				"multiSelect": "1"
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "[\"Venus\", \"Mercury\"]",
+				"explanation": "Mercury is the innermost planet.",
+				"multiSelect": true
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": 42,
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": null
+			},
+			"parsed": {
+				"question": "42",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "null"
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": 1.5e+21,
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": true
+			},
+			"parsed": {
+				"question": "1.5e+21",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "true"
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "A",
+						"description": "leak"
+					},
+					{
+						"label": "B",
+						"value": " b "
+					}
+				],
+				"correctAnswer": "b",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "A"
+					},
+					{
+						"label": "B",
+						"value": " b "
+					}
+				],
+				"correctAnswer": "b",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "A"
+					}
+				],
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": null
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": {
+					"label": "A"
+				},
+				"correctAnswer": "Mercury",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": null
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": "nope",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": null
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": " \"Mercury\": ",
+				"explanation": "Mercury is the innermost planet."
+			},
+			"parsed": {
+				"question": "Which planet is closest to the sun?",
+				"options": [
+					{
+						"label": "Venus"
+					},
+					{
+						"label": "Mercury"
+					}
+				],
+				"correctAnswer": " \"Mercury\": ",
+				"explanation": "Mercury is the innermost planet."
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\"",
+				"nodeId": "experience-first"
+			},
+			"parsed": {
+				"question": "What was Parmenides' claim?",
+				"options": [
+					{
+						"label": "Being is changeless and complete",
+						"value": "parmenides"
+					},
+					{
+						"label": "Becoming is fundamental",
+						"value": "heraclitus"
+					}
+				],
+				"explanation": "The flux is appearance.",
+				"correctAnswer": [
+					":parmenides"
+				],
+				"type": "\"predict\""
+			}
+		},
+		{
+			"tool": "quiz",
+			"input": "a string",
+			"parsed": null
+		},
+		{
+			"tool": "quiz",
+			"input": [
+				{
+					"question": "Which planet is closest to the sun?",
+					"options": [
+						{
+							"label": "Venus"
+						},
+						{
+							"label": "Mercury"
+						}
+					],
+					"correctAnswer": "Mercury",
+					"explanation": "Mercury is the innermost planet."
+				}
+			],
+			"parsed": null
+		},
+		{
+			"tool": "quiz",
+			"input": null,
+			"parsed": null
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"question": "What do you want to learn?"
+			},
+			"parsed": {
+				"question": "What do you want to learn?"
+			}
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"question": "Which?",
+				"options": [
+					{
+						"label": "A",
+						"description": " d "
+					},
+					{
+						"label": "B"
+					}
+				],
+				"multiSelect": true
+			},
+			"parsed": {
+				"question": "Which?",
+				"options": [
+					{
+						"label": "A",
+						"description": " d "
+					},
+					{
+						"label": "B"
+					}
+				],
+				"multiSelect": true
+			}
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"question": "q",
+				"options": "[]"
+			},
+			"parsed": null
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A",
+						"value": "x"
+					},
+					{
+						"label": "B",
+						"value": "x"
+					}
+				]
+			},
+			"parsed": null
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"question": "q",
+				"options": [
+					{
+						"label": "A"
+					}
+				]
+			},
+			"parsed": null
+		},
+		{
+			"tool": "ask_user_question",
+			"input": {
+				"question": "q",
+				"details": 7,
+				"multiSelect": 0
+			},
+			"parsed": {
+				"question": "q",
+				"details": "7",
+				"multiSelect": false
+			}
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"question": "q",
+				"correctAnswer": "a",
+				"nodeId": "n",
+				"type": "predict"
+			},
+			"parsed": {
+				"question": "q",
+				"correctAnswer": "a",
+				"type": "predict"
+			}
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"question": "q",
+				"correctAnswer": 42
+			},
+			"parsed": {
+				"question": "q",
+				"correctAnswer": "42"
+			}
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"question": "q",
+				"correctAnswer": "   "
+			},
+			"parsed": null
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"question": "q",
+				"correctAnswer": {
+					"nested": true
+				}
+			},
+			"parsed": null
+		},
+		{
+			"tool": "explain",
+			"input": {
+				"explanation": "e",
+				"correctAnswer": "a"
+			},
+			"parsed": null
+		},
+		{
+			"tool": "probe_done",
+			"input": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			},
+			"parsed": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "modal logic",
+							"assessment": "Floor: intuition."
+						}
+					],
+					"summary": "Teach the symbols."
+				}
+			}
+		},
+		{
+			"tool": "probe_done",
+			"input": {
+				"assessment": "{\"strands\":[{\"strand\":\"modal logic\",\"assessment\":\"Floor: intuition.\"}],\"summary\":\"Teach the symbols.\"}"
+			},
+			"parsed": null
+		},
+		{
+			"tool": "probe_done",
+			"input": {
+				"assessment": {
+					"summary": "…"
+				}
+			},
+			"parsed": null
+		},
+		{
+			"tool": "probe_done",
+			"input": {
+				"assessment": {
+					"strands": []
+				}
+			},
+			"parsed": null
+		},
+		{
+			"tool": "probe_done",
+			"input": {
+				"assessment": {
+					"strands": {
+						"strand": "s",
+						"assessment": "a"
+					},
+					"extra": true
+				}
+			},
+			"parsed": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "s",
+							"assessment": "a"
+						}
+					]
+				}
+			}
+		},
+		{
+			"tool": "probe_done",
+			"input": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": 1,
+							"assessment": false,
+							"x": 1
+						}
+					]
+				}
+			},
+			"parsed": {
+				"assessment": {
+					"strands": [
+						{
+							"strand": "1",
+							"assessment": "false"
+						}
+					]
+				}
+			}
+		}
+	]
+}

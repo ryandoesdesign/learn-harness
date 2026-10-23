@@ -1,0 +1,69 @@
+# XcodeGen spec — the source of truth for LearnHarness.xcodeproj (both are
+# committed; regenerate with `xcodegen` from this directory after editing).
+name: LearnHarness
+options:
+  bundleIdPrefix: com.ryandoesdesign
+  deploymentTarget:
+    macOS: "27.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    DEVELOPMENT_TEAM: 5U34MG28NQ
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "Apple Development"
+    MACOSX_DEPLOYMENT_TARGET: "27.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+packages:
+  LHKit:
+    path: Packages/LHKit
+targets:
+  LearnHarness:
+    type: application
+    platform: macOS
+    sources: [LearnHarness]
+    dependencies:
+      - package: LHKit
+        product: LHCore
+      - package: LHKit
+        product: LHResources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryandoesdesign.LearnHarness
+        PRODUCT_NAME: LearnHarness
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: LearnHarness
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.education
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        CODE_SIGN_ENTITLEMENTS: LearnHarness/LearnHarness.entitlements
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+  LearnHarnessTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [LearnHarnessTests]
+    dependencies:
+      - target: LearnHarness
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryandoesdesign.LearnHarnessTests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/LearnHarness.app/Contents/MacOS/LearnHarness"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  LearnHarness:
+    build:
+      targets:
+        LearnHarness: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - LearnHarnessTests
+        - package: LHKit/LHCoreTests
