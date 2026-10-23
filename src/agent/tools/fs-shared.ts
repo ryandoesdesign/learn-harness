@@ -1,5 +1,4 @@
 import * as fs from "node:fs/promises";
-import * as os from "node:os";
 import * as path from "node:path";
 
 /**
@@ -9,10 +8,10 @@ import * as path from "node:path";
  * the learner references files in messages; the agent finds them).
  *
  * Safety posture (user-locked): READ-ONLY by construction — no shell-out,
- * no user-controlled process args, no mutation APIs anywhere here. The one
- * deliberate scope widening vs pi: relative paths and default roots resolve
- * against the LEARNER'S HOME, not a project cwd — the harness has no
- * meaningful working directory, and "find my notes" should just work.
+ * no user-controlled process args, no mutation APIs anywhere here. Scope:
+ * only the folders the learner allowed (FileAccessPolicy below) — relative
+ * paths and default roots resolve against THOSE, not a project cwd or the
+ * whole home directory (security hardening, 2026-10-24).
  *
  * Ported behaviors (mirroring pi's dist/core/tools/{ls,find,grep}.js): the
  * schemas, descriptions, output formats, and truncation notices are copied
@@ -35,12 +34,102 @@ export const WALK_TIMEOUT_MS = 10_000;
  */
 const EXCLUDED_DIR_NAMES = new Set(["node_modules", ".git", "Library", ".Trash"]);
 
-/** Resolve a tool path argument: absolute stays, relative/absent → home.
- *  (pi resolves against the project cwd; the harness's "project" is the
- *  learner's life, so the home directory is the anchor.) */
-export function resolveSourcePath(p?: string): string {
-	if (!p) return os.homedir();
-	return path.isAbsolute(p) ? p : path.join(os.homedir(), p);
+/**
+ * File-access policy (security hardening, 2026-10-24): the learner-file
+ * tools reach ONLY folders the learner allowed in Settings → Agent → File
+ * access. `deniedPaths` (the app's own data dir, auth.json, .env*) stay
+ * refused even inside an allowed folder. Injected by the server wiring —
+ * the agent layer may not read the settings store — and read FRESH per
+ * call, so a settings change lands on the next tool call.
+ */
+export interface FileAccessPolicy {
+	allowedFolders: string[];
+	deniedPaths: string[];
+}
+
+let policySource: (() => FileAccessPolicy) | null = null;
+
+/** Register the policy source (server wiring; tests). null unregisters —
+ *  and an unregistered policy DENIES EVERYTHING (fail closed). */
+export function setFileAccessPolicy(source: (() => FileAccessPolicy) | null): void {
+	policySource = source;
+}
+
+function currentPolicy(): FileAccessPolicy {
+	return policySource?.() ?? { allowedFolders: [], deniedPaths: [] };
+}
+
+const SETTINGS_HINT = "Settings → Agent → File access";
+
+/** realpath, tolerating a missing tail: the nearest existing ancestor is
+ *  resolved (symlinks included) and the missing segments re-appended — so
+ *  a not-yet-existing path under a symlinked dir is still judged by where
+ *  it would really land. */
+async function realpathLoose(p: string): Promise<string> {
+	let current = path.resolve(p);
+	const missing: string[] = [];
+	for (;;) {
+		try {
+			return path.join(await fs.realpath(current), ...missing.reverse());
+		} catch {
+			const parent = path.dirname(current);
+			if (parent === current) return path.resolve(p);
+			missing.push(path.basename(current));
+			current = parent;
+		}
+	}
+}
+
+/** True when `child` is `parent` itself or lies beneath it. */
+export function isInside(child: string, parent: string): boolean {
+	const rel = path.relative(parent, child);
+	return rel === "" || (rel !== ".." && !rel.startsWith(`..${path.sep}`) && !path.isAbsolute(rel));
+}
+
+/** Throw (→ the model-visible error result, serverExecute) unless `absPath`
+ *  really lies inside an allowed folder and outside every denied path. */
+export async function assertAllowed(absPath: string): Promise<void> {
+	const { allowedFolders, deniedPaths } = currentPolicy();
+	if (allowedFolders.length === 0) {
+		throw new Error(`File access is off: the learner hasn't allowed any folders yet. Ask them to add the folder in ${SETTINGS_HINT}.`);
+	}
+	const real = await realpathLoose(absPath);
+	const allowed = await Promise.all(allowedFolders.map(realpathLoose));
+	const denied = await Promise.all(deniedPaths.map(realpathLoose));
+	if (!allowed.some((folder) => isInside(real, folder)) || denied.some((d) => isInside(real, d))) {
+		throw new Error(
+			`Access denied: ${absPath} is outside the folders the learner has allowed (${allowedFolders.join(", ")}). Ask them to add its folder in ${SETTINGS_HINT}.`,
+		);
+	}
+}
+
+/**
+ * Resolve a tool path argument against the allowed folders, then assert
+ * access. Absent → every allowed folder (the walk roots); absolute → itself;
+ * relative → the first allowed folder where it exists (none → the first
+ * candidate, so the caller's not-found error names a real path).
+ */
+export async function resolveAllowedPaths(p?: string): Promise<string[]> {
+	const { allowedFolders } = currentPolicy();
+	let resolved: string[];
+	if (!p) {
+		resolved = allowedFolders;
+	} else if (path.isAbsolute(p)) {
+		resolved = [p];
+	} else {
+		const candidates = allowedFolders.map((folder) => path.join(folder, p));
+		let hit: string | undefined;
+		for (const candidate of candidates) {
+			if (await fs.stat(candidate).then(() => true, () => false)) {
+				hit = candidate;
+				break;
+			}
+		}
+		resolved = hit ? [hit] : candidates.slice(0, 1);
+	}
+	if (resolved.length === 0) await assertAllowed(p ?? ""); // no allowed folders: throws the "off" error
+	for (const r of resolved) await assertAllowed(r);
+	return resolved;
 }
 
 /** pi's formatSize idiom (50KB prints as "50.0KB"). */

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { fitGraphView, fitZoomFor, zoomedGraphView, type Viewport } from "@/components/pan-zoom";
 import { renderMermaid } from "@/components/mermaid-render";
 import { MermaidError } from "@/components/mermaid-error";
+import { svgDataUrl } from "@/components/artifacts/svg-data-url";
 import { Hint } from "@/components/ui/hint";
 
 /**
@@ -276,15 +277,26 @@ export function MermaidOverlay({
 							    backing law — models draw for a white page) with the
 							    caller's invert filter riding it, exactly like the
 							    in-card holder. */}
-							<div
-								data-lh-overlay-chart
-								className={cn(
-									"[&_svg]:h-auto [&_svg]:w-full",
-									rawSvg !== undefined && "bg-white",
-								)}
-								style={rawSvg !== undefined && inverted ? { filter: "invert(1) hue-rotate(180deg)" } : undefined}
-								dangerouslySetInnerHTML={{ __html: svg }}
-							/>
+							{rawSvg !== undefined ? (
+								// FIGURE MODE renders the model-authored SVG as an <img>
+								// (security hardening, 2026-10-24): no script or external
+								// fetch can run from it. The fit math reads the string
+								// (chartSize), so the box sizing is unchanged.
+								<div
+									data-lh-overlay-chart
+									className="bg-white [&_img]:h-auto [&_img]:w-full"
+									style={inverted ? { filter: "invert(1) hue-rotate(180deg)" } : undefined}
+								>
+									{/* eslint-disable-next-line @next/next/no-img-element -- a data: URL, nothing for next/image to optimize */}
+									<img src={svgDataUrl(svg)} alt="Figure" draggable={false} />
+								</div>
+							) : (
+								<div
+									data-lh-overlay-chart
+									className="[&_svg]:h-auto [&_svg]:w-full"
+									dangerouslySetInnerHTML={{ __html: svg }}
+								/>
+							)}
 						</div>
 						<div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between p-2">
 							<span className="text-xs text-muted-foreground/60">Drag to pan · scroll to zoom</span>

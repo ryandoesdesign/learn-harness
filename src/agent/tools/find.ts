@@ -8,7 +8,7 @@ import {
 	formatSize,
 	MAX_OUTPUT_BYTES,
 	matchGlob,
-	resolveSourcePath,
+	resolveAllowedPaths,
 	walkFiles,
 } from "./fs-shared.ts";
 
@@ -17,8 +17,8 @@ import {
  * ported to a pure-Node walker (pi shells out to fd; no binaries here —
  * Electron/Windows-safe, fs-shared.ts). Schemas, fd's glob semantics
  * (basename-mode without a slash, implied deep prefix with one), relativized output,
- * and the notice formats are pi-verbatim; the deltas: home-anchored
- * default, .gitignore replaced by hard noise exclusions, and a wall-clock
+ * and the notice formats are pi-verbatim; the deltas: roots are the
+ * learner's allowed folders, .gitignore replaced by hard noise exclusions, and a wall-clock
  * timeout with partial results. Read-only by construction.
  */
 
@@ -29,7 +29,7 @@ const findInput = Type.Object({
 		minLength: 1,
 		description: "Glob pattern to match files, e.g. '*.ts', '**/*.json', or 'src/**/*.spec.ts'",
 	}),
-	path: Type.Optional(Type.String({ description: "Directory to search in (default: the learner's home directory)" })),
+	path: Type.Optional(Type.String({ description: "Directory to search in (default: all folders the learner has allowed)" })),
 	limit: Type.Optional(Type.Integer({ description: "Maximum number of results (default: 1000)" })),
 });
 
@@ -40,32 +40,44 @@ export const findTool: AgentTool<typeof findInput> = {
 	parameters: findInput,
 	execute: serverExecute("find", findInput, async (input, ctx) => {
 		if (ctx?.signal?.aborted) return "Operation aborted";
-		const searchPath = resolveSourcePath(input.path);
-		let stat;
-		try {
-			stat = await fs.stat(searchPath);
-		} catch {
-			throw new Error(`Path not found: ${searchPath}`);
+		const roots = await resolveAllowedPaths(input.path);
+		for (const searchPath of roots) {
+			let stat;
+			try {
+				stat = await fs.stat(searchPath);
+			} catch {
+				throw new Error(`Path not found: ${searchPath}`);
+			}
+			if (!stat.isDirectory()) throw new Error(`Not a directory: ${searchPath}`);
 		}
-		if (!stat.isDirectory()) throw new Error(`Not a directory: ${searchPath}`);
 
+		// One root keeps pi's relativized output; several (no path, multiple
+		// allowed folders) print absolute paths so results stay unambiguous.
+		const absoluteOutput = roots.length > 1;
 		const effectiveLimit = input.limit ?? DEFAULT_LIMIT;
 		const matches: string[] = [];
 		let limitReached = false;
-		const { timedOut, aborted } = await walkFiles(
-			searchPath,
-			(filePath) => {
-				const rel = path.relative(searchPath, filePath).split(path.sep).join("/");
-				if (!matchGlob(rel, input.pattern)) return false;
-				if (matches.length >= effectiveLimit) {
-					limitReached = true;
-					return true; // stop the walk
-				}
-				matches.push(rel);
-				return false;
-			},
-			ctx?.signal,
-		);
+		let timedOut = false;
+		let aborted = false;
+		for (const searchPath of roots) {
+			const walk = await walkFiles(
+				searchPath,
+				(filePath) => {
+					const rel = path.relative(searchPath, filePath).split(path.sep).join("/");
+					if (!matchGlob(rel, input.pattern)) return false;
+					if (matches.length >= effectiveLimit) {
+						limitReached = true;
+						return true; // stop the walk
+					}
+					matches.push(absoluteOutput ? filePath : rel);
+					return false;
+				},
+				ctx?.signal,
+			);
+			timedOut ||= walk.timedOut;
+			aborted ||= walk.aborted;
+			if (limitReached || timedOut || aborted) break;
+		}
 
 		if (aborted) {
 			return matches.length > 0

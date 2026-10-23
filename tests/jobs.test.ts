@@ -26,7 +26,7 @@
 import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { after, afterEach, describe, it } from "node:test";
+import { after, afterEach, before, describe, it } from "node:test";
 import { createFauxCore, fauxAssistantMessage, fauxText, fauxToolCall, type AssistantMessage, type FauxResponseStep } from "@earendil-works/pi-ai";
 import {
 	accumulateJobUsage,
@@ -67,6 +67,7 @@ import { persistTurn } from "../src/server/turn-service.ts";
 import { chatStore } from "../src/store/chats.ts";
 import { jobStore } from "../src/store/jobs.ts";
 import { createJobRunner, pdfModelOverride, researchModelOverride } from "../src/agent/subagents/runner.ts";
+import { setFileAccessPolicy } from "../src/agent/tools/fs-shared.ts";
 import { providerKeyMissing, type ModelSlotName } from "../src/core/settings.ts";
 import type { PiEngine } from "../src/agent/models.ts";
 import type { SearchProvider } from "../src/core/search.ts";
@@ -673,6 +674,9 @@ describe("research runner (async protocol §3)", () => {
 
 
 describe("pdf runner (sources v0)", () => {
+	// The learner's PDFs obey the allowed-folders policy: allow the fixtures.
+	before(() => setFileAccessPolicy(() => ({ allowedFolders: [path.join(import.meta.dirname, "fixtures")], deniedPaths: [] })));
+	after(() => setFileAccessPolicy(null));
 	const PDF_FIXTURE = path.join(import.meta.dirname, "fixtures", "sample-3page.pdf");
 	const PDF_INPUT = { path: PDF_FIXTURE, question: "What is the integral of x dx?" };
 
@@ -742,6 +746,26 @@ describe("pdf runner (sources v0)", () => {
 
 		const steer = delivery.steers[0]!;
 		assert.ok(steer.content.includes("flag the gap"), "the teacher learns to flag the gap");
+	});
+
+	it("a PDF outside the allowed folders is refused before any reading (file-access policy)", async () => {
+		const chat = chatStore.createChat("Test: pdf runner outside allowed");
+		trackChat(chat.id);
+		const job = jobStore.createJob({ kind: "pdf", chatId: chat.id, toolCallId: "call-pdf3" });
+		trackJob(job.id);
+
+		const delivery = fakeDeliver();
+		const runner = createJobRunner({ chatStore, jobStore, deliver: delivery.deliver });
+		pdfModelOverride.current = pdfReaderModel();
+		try {
+			await runner.runJob(job.id, { path: path.join(import.meta.dirname, "..", "package.json"), question: "anything" });
+		} finally {
+			pdfModelOverride.current = undefined;
+		}
+
+		const done = jobStore.getJob(job.id)!;
+		assert.equal(done.status, "error");
+		assert.match((done.result as PdfResult).brief, /^PDF failed: Access denied: .*outside the folders the learner has allowed/);
 	});
 });
 
@@ -1363,7 +1387,7 @@ describe("prompt composition", () => {
 			const instructions = composeInstructions(kind);
 			assert.ok(instructions.includes("## Learner files"), `${kind} carries the shared learner-files fragment`);
 			assert.ok(instructions.includes("find it yourself with `find`"), `${kind} knows to locate files itself`);
-			assert.ok(instructions.includes("home directory"), `${kind} knows the home-anchored path rule`);
+			assert.ok(instructions.includes("Settings → Agent → File access"), `${kind} knows the allowed-folders path rule`);
 		}
 		// the agent's OWN fragments compose before the shared appendix
 		// (the reorder's order rule, 2026-09-27: job and method lead)

@@ -1,6 +1,38 @@
 import type { NextConfig } from "next";
 
+// Content-Security-Policy (security hardening, 2026-10-24) — an OUTBOUND
+// LOCK: the page may only talk to its own server, plus Deepgram's
+// websocket for dictation, so injected script has nowhere to send data.
+// Scripts keep 'unsafe-inline' (Next's inline bootstrap and the demo
+// srcdoc iframes, which inherit this policy); the three CDNs serve the
+// libraries the demo builder may import (demo-builder.ts). Remote images
+// in chat markdown no longer load (img-src). Dev adds 'unsafe-eval' for
+// React's debugging (Next CSP guide).
+const DEMO_CDNS = "https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com";
+const CONTENT_SECURITY_POLICY = [
+	"default-src 'self'",
+	`script-src 'self' 'unsafe-inline' ${DEMO_CDNS}${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
+	`style-src 'self' 'unsafe-inline' ${DEMO_CDNS}`,
+	`font-src 'self' data: ${DEMO_CDNS}`,
+	"img-src 'self' data: blob:",
+	"connect-src 'self' wss://api.deepgram.com",
+	"worker-src 'self' blob:",
+	"frame-src 'self' about: blob:",
+	"object-src 'none'",
+	"base-uri 'none'",
+	"form-action 'self'",
+	"frame-ancestors 'none'",
+].join("; ");
+
 const nextConfig: NextConfig = {
+	async headers() {
+		return [
+			{
+				source: "/(.*)",
+				headers: [{ key: "Content-Security-Policy", value: CONTENT_SECURITY_POLICY }],
+			},
+		];
+	},
 	// Desktop target (Electron wrapper, 2026-09-17): standalone output = a
 	// self-contained .next/standalone/server.js the Electron shell spawns
 	// on 127.0.0.1. Harmless for plain web deploys (extra build output).

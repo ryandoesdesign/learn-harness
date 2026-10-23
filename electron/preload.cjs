@@ -23,6 +23,11 @@
  *   asks main to kill the server and quit-and-install. Browser builds:
  *   both absent, the banner never renders.
  *
+ *   window.lh.pickFolder() — the native folder chooser for Settings →
+ *   Agent → File access (security hardening, 2026-10-24): resolves to the
+ *   chosen absolute path, or null on cancel. Browser builds: absent, the
+ *   settings row falls back to a typed path.
+ *
  * Channel names are mirrored in electron/main.cjs — keep them in sync.
  */
 const { contextBridge, ipcRenderer } = require("electron");
@@ -42,4 +47,5 @@ contextBridge.exposeInMainWorld("lh", {
 		return () => ipcRenderer.removeListener("lh:update-status", listener);
 	},
 	installUpdate: () => ipcRenderer.send("lh:update-install"),
+	pickFolder: () => ipcRenderer.invoke("lh:pick-folder"),
 });

@@ -8,6 +8,7 @@ import { Toggle } from "@/components/settings/controls";
 import { useSessionMermaid } from "@/components/session-overlay";
 import { downloadFile } from "@/components/artifacts/download";
 import { DispatchCard } from "@/components/artifacts/dispatch-card";
+import { svgDataUrl } from "@/components/artifacts/svg-data-url";
 import type { ArtifactPartProps, VisualResult } from "@/src/core";
 
 /**
@@ -16,21 +17,11 @@ import type { ArtifactPartProps, VisualResult } from "@/src/core";
  * the chat view's jobs feed). The SVG itself renders from the steer message
  * (sub-agent result delivery) via VisualOutputCard.
  *
- * The SVG is model-authored for the learner's own machine (their own teacher
- * wrote it, verified by looking) — dangerouslySetInnerHTML is acceptable
- * here, with a cheap hygiene pass (sanitizeSvg: strip <script> blocks, on*
- * handlers, and javascript:/data:text/html URLs) since it lands in the
- * app's DOM.
+ * The SVG is model-authored and may echo untrusted web/PDF content, so it
+ * renders as an <img> (svgDataUrl): no script or external fetch can run
+ * from it (security hardening, 2026-10-24 — replaced the bypassable regex
+ * sanitizer + dangerouslySetInnerHTML).
  */
-
-/** Cheap SVG hygiene — not a full sanitizer, just removing the obvious exec vectors. */
-export function sanitizeSvg(svg: string): string {
-	return svg
-		.replace(/<script[\s\S]*?<\/script\s*>/gi, "")
-		.replace(/<script[^>]*\/?>/gi, "")
-		.replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
-		.replace(/(href|xlink:href)\s*=\s*(?:"\s*(?:javascript|data:text\/html)[^"]*"|'\s*(?:javascript|data:text\/html)[^']*'|(?:javascript|data:text\/html)[^\s>]*)/gi, "");
-}
 
 /** The svg root's DECLARED width in px, when there is one — the natural
  *  size the card displays at instead of stretching to full width (owner,
@@ -122,13 +113,15 @@ export function VisualOutputCard({
 			<div
 				className={
 					natural !== null
-						? "w-fit max-w-full overflow-hidden rounded-lg bg-white [&_svg]:h-auto [&_svg]:max-w-full"
-						: "w-full overflow-hidden rounded-lg bg-white [&_svg]:h-auto [&_svg]:w-full"
+						? "w-fit max-w-full overflow-hidden rounded-lg bg-white [&_img]:h-auto [&_img]:max-w-full"
+						: "w-full overflow-hidden rounded-lg bg-white [&_img]:h-auto [&_img]:w-full"
 				}
 				style={{ filter: inverted ? "invert(1) hue-rotate(180deg)" : undefined }}
-				dangerouslySetInnerHTML={{ __html: sanitizeSvg(result.svg) }}
 				data-testid="visual-svg"
-			/>
+			>
+				{/* eslint-disable-next-line @next/next/no-img-element -- a data: URL, nothing for next/image to optimize */}
+				<img src={svgDataUrl(result.svg)} alt="Figure" />
+			</div>
 			<div className="mt-2 flex items-center justify-between gap-2">
 				<div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Figure</div>
 				<div className="flex items-center gap-1.5">

@@ -248,6 +248,27 @@ function killServer() {
 	}, 3000);
 }
 
+/** External links (security hardening, 2026-10-24): only http(s) reach the
+ *  OS. Model-written links can carry file:, smb: or custom app schemes,
+ *  which shell.openExternal would hand to whatever app claims them —
+ *  those are dropped and logged instead. */
+const EXTERNAL_SCHEMES = new Set(["http:", "https:"]);
+
+function openExternalSafe(target) {
+	let scheme;
+	try {
+		scheme = new URL(target).protocol;
+	} catch {
+		log("blocked external link: unparseable URL");
+		return;
+	}
+	if (!EXTERNAL_SCHEMES.has(scheme)) {
+		log(`blocked external link: ${scheme}`);
+		return;
+	}
+	void shell.openExternal(target);
+}
+
 /** Security posture (all defaults asserted explicitly; the guards are the
  *  checklist's own recommendations for localhost-app shells):
  *  - deny-by-default permission handler allowing only our loopback origin
@@ -329,11 +350,11 @@ function createWindow(url) {
 	win.webContents.on("will-navigate", (event, target) => {
 		if (new URL(target).origin !== allowedOrigin()) {
 			event.preventDefault();
-			void shell.openExternal(target);
+			openExternalSafe(target);
 		}
 	});
 	win.webContents.setWindowOpenHandler(({ url: target }) => {
-		void shell.openExternal(target);
+		openExternalSafe(target);
 		return { action: "deny" };
 	});
 
@@ -589,6 +610,15 @@ async function main() {
 	// The renderer's first paint can race did-finish-load — it asks for
 	// the current factor itself (mirrors "lh:zoom" pushes).
 	ipcMain.handle("lh:zoom:get", (event) => BrowserWindow.fromWebContents(event.sender)?.webContents.getZoomFactor() ?? 1);
+	// File access (security hardening, 2026-10-24): the native folder
+	// chooser behind Settings → Agent → File access. Returns the chosen
+	// absolute path or null; the server validates it on the settings PUT.
+	ipcMain.handle("lh:pick-folder", async (event) => {
+		const win = BrowserWindow.fromWebContents(event.sender);
+		const options = { properties: ["openDirectory"] };
+		const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options);
+		return result.canceled ? null : (result.filePaths[0] ?? null);
+	});
 	ipcMain.on("lh:expand-window", (event) => {
 		const win = BrowserWindow.fromWebContents(event.sender);
 		if (!win) return;

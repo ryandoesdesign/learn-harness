@@ -40,7 +40,7 @@ import {
 	INITIAL_DEMO_BRIDGE_STATE,
 	reduceDemoBridgeState,
 } from "../components/artifacts/demo-card.tsx";
-import { sanitizeSvg, svgNaturalWidth, VisualCard, VisualOutputCard } from "../components/artifacts/visual-card.tsx";
+import { svgNaturalWidth, VisualCard, VisualOutputCard } from "../components/artifacts/visual-card.tsx";
 import { slugFilename } from "../components/artifacts/download.ts";
 import { chartSize } from "../components/session-overlay.tsx";
 import { SubagentSteerCard } from "../components/artifacts/steer-card.tsx";
@@ -373,19 +373,19 @@ describe("steer card rendering (the delivered artifact)", () => {
 		assert.ok(!html.includes("<iframe"), "no iframe for a failed build");
 	});
 
-	it("renders the verified svg inline (sanitized); the maker's notes are glue and stay hidden", () => {
+	it("renders the verified svg (as an <img>); the maker's notes are glue and stay hidden", () => {
 		const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100"><circle cx="50" cy="50" r="20"/></svg>';
 		const steer = buildSubagentSteer(
 			{ id: "jv", kind: "visual", toolCallId: "cv" },
 			{ svg, notes: "Looking at the render, the diagram is clean and accurate." },
 		);
 		const html = renderToStaticMarkup(<SubagentSteerCard message={projectNative([steer])[0] as never} />);
-		assert.ok(html.includes("circle"), "svg content rendered inline");
+		assert.ok(html.includes("circle"), "svg content rendered (inside the <img> data: URL)");
 		assert.match(html, /Figure/);
 		// Natural sizing (owner, 2026-10-07): a DECLARED width (200) means the
 		// holder hugs + centers rather than stretching full-width.
 		assert.match(html, /w-fit/, "holder hugs the declared size");
-		assert.match(html, /svg\]:max-w-full/, "svg shrinks to fit only when oversized");
+		assert.match(html, /img\]:max-w-full/, "the figure shrinks to fit only when oversized");
 		assert.ok(!html.includes("Looking at the render"), "model-facing notes never render");
 	});
 
@@ -590,15 +590,13 @@ describe("setSteerUiInverted (the persisted invert switch, 2026-10-07)", () => {
 	});
 });
 
-describe("sanitizeSvg", () => {
-	it("strips script blocks, event handlers, and javascript: urls, keeps geometry", () => {
-		const dirty = '<svg width="10" height="10" onload="alert(1)"><script>alert(2)</script><circle r="1" onclick="pwn()"/><a href="javascript:alert(3)"><rect width="2" height="2"/></a></svg>';
-		const clean = sanitizeSvg(dirty);
-		assert.ok(!/<script/i.test(clean), "script tags removed");
-		assert.ok(!/\sonload/i.test(clean), "onload removed");
-		assert.ok(!/\sonclick/i.test(clean), "onclick removed");
-		assert.ok(!/javascript:/i.test(clean), "javascript: urls removed");
-		assert.ok(clean.includes("circle") && clean.includes("rect"), "geometry preserved");
+describe("figure rendering is inert (security hardening, 2026-10-24)", () => {
+	it("renders the SVG as an <img> data: URL — never inline markup, so no script can run", () => {
+		const dirty = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/onload="alert(1)"><script>alert(2)</script><circle r="1"/></svg>';
+		const html = renderToStaticMarkup(<VisualOutputCard output={{ svg: dirty }} />);
+		assert.ok(html.includes('<img src="data:image/svg+xml;charset=utf-8,'), "an <img> with a data: URL");
+		assert.ok(!html.includes('width="10" height="10"/onload'), "the model's raw markup never reaches the DOM");
+		assert.ok(!html.includes("<script"), "no script element reaches the DOM");
 	});
 });
 

@@ -4,13 +4,14 @@ import { Type } from "typebox";
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { serverExecute } from "../tool-execute.ts";
 import {
+	assertAllowed,
 	capOutput,
 	formatSize,
 	GREP_MAX_LINE_LENGTH,
 	isBinaryFile,
 	matchGlob,
 	MAX_OUTPUT_BYTES,
-	resolveSourcePath,
+	resolveAllowedPaths,
 	truncateGrepLine,
 	walkFiles,
 	WALK_TIMEOUT_MS,
@@ -21,7 +22,8 @@ import {
  * ported to a pure-Node scan (pi shells out to rg). Schemas and output
  * formats are pi-verbatim — `relative/path:LINE: text` matches,
  * `relative/path-LINE- text` context lines, the 500-char line cap, the
- * "use read to see full lines" notice. Deltas: home-anchored default,
+ * "use read to see full lines" notice. Deltas: roots are the learner's
+ * allowed folders (absolute labels when several are searched),
  * .gitignore replaced by hard noise exclusions, binary detection via NUL
  * sniff, a 2MB file cap, and a wall-clock timeout with partial results.
  * Read-only by construction.
@@ -33,7 +35,7 @@ const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const grepInput = Type.Object({
 	pattern: Type.String({ minLength: 1, description: "Search pattern (regex or literal string)" }),
 	path: Type.Optional(
-		Type.String({ description: "Directory or file to search (default: the learner's home directory)" }),
+		Type.String({ description: "Directory or file to search (default: all folders the learner has allowed)" }),
 	),
 	glob: Type.Optional(Type.String({ description: "Filter files by glob pattern, e.g. '*.ts' or '**/*.spec.ts'" })),
 	ignoreCase: Type.Optional(Type.Boolean({ description: "Case-insensitive search (default: false)" })),
@@ -53,15 +55,18 @@ export const grepTool: AgentTool<typeof grepInput> = {
 	parameters: grepInput,
 	execute: serverExecute("grep", grepInput, async (input, ctx) => {
 		if (ctx?.signal?.aborted) return "Operation aborted";
-		const searchPath = resolveSourcePath(input.path);
-
-		let stat;
-		try {
-			stat = await fs.stat(searchPath);
-		} catch {
-			throw new Error(`Path not found: ${searchPath}`);
+		const roots = await resolveAllowedPaths(input.path);
+		const rootIsDirectory = new Map<string, boolean>();
+		for (const root of roots) {
+			try {
+				rootIsDirectory.set(root, (await fs.stat(root)).isDirectory());
+			} catch {
+				throw new Error(`Path not found: ${root}`);
+			}
 		}
-		const isDirectory = stat.isDirectory();
+		// One root keeps pi's relativized output; several (no path, multiple
+		// allowed folders) print absolute paths so results stay unambiguous.
+		const absoluteOutput = roots.length > 1;
 
 		const regex = new RegExp(
 			input.literal ? input.pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : input.pattern,
@@ -70,27 +75,29 @@ export const grepTool: AgentTool<typeof grepInput> = {
 		const contextValue = input.context && input.context > 0 ? input.context : 0;
 		const effectiveLimit = Math.max(1, input.limit ?? DEFAULT_LIMIT);
 
-		// Files to scan: one explicit file, or the walked tree (glob-filtered).
-		const files: string[] = [];
+		// Files to scan: one explicit file, or the walked trees (glob-filtered),
+		// each paired with the output label pi's format prints for it.
+		const files: { filePath: string; label: string }[] = [];
 		let timedOut = false;
 		let aborted = false;
-		if (!isDirectory) {
-			files.push(searchPath);
-		} else {
+		for (const searchPath of roots) {
+			if (!rootIsDirectory.get(searchPath)) {
+				files.push({ filePath: searchPath, label: absoluteOutput ? searchPath : path.basename(searchPath) });
+				continue;
+			}
 			const result = await walkFiles(
 				searchPath,
 				(filePath) => {
-					if (input.glob) {
-						const rel = path.relative(searchPath, filePath).split(path.sep).join("/");
-						if (!matchGlob(rel, input.glob)) return false;
-					}
-					files.push(filePath);
+					const rel = path.relative(searchPath, filePath).split(path.sep).join("/");
+					if (input.glob && !matchGlob(rel, input.glob)) return false;
+					files.push({ filePath, label: absoluteOutput ? filePath : rel });
 					return false;
 				},
 				ctx?.signal,
 			);
-			timedOut = result.timedOut;
-			aborted = result.aborted;
+			timedOut ||= result.timedOut;
+			aborted ||= result.aborted;
+			if (timedOut || aborted) break;
 		}
 
 		const outLines: string[] = [];
@@ -104,7 +111,7 @@ export const grepTool: AgentTool<typeof grepInput> = {
 		const scanDeadline = Date.now() + WALK_TIMEOUT_MS;
 		let scanTimedOut = false;
 
-		for (const filePath of files) {
+		for (const { filePath, label: rel } of files) {
 			if (ctx?.signal?.aborted) {
 				aborted = true;
 				break;
@@ -124,6 +131,9 @@ export const grepTool: AgentTool<typeof grepInput> = {
 				continue;
 			}
 			if (fileStat.size > MAX_FILE_BYTES) continue; // rg-style silent skip of huge files
+			// Per-file re-check: a denied path nested in an allowed folder
+			// (the app's data dir, auth.json, .env*) is skipped silently.
+			if (await assertAllowed(filePath).then(() => false, () => true)) continue;
 			if (await isBinaryFile(filePath).catch(() => true)) continue;
 
 			let content: string;
@@ -133,9 +143,6 @@ export const grepTool: AgentTool<typeof grepInput> = {
 				continue;
 			}
 			const lines = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-			const rel = isDirectory
-				? path.relative(searchPath, filePath).split(path.sep).join("/")
-				: path.basename(filePath);
 
 			for (let i = 0; i < lines.length; i++) {
 				if (regex.test(lines[i]!)) {

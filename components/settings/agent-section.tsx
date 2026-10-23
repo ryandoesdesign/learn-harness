@@ -131,6 +131,20 @@ export function composeGraphTools(agent: AgentSettings | undefined, on: boolean)
 	return { ...agent, graphTools: { enabled: on } };
 }
 
+/** Compose the file-access list (security hardening, 2026-10-24): the
+ *  whole allowed-folders list replaces the stored one; the server
+ *  validates and stores real paths. Pure — exported for tests. */
+export function composeAllowedFolders(agent: AgentSettings | undefined, folders: string[]): AgentSettings {
+	return { ...agent, fileAccess: { allowedFolders: folders } };
+}
+
+/** Display form of an allowed folder: the user's home prefix as "~"
+ *  (macOS /Users/x, Linux /home/x, Windows C:\Users\x). Display only — the
+ *  record keeps the full path. Pure — exported for tests. */
+export function abbreviateHome(folder: string): string {
+	return folder.replace(/^(?:\/Users\/[^/]+|\/home\/[^/]+|[A-Za-z]:\\Users\\[^\\]+)(?=$|[/\\])/, "~");
+}
+
 /** The research tool runs on the search port — the teacher registry DROPS
  *  it when no engine is live (chat-handler's searchAvailable, the same
  *  /api/search signal the section fetches). Pure — exported for tests.
@@ -331,6 +345,11 @@ export function AgentSection({
 	 *  row), which kind. */
 	const [openMenu, setOpenMenu] = useState<{ target: ModelSlotName | "search"; kind: "model" | "thinking" | "engine" } | null>(null);
 	const menuAnchorRef = useRef<HTMLSpanElement>(null);
+	/** The native folder chooser exists only in Electron (preload bridge);
+	 *  read after mount so the server render and first paint agree. */
+	const [canPickFolder, setCanPickFolder] = useState(false);
+	useEffect(() => setCanPickFolder(typeof window.lh?.pickFolder === "function"), []);
+	const allowedFolders = agent?.fileAccess?.allowedFolders ?? [];
 
 	const refreshSearch = () =>
 		fetch("/api/search")
@@ -859,6 +878,55 @@ export function AgentSection({
 						</SettingsRow>
 					);
 				})()}
+			</SettingsGroup>
+
+			<SettingsGroup label="File access" testid="group-file-access">
+				<SettingsRow
+					label="Allowed folders"
+					hint="The agent can only read files inside these folders. Empty = no file access."
+					testid="file-access-row"
+				>
+					{canPickFolder ? (
+						<button
+							type="button"
+							onClick={() => {
+								void window.lh?.pickFolder?.().then((folder) => {
+									if (folder) onSectionChange(composeAllowedFolders(agent, [...allowedFolders, folder]));
+								});
+							}}
+							data-testid="file-access-add"
+							className="shrink-0 text-xs text-muted-foreground/70 underline-offset-2 hover:text-foreground hover:underline"
+						>
+							Add folder…
+						</button>
+					) : (
+						<CommitInput
+							value=""
+							placeholder="/absolute/path"
+							ariaLabel="add allowed folder"
+							testid="file-access-input"
+							onCommit={(v) => {
+								const folder = v.trim();
+								if (folder) onSectionChange(composeAllowedFolders(agent, [...allowedFolders, folder]));
+							}}
+						/>
+					)}
+				</SettingsRow>
+				{allowedFolders.map((folder) => (
+					<div key={folder} className="flex items-center justify-between gap-4 py-0.5" data-testid="file-access-folder">
+						<span className="min-w-0 truncate font-ui text-xs" title={folder}>
+							{abbreviateHome(folder)}
+						</span>
+						<button
+							type="button"
+							aria-label={`Remove ${folder}`}
+							onClick={() => onSectionChange(composeAllowedFolders(agent, allowedFolders.filter((f) => f !== folder)))}
+							className="shrink-0 text-xs text-muted-foreground/70 hover:text-red-500"
+						>
+							✕
+						</button>
+					</div>
+				))}
 			</SettingsGroup>
 
 			<SettingsGroup label="Context" testid="group-context">

@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
 import type { Usage } from "@earendil-works/pi-ai";
 import {
 	createPracticeAgent,
@@ -9,7 +11,8 @@ import {
 import { piEngineForSpec, type PiEngine } from "../agent/models.ts";
 import { createJobRunner } from "../agent/subagents/runner.ts";
 import { createExtractionPipeline } from "../agent/subagents/extraction.ts";
-import type { ModelRole } from "../../config.ts";
+import { AUTH_FILE, PATHS, ROOT, type ModelRole } from "../../config.ts";
+import { setFileAccessPolicy } from "../agent/tools/fs-shared.ts";
 import {
 	deliverJobResult,
 	noteSteerVisible,
@@ -72,6 +75,24 @@ import type {CallUsage, SteerMessage} from "../core/contracts.ts";
  * wake pipeline's server-side steers (src/server/jobs.ts) — one code path
  * for write-ahead persistence, turn liveness, and the turn services.
  */
+
+// File-access policy (security hardening, 2026-10-24): the learner-file
+// tools and pdf jobs reach only the folders allowed in settings — read
+// FRESH per tool call, so a settings PUT lands on the next call. The app's
+// own data dir, auth.json and the repo's .env* files stay denied even
+// inside an allowed folder.
+setFileAccessPolicy(() => ({
+	allowedFolders: effectiveSettings().agent.fileAccess.allowedFolders,
+	deniedPaths: [PATHS.data, AUTH_FILE, ...envFiles()],
+}));
+
+function envFiles(): string[] {
+	try {
+		return fs.readdirSync(ROOT).filter((name) => name.startsWith(".env")).map((name) => path.join(ROOT, name));
+	} catch {
+		return [];
+	}
+}
 
 const jobRunner = createJobRunner({
 	chatStore: stores.chatStore,

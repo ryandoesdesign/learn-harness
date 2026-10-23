@@ -10,6 +10,8 @@ import { describe, it } from "node:test";
 import { appearanceVars, derivedPalette, resolveAppearance, staleVarNames } from "../components/settings/appearance.tsx";
 import {
 	PROMPT_IN_USE_HINT,
+	abbreviateHome,
+	composeAllowedFolders,
 	composePromptSwitch,
 	composeSearchEngine,
 	composeSlotModel,
@@ -150,6 +152,21 @@ describe("agent section compose helpers — the replace-whole PUT body", () => {
 		const after = composeTool(before, "visual", false);
 		assert.deepEqual(after.tools, { demo: false, visual: false });
 		assert.deepEqual(after.prompts, { "system-prompt.md": true }, "prompts untouched");
+	});
+
+	it("composeAllowedFolders replaces the list and carries the rest verbatim", () => {
+		const before = { tools: { demo: false }, fileAccess: { allowedFolders: ["/a"] } };
+		const after = composeAllowedFolders(before, ["/a", "/b"]);
+		assert.deepEqual(after.fileAccess, { allowedFolders: ["/a", "/b"] });
+		assert.deepEqual(after.tools, { demo: false }, "tools untouched");
+	});
+
+	it("abbreviateHome shows the home prefix as ~ on each OS, display only", () => {
+		assert.equal(abbreviateHome("/Users/ryan/Documents/Study"), "~/Documents/Study");
+		assert.equal(abbreviateHome("/home/ryan"), "~");
+		assert.equal(abbreviateHome("C:\\Users\\ryan\\Notes"), "~\\Notes");
+		assert.equal(abbreviateHome("/Volumes/USB/notes"), "/Volumes/USB/notes", "non-home paths stay whole");
+		assert.equal(abbreviateHome("/Users/ryanx"), "~", "the whole user segment is the prefix");
 	});
 
 	it("composeSlotModel: empty+empty REMOVES the slot (absent = factory pin)", () => {

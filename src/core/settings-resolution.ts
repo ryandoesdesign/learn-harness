@@ -82,6 +82,9 @@ export interface EffectiveSettings {
 		/** Prober graph tools (wave 7): passthrough delta as stored —
 		 * absent/undefined enabled = ON; consumers use graphToolsEnabled. */
 		graphTools: { enabled?: boolean };
+		/** Agent file access (security hardening): the allowed folders,
+		 *  [] when unset — the file tools refuse everything then. */
+		fileAccess: { allowedFolders: string[] };
 	};
 	/** The resolved strong/cheap/vision slots: each tier's concrete model or
 	 *  NULL when the tier holds no model (no factory floor — BYOK all the
@@ -182,6 +185,7 @@ export function resolveSettings(record: UserSettings | null): EffectiveSettings 
 			prompts: agent.prompts ?? {},
 			search: agent.search ?? {},
 			graphTools: agent.graphTools ?? {},
+			fileAccess: { allowedFolders: agent.fileAccess?.allowedFolders ?? [] },
 		},
 		models: {
 			strong: resolveSlot(modelsSection.strong),

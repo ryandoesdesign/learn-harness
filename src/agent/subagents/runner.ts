@@ -26,6 +26,7 @@ import type { ModelRole } from "../../../config.ts";
 import { ROLE_SLOT, modelsNotConfigured, type ModelSlotName, type ProviderKeyMissing } from "../../core/settings.ts";
 import type { ChatStore, JobStore } from "../../core/ports.ts";
 import { runDemoBuilder } from "./demo-builder.ts";
+import { resolveAllowedPaths } from "../tools/fs-shared.ts";
 import { runPdfReaderAgent } from "./pdf-reader.ts";
 import { runResearcherAgent } from "./researcher.ts";
 import { runVisualMaker } from "./visual-maker.ts";
@@ -489,8 +490,11 @@ export function createJobRunner(deps: JobRunnerDeps): JobRunner {
 
 		try {
 			jobStore.updateJob(jobId, { activity: "reading pdf" });
+			// The learner's PDF obeys the same allowed-folders policy as the
+			// file tools; a refusal throws into the catch → "PDF failed: …".
+			const readablePath = path ? (await resolveAllowedPaths(path))[0]! : path;
 			const result = await runPdfReaderAgent(
-				{ path, question },
+				{ path: readablePath, question },
 			{
 				engine: model,
 				abortSignal: loop.abortSignal,

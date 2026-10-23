@@ -4,11 +4,16 @@
  * Same discipline as parseSettingsBody (its tests live in
  * default-settings.test.ts): every known field is strict (bad type/shape
  * → 400-style error, never a silent clamp), unknown keys drop, absent
- * fields mean absent overrides. Pure — no fs.
+ * fields mean absent overrides. Pure — no fs — except fileAccess, whose
+ * folders are checked against the real filesystem (temp dirs here).
  */
 
 import assert from "node:assert/strict";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 import { describe, it } from "node:test";
+import { AUTH_FILE } from "../config.ts";
 import {
 	parseAgentSettingsBody,
 	parseModelsSettingsBody,
@@ -88,6 +93,33 @@ describe("parseAgentSettingsBody", () => {
 		assert.equal(parseAgentSettingsBody({ graphTools: "off" }).ok, false, "graphTools must be an object");
 		assert.equal(parseAgentSettingsBody({ graphTools: { enabled: "yes" } }).ok, false, "enabled must be a boolean");
 		assert.equal(parseAgentSettingsBody({ graphTools: null }).ok, false);
+	});
+
+	it("fileAccess: existing absolute folders, stored by real path, deduped — security hardening", () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lh-allowed-"));
+		const real = fs.realpathSync(dir);
+		const ok = parseAgentSettingsBody({ fileAccess: { allowedFolders: [dir, real] } });
+		assert.ok(ok.ok);
+		assert.deepEqual(ok.settings.fileAccess, { allowedFolders: [real] }, "symlinked tmpdir resolves; duplicates collapse");
+		const cleared = parseAgentSettingsBody({ fileAccess: {} });
+		assert.ok(cleared.ok);
+		assert.deepEqual(cleared.settings.fileAccess, {}, "no list = no access");
+		fs.rmSync(dir, { recursive: true });
+	});
+
+	it("fileAccess: rejects bad shapes, relative/missing/non-folder paths, and the app's own data/keys", () => {
+		assert.equal(parseAgentSettingsBody({ fileAccess: "all" }).ok, false, "fileAccess must be an object");
+		assert.equal(parseAgentSettingsBody({ fileAccess: { allowedFolders: "/tmp" } }).ok, false, "must be an array");
+		assert.equal(parseAgentSettingsBody({ fileAccess: { allowedFolders: [1] } }).ok, false, "entries must be strings");
+		assert.equal(parseAgentSettingsBody({ fileAccess: { allowedFolders: ["notes"] } }).ok, false, "relative path");
+		const missing = parseAgentSettingsBody({ fileAccess: { allowedFolders: [path.join(os.tmpdir(), "lh-no-such-dir-xyz")] } });
+		assert.equal(missing.ok, false);
+		const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "lh-allowed-")), "f.txt");
+		fs.writeFileSync(file, "x");
+		assert.equal(parseAgentSettingsBody({ fileAccess: { allowedFolders: [file] } }).ok, false, "a file is not a folder");
+		const keysDir = parseAgentSettingsBody({ fileAccess: { allowedFolders: [path.dirname(AUTH_FILE)] } });
+		assert.equal(keysDir.ok, false, "the auth file's folder is reserved");
+		assert.ok(!keysDir.ok && /own data or keys/.test(keysDir.error));
 	});
 
 	it("an empty {} agent section parses to {} (replace-whole clear)", () => {

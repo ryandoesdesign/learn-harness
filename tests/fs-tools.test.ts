@@ -5,17 +5,19 @@ import * as path from "node:path";
 import { describe, it } from "node:test";
 
 import type { AgentTool } from "@earendil-works/pi-agent-core";
-import { expandBraces, globToRegex, matchGlob, walkFiles } from "../src/agent/tools/fs-shared.ts";
+import { expandBraces, globToRegex, matchGlob, setFileAccessPolicy, walkFiles } from "../src/agent/tools/fs-shared.ts";
 import { findTool } from "../src/agent/tools/find.ts";
 import { grepTool } from "../src/agent/tools/grep.ts";
 import { lsTool } from "../src/agent/tools/ls.ts";
 import { readTool } from "../src/agent/tools/read.ts";
 
+setFileAccessPolicy(() => ({ allowedFolders: [os.tmpdir()], deniedPaths: [] }));
+
 /**
  * The learner-filesystem tools (sources v1, 2026-09-19): ls/find/grep as
- * pure-Node pi ports, read re-anchored to the home directory. All calls go
- * through absolute paths — the tools' relative resolution targets the real
- * home, which tests must not touch.
+ * pure-Node pi ports, scoped to the learner's allowed folders. Every fixture
+ * lives under tmpdir, so the file allows exactly that folder (the policy
+ * itself is covered in file-access.test.ts).
  *
  * Fixture tree (tmpdir):
  *   notes/calculus.md         "The derivative measures force…"
@@ -105,7 +107,7 @@ describe("ls (pi port)", () => {
 	});
 
 	it("missing path and non-directory throw (the model sees the error)", async () => {
-		await assert.rejects(async () => lsTool.execute!("c", { path: "/nonexistent/xyz" }), /Path not found/);
+		await assert.rejects(async () => lsTool.execute!("c", { path: path.join(FIXTURE, "nonexistent") }), /Path not found/);
 		await assert.rejects(
 			async () => lsTool.execute!("c", { path: path.join(FIXTURE, "binary.bin") }),
 			/Not a directory/,
@@ -190,7 +192,7 @@ describe("grep (pi port)", () => {
 	});
 });
 
-describe("read (home-anchored re-port)", () => {
+describe("read (allowed-folders re-port)", () => {
 	it("reads a fixture file verbatim through the shared slice machinery", async () => {
 		const out = await runText(readTool, { path: path.join(FIXTURE, "notes", "linear.txt") });
 		assert.match(out, /Eigenvectors keep their direction/);

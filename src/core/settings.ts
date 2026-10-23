@@ -257,6 +257,11 @@ export interface AgentSettings {
 	 *  tool-toggles map. Absent = enabled (the toggle discipline); the
 	 *  effective gate composes graph.enabled AND this switch. */
 	graphTools?: { enabled?: boolean };
+	/** Agent file access (security hardening, 2026-10-24): the ONLY folders
+	 *  the learner-file tools (read/ls/find/grep) and pdf jobs may reach.
+	 *  Absent/empty = no file access (fail closed). Entries are stored as
+	 *  real absolute paths (the write side resolves symlinks). */
+	fileAccess?: { allowedFolders?: string[] };
 	/** System-prompt override SWITCHES keyed by segment path (absent key =
 	 *  off). Switch-on requires the override file to exist (enforced by the
 	 *  route); the switch is explicit so users keep a file on disk but run
@@ -528,7 +533,23 @@ function sanitizeAgent(raw: Record<string, unknown>): AgentSettings {
 		if (enabled === undefined) out.graphTools = {};
 		else if (typeof enabled === "boolean") out.graphTools = { enabled };
 	}
+	// File access (security hardening): lenient read side — non-string or
+	// relative entries drop, duplicates collapse; a bad shape drops the key
+	// (= no access). The write side's parser is strict.
+	if (raw.fileAccess !== null && typeof raw.fileAccess === "object" && !Array.isArray(raw.fileAccess)) {
+		const folders = (raw.fileAccess as Record<string, unknown>).allowedFolders;
+		if (folders === undefined) out.fileAccess = {};
+		else if (Array.isArray(folders)) {
+			const kept = folders.filter((f): f is string => typeof f === "string" && isAbsolutePath(f));
+			out.fileAccess = { allowedFolders: [...new Set(kept)] };
+		}
+	}
 	return out;
+}
+
+/** POSIX root, Windows drive, or UNC — core stays free of node:path. */
+export function isAbsolutePath(p: string): boolean {
+	return /^(?:\/|[A-Za-z]:[\\/]|\\\\)/.test(p);
 }
 
 function sanitizeMdRendering(raw: unknown): MdRenderingSettings {

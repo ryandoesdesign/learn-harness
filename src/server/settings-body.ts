@@ -11,7 +11,11 @@
  * a different concern and are preserved by the sanitizer (core/settings.ts).
  */
 
+import * as fs from "node:fs";
+import * as path from "node:path";
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
+import { AUTH_FILE, PATHS } from "../../config.ts";
+import { isInside } from "../agent/tools/fs-shared.ts";
 import { isHexColor, type ChatSettings } from "../core";
 import type {
 	AgentSettings,
@@ -195,7 +199,62 @@ export function parseAgentSettingsBody(body: unknown): SettingsBodyResult<AgentS
 		}
 		settings.graphTools = graphTools.enabled === undefined ? {} : { enabled: graphTools.enabled };
 	}
+	// File access (security hardening, 2026-10-24): strict write side —
+	// every folder must be an existing absolute directory, stored by its
+	// real path, and never the app's own data/key store (or inside it).
+	if (raw.fileAccess !== undefined) {
+		const fileAccess = asRecord(raw.fileAccess);
+		if (!fileAccess) return { ok: false, error: "fileAccess must be an object" };
+		const list = parseStringList(fileAccess.allowedFolders, "fileAccess.allowedFolders");
+		if (list.error) return { ok: false, error: list.error };
+		if (!list.list) {
+			settings.fileAccess = {};
+		} else {
+			const folders: string[] = [];
+			for (const folder of list.list) {
+				const checked = checkAllowedFolder(folder);
+				if (!checked.ok) return { ok: false, error: checked.error };
+				if (!folders.includes(checked.real)) folders.push(checked.real);
+			}
+			settings.fileAccess = { allowedFolders: folders };
+		}
+	}
 	return { ok: true, settings };
+}
+
+/** A string list: absent → {}, else every entry must be a string. */
+function parseStringList(value: unknown, field: string): { list?: string[]; error?: string } {
+	if (value === undefined) return {};
+	if (!Array.isArray(value)) return { error: `${field} must be an array` };
+	for (const entry of value) {
+		if (typeof entry !== "string") return { error: `${field} entries must be strings` };
+	}
+	return { list: value as string[] };
+}
+
+/** One allowed folder: absolute, an existing directory, resolved to its
+ *  real path, and outside the app's data dir and auth-file directory. */
+function checkAllowedFolder(folder: string): { ok: true; real: string } | { ok: false; error: string } {
+	if (!path.isAbsolute(folder)) return { ok: false, error: `"${folder}" must be an absolute path` };
+	let real: string;
+	try {
+		real = fs.realpathSync(folder);
+	} catch {
+		return { ok: false, error: `"${folder}" does not exist` };
+	}
+	if (!fs.statSync(real).isDirectory()) return { ok: false, error: `"${folder}" is not a folder` };
+	for (const reserved of [PATHS.data, path.dirname(AUTH_FILE)]) {
+		let reservedReal = reserved;
+		try {
+			reservedReal = fs.realpathSync(reserved);
+		} catch {
+			/* not created yet — compare the configured path */
+		}
+		if (isInside(real, reservedReal)) {
+			return { ok: false, error: `"${folder}" holds LearnHarness's own data or keys and can't be shared with the agent` };
+		}
+	}
+	return { ok: true, real };
 }
 
 /** A hex-or-null color field (appearance colors): null = default. */

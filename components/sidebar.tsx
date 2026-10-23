@@ -65,6 +65,8 @@ declare global {
 			/** Auto-update channel (Wave C, 2026-10-10): "lh:update-status" pushes once a staged update exists. */
 			onUpdateStatus?: (cb: (status: { status: string; version: string | null }) => void) => () => void;
 			installUpdate?: () => void;
+			/** Native folder chooser (Settings → Agent → File access): the chosen path, or null on cancel. */
+			pickFolder?: () => Promise<string | null>;
 		};
 	}
 }
