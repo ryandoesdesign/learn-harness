@@ -114,6 +114,7 @@ Each milestone ends runnable, with `xcodebuild test` green and a commit on branc
 - **M2, importer:** you pick the old data folder (default: `~/Library/Application Support/LearnHarness/data`). Only `ANTHROPIC_API_KEY` moves to Keychain; other provider keys are reported and skipped. Non-Anthropic model slots map to the defaults: Opus 5.5 for Strong, Sonnet 5.5 for Cheap and Vision. The old `thinkingLevel` maps to `effort`.
 - **M6, sandbox:** file tools go through one `withAccess(bookmark)` helper that checks the symlink-resolved path and denies the container's own data. Demo web views use a non-persistent data store, a strict CSP, no native bridge in display mode, and a kill timeout.
 - **M7, backfill** (your answer, 2026-10-24): extraction also processes sessions from before M7 (native sessions from M5 and M6, which never ran extraction), so their answers reach the graph. How and when it runs is decided in M7's design.
+- **M8, font menu:** dropped. M1 dropped Appearance entirely, so the "font-menu" tests in the M8 row don't apply (docs/native-macos-m8.md).
 - **M8, Agent Skill:** the scripts open `~/Library/Containers/com.ryandoesdesign.LearnHarness/Data/Library/Application Support/LearnHarness/learnharness.sqlite` read-only via sqlite3 `mode=ro`, with a `--db` override. `references/data-format.md` is updated.
 
 ## Risks

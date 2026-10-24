@@ -171,3 +171,50 @@ The dock's own keys (↑/↓, Space, ←/→, Return) and the layered Esc are un
 - **Still open from earlier milestones:**
   - the live runs (`LiveJobs`, `LiveExtraction`, the new practice live test) wait on a working key;
   - the M6 and M7 screens haven't been checked by eye.
+
+## Implementation notes (2026-10-24)
+Commits on `native-macos`:
+
+| Commit | What |
+|---|---|
+| dfc1808 | The practice agent, its tools and the turn service |
+| 9e14909 | Practice in the app |
+| 0362ac9 | The opt-in live practice test |
+| b51da25 | On-device dictation |
+| d37d235 | Menus and shortcuts |
+| 42569be | The Agent Skill on SQLite |
+| a4b9bd8 | The rest of Settings |
+| 678a0ec | Polish |
+
+What differs from the plan above, or was settled while building:
+- **Practice:**
+  - The golden dumps now include the TS practice registry and prompt (`tools-practice.json`, `prompt-practice.json`). The Swift test applies the one recorded schema difference (no `dismissed`) before comparing.
+  - The pose-after-conclude refusal reads: "a problem was concluded in this turn — the next one waits for the learner's go-ahead … end your turn".
+  - Targets are checked against the raw node ledger (`readNodes`), as TS does.
+  - A record that ends in thinking or Next now resumes on open.
+  - A problem's statement also gets the literal-newline repair (c3bf90c).
+- **Dictation:**
+  - It uses `DictationTranscriber` (`.longDictation`) rather than `SpeechTranscriber`, because it punctuates like the system's dictation.
+  - It uses macOS 27's `installAudioTap`.
+  - The menu item is Edit → "Dictate" / "Stop Dictating", because the system already adds its own "Start Dictation…".
+- **Menus:**
+  - View → Show / Hide Sidebar is SwiftUI's standard sidebar command.
+  - Next Problem is ⌘↩. Plain Return with no field focused is a hidden default button.
+- **Settings:** TS deliberately removed the per-role model rows (agent-section.tsx: "the six per-role rows disappeared"). They're back natively, collapsed under "Per-role models", as this design says. Say if you'd rather they stay hidden.
+- **Agent Skill:** the agent's open choices, kept as built:
+  1. **Opening the file:** `mode=ro` changes `-shm` and creates WAL siblings. It opens with `readonly_shm=1` when a `-wal` exists and `immutable=1` when it doesn't, and a test confirms nothing next to the file changes.
+  2. **Output names:** the JSON key `data_dir` is now `db`.
+  3. **No fallback when blocked:** a container that exists but is blocked is reported, never swapped for the fallback copy.
+  4. **Settings shape:** settings show in the stored native shape. Stop reasons are mapped back.
+  5. **Web search:** server web-search blocks show as unsupported content.
+  6. **Omission counts:** they're lower because the importer drops turns, `api` and `responseId`.
+  - Four JSON-only tests were retired, leaving 52 tests in all.
+  - From a terminal, macOS App Data privacy blocks the real container, as predicted, and the script prints the copy-and-`--db` guidance.
+- **Polish:**
+  - The first-run check splits `startSession` (which checks the key) from `beginSession` (which creates the chat, used by tests).
+  - The About copyright line reads "© 2026 Ryan Tessier".
+
+Still not done:
+- the live runs (`LiveLesson`, `LiveJobs`, `LiveExtraction`, `LivePractice`), which need a working key;
+- every UI check by eye;
+- a real-microphone dictation run.
