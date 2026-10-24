@@ -30,22 +30,7 @@ struct LearnHarnessApp: App {
 				#endif
 		}
 		.commands {
-			CommandGroup(replacing: .newItem) {
-				Button("New Session") { model.newSession() }.keyboardShortcut("n")
-			}
-			CommandGroup(after: .newItem) {
-				Divider()
-				ImportCommand(model: model)
-				ExportCommand(model: model)
-			}
-			CommandGroup(after: .textEditing) {
-				Divider()
-				FindCommands()
-				Divider()
-				Button(model.dictation.isRecording ? "Stop Dictating" : "Dictate") { model.dictation.toggle() }
-					.keyboardShortcut("d")
-					.disabled(!model.dictation.available)
-			}
+			AppCommands(model: model)
 			#if DEBUG
 			CommandMenu("Debug") {
 				PlaygroundCommand()
@@ -60,8 +45,12 @@ struct LearnHarnessApp: App {
 		Window("Knowledge Graph", id: "graph") {
 			GraphWindow(app: model)
 		}
-		.keyboardShortcut("g", modifiers: [.command, .shift])
+		.keyboardShortcut(AppShortcut.knowledgeGraph.key, modifiers: AppShortcut.knowledgeGraph.modifiers)
 		.defaultSize(width: 1100, height: 760)
+		Window("Keyboard Shortcuts", id: "shortcuts") {
+			ShortcutsView()
+		}
+		.windowResizability(.contentSize)
 		#if DEBUG
 		Window("Anthropic Playground", id: "playground") {
 			PlaygroundView(model: playground)

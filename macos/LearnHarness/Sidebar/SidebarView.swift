@@ -70,11 +70,7 @@ struct SidebarView: View {
 						}
 						.tag(s.id)
 						.contextMenu {
-							Button("Rename") {
-								renameText = s.title
-								renaming = s.id
-								renameFocused = true
-							}
+							Button("Rename") { startRename(s) }
 							Button("Export as Markdown…") { model.exportMarkdown(chatId: s.id) }
 							if s.kind != .practice { CoverageMenuItems(model: model, chatId: s.id) }
 							Divider()
@@ -87,6 +83,12 @@ struct SidebarView: View {
 				}
 			}
 			.listStyle(.sidebar)
+			// Return on a selected row renames it, as in Finder.
+			.onKeyPress(.return) {
+				guard renaming == nil, let id = selection, let s = model.sessions.first(where: { $0.id == id }) else { return .ignored }
+				startRename(s)
+				return .handled
+			}
 			BackgroundAgentsSection(model: model)
 		}
 		.padding(.top, 8)
@@ -104,11 +106,18 @@ struct SidebarView: View {
 				}
 			}
 		}
-		.background {
-			Button("") { searchFocused = true }
-				.keyboardShortcut("f", modifiers: [.command, .shift])
-				.hidden()
+		.onChange(of: model.searchRequest) { searchFocused = true }
+		.onChange(of: model.renameRequest) {
+			guard let id = model.renameRequest, let s = model.sessions.first(where: { $0.id == id }) else { return }
+			model.renameRequest = nil
+			startRename(s)
 		}
+	}
+
+	private func startRename(_ s: ChatSummary) {
+		renameText = s.title
+		renaming = s.id
+		renameFocused = true
 	}
 
 	private func commitRename(_ id: String) {

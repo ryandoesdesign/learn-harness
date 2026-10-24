@@ -420,6 +420,33 @@ struct ModelControl: View {
 		.buttonStyle(.borderless)
 		.font(Theme.ui)
 		.fixedSize()
+		.popover(isPresented: Binding(get: { session.overlays.modelPickerOpen }, set: { session.overlays.modelPickerOpen = $0 }), arrowEdge: .top) {
+			ModelEffortPicker(catalog: session.catalog, model: spec.model, effort: spec.effort) { session.setModel($0, effort: $1) }
+		}
+	}
+}
+
+/// ⌘K (model-picker.tsx's keyboard opening): the model and the effort it
+/// supports, as pickers — Return or Esc closes it.
+struct ModelEffortPicker: View {
+	var catalog: ModelCatalog
+	var model: String
+	var effort: Effort
+	var onChange: (String, Effort) -> Void
+
+	var body: some View {
+		let efforts = catalog.model(model)?.efforts ?? []
+		Form {
+			Picker("Model", selection: Binding(get: { model }, set: { onChange($0, effort) })) {
+				ForEach(catalog.models, id: \.id) { Text($0.name).tag($0.id) }
+			}
+			Picker("Effort", selection: Binding(get: { effort }, set: { onChange(model, $0) })) {
+				ForEach(efforts, id: \.self) { Text($0.rawValue).tag($0) }
+			}
+			.disabled(efforts.isEmpty)
+		}
+		.padding(12)
+		.frame(width: 300)
 	}
 }
 

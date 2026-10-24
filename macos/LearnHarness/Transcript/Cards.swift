@@ -41,7 +41,7 @@ struct ThinkingBlock: View {
 	@Environment(SessionModel.self) private var session
 
 	var body: some View {
-		let open = session.isOpen(id, default: defaultOpen)
+		let open = session.isOpen(id, default: session.allUserThinkingOpen ?? defaultOpen)
 		HStack(spacing: 0) {
 			Rectangle().fill(Theme.muted.opacity(0.3)).frame(width: Theme.railWidth)
 			VStack(alignment: .leading, spacing: 4) {

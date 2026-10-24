@@ -4,9 +4,11 @@ import SwiftUI
 /// The app shell: the sessions sidebar + the selected session.
 struct RootView: View {
 	@Bindable var model: AppModel
+	/// The sidebar's shown state survives relaunch (View → Show / Hide Sidebar).
+	@AppStorage("lh.sidebarShown") private var sidebarShown = true
 
 	var body: some View {
-		NavigationSplitView {
+		NavigationSplitView(columnVisibility: Binding(get: { sidebarShown ? .all : .detailOnly }, set: { sidebarShown = $0 != .detailOnly })) {
 			SidebarView(model: model, selection: $model.selection)
 				.navigationSplitViewColumnWidth(min: 220, ideal: 288)
 		} detail: {

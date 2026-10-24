@@ -155,6 +155,27 @@ final class SessionModel {
 
 	func isOpen(_ id: String, default fallback: Bool = false) -> Bool { openState[id] ?? fallback }
 
+	/// ⌘T's last set (thinking-block.tsx): nil = rows run their own defaults.
+	private(set) var allUserThinkingOpen: Bool?
+
+	/// ⌘T: every "your thinking" row to one state — transcript rows default
+	/// open, so the first press collapses everything, the next re-expands.
+	/// An explicit set stomps individual toggles; later rows honor it too.
+	func toggleAllUserThinking() {
+		let open = !(allUserThinkingOpen ?? true)
+		allUserThinkingOpen = open
+		for row in rows {
+			switch row.kind {
+			case .practiceThinking: openState[row.id] = open
+			case .answered(let a, _):
+				if a.thinking != nil || a.note != nil { openState["\(row.id).thinking"] = open }
+				if a.readingThinking != nil { openState["\(row.id).reading"] = open }
+			default: break
+			}
+		}
+		refreshFindUnits()
+	}
+
 	func setOpen(_ id: String, _ open: Bool) {
 		openState[id] = open
 		refreshFindUnits()
@@ -203,7 +224,7 @@ final class SessionModel {
 			case .reasoning(let text, _):
 				if isOpen(id) { add(findUnits(MarkdownCache.blocks(text), prefix: "\(id).body"), id) }
 			case .practiceThinking(let text):
-				if isOpen(id, default: true) { plain("\(id).text", text, id) }
+				if isOpen(id, default: allUserThinkingOpen ?? true) { plain("\(id).text", text, id) }
 			case .answered(let answer, let input):
 				add(answeredUnits(answer, input: input, id: id), id)
 			case .tool(let part):
@@ -269,6 +290,8 @@ final class SessionOverlays {
 
 	var diagram: Diagram?
 	var planOpen = false
+	/// Session → Model and Effort… (⌘K): the status bar's picker popover.
+	var modelPickerOpen = false
 
 	func openDiagram(svg: String, size: CGSize, figure: Bool, inverted: Bool) {
 		planOpen = false

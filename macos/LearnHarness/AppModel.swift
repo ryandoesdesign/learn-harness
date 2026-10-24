@@ -42,6 +42,10 @@ final class AppModel {
 	var drafting = false
 	/// The draft's mode (M8): nil = a teaching session, .practice = practice.
 	var draftKind: ChatKind?
+	/// Edit → Search Sessions (⇧⌘F): each bump focuses the sidebar search.
+	var searchRequest = 0
+	/// Session → Rename… (or Return on a sidebar row): the chat to rename.
+	var renameRequest: String?
 	/// The sidebar selection; opening a session builds its model.
 	var selection: String? {
 		didSet {

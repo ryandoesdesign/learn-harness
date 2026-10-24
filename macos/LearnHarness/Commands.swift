@@ -19,13 +19,13 @@ struct FindCommands: View {
 
 	var body: some View {
 		Button("Find…") { session?.find.open() }
-			.keyboardShortcut("f")
+			.keyboardShortcut(.find)
 			.disabled(session == nil)
 		Button("Find Next") { session.map { open($0); $0.find.step(1) } }
-			.keyboardShortcut("g")
+			.keyboardShortcut(.findNext)
 			.disabled(session == nil)
 		Button("Find Previous") { session.map { open($0); $0.find.step(-1) } }
-			.keyboardShortcut("g", modifiers: [.command, .shift])
+			.keyboardShortcut(.findPrevious)
 			.disabled(session == nil)
 	}
 
