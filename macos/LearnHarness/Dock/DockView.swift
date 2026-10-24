@@ -70,7 +70,6 @@ struct DockView: View {
 /// Send becomes Stop while busy with an empty field.
 struct ComposerView: View {
 	@Bindable var session: SessionModel
-	var placeholder = "Ask, answer, or steer the lesson…"
 	var onSend: (() -> Void)?
 	@FocusState private var focused: Bool
 	@Environment(DictationService.self) private var dictation: DictationService?
@@ -78,57 +77,45 @@ struct ComposerView: View {
 	var body: some View {
 		let action = enterAction(busy: session.busy, canSend: session.canSend, nextProblem: session.nextReady)
 		HStack(alignment: .bottom, spacing: 8) {
-			ZStack(alignment: .topLeading) {
-				if session.draft.isEmpty {
-					Text(session.compacting ? "Compacting session…" : session.nextReady ? "Ask anything, or press Enter for the next one." : placeholder)
-						.foregroundStyle(Theme.muted)
-						.padding(.horizontal, 5)
-						.padding(.vertical, 8)
-						.allowsHitTesting(false)
-				}
-				TextEditor(text: $session.draft)
-					.scrollContentBackground(.hidden)
-					.focused($focused)
-					.dictationTarget("composer", .composer, text: $session.draft)
-					.frame(minHeight: 36, maxHeight: 192)
-					.fixedSize(horizontal: false, vertical: true)
-					.padding(.vertical, 4)
-					.onKeyPress(.return, phases: .down) { press in
-						if press.modifiers.contains(.shift) { return .ignored }
-						act(action)
+			TextField("", text: $session.draft, prompt: Text(session.compacting ? "Compacting session…" : session.nextReady ? "Ask anything, or press Enter for the next one." : "Ask, answer, or steer the lesson…"), axis: .vertical)
+				.textFieldStyle(.plain)
+				.focused($focused)
+				.dictationTarget("composer", .composer, text: $session.draft)
+				.onKeyPress(.return, phases: .down) { press in
+					if press.modifiers.contains(.shift) {
+						// A text field's Return ends editing (selecting it all): ⇧Return
+						// inserts the newline ⌥Return would, at the cursor.
+						NSApp.sendAction(#selector(NSResponder.insertNewlineIgnoringFieldEditor(_:)), to: nil, from: nil)
 						return .handled
 					}
-			}
-			.font(Theme.prose)
+					act(action)
+					return .handled
+				}
+				.padding(12)
+				.font(Theme.prose)
 			if action == .next {
 				// The practice pause (composer.tsx): the button becomes Next Problem.
 				Button { act(.next) } label: {
 					HStack(spacing: 4) { Text("Next Problem"); Image(systemName: "arrow.right") }
 						.font(Theme.uiMedium)
-						.frame(height: 28)
-						.padding(.horizontal, 4)
 				}
 				.buttonStyle(.borderedProminent)
 				.tint(Theme.green)
 				.help("The next problem (↩)")
-				.padding(.bottom, 4)
 			} else {
 				Button {
 					act(session.busy && !session.canSend ? .stop : .send)
 				} label: {
 					Image(systemName: session.busy && !session.canSend ? "stop.fill" : "return")
-						.frame(width: 28, height: 28)
 				}
-				.buttonStyle(.borderedProminent)
-				.tint(session.busy && !session.canSend ? Color.secondary : Color.accentColor)
+				.buttonStyle(.plain)
 				.disabled(!session.busy && !session.canSend)
 				.accessibilityLabel(session.busy && !session.canSend ? "Stop" : "Send")
-				.padding(.bottom, 4)
+				.padding(12)
 			}
 		}
-		.padding(.horizontal, 10)
-		.background(RoundedRectangle(cornerRadius: 12).fill(Theme.card))
-		.overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border))
+		.background(RoundedRectangle(cornerRadius: 8).fill(Theme.card))
+		.overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.border))
 		.onAppear { focused = true }
 	}
 

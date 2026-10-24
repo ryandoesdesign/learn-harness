@@ -1,3 +1,4 @@
+import AppKit
 import LHCore
 import LHStore
 import SwiftUI
@@ -46,34 +47,30 @@ struct DraftView: View {
 			.frame(maxWidth: DockView.width)
 			.padding(.horizontal, 16)
 			HStack(alignment: .bottom, spacing: 8) {
-				ZStack(alignment: .topLeading) {
-					if text.isEmpty {
-						Text(practice ? "What do you want to practice?" : "What do you want to learn?")
-							.foregroundStyle(Theme.muted).padding(.horizontal, 5).padding(.vertical, 8).allowsHitTesting(false)
-					}
-					TextEditor(text: $text)
-						.scrollContentBackground(.hidden)
-						.focused($focused)
-						.dictationTarget("draft", .composer, text: $text)
-						.frame(minHeight: 36, maxHeight: 192)
-						.fixedSize(horizontal: false, vertical: true)
-						.padding(.vertical, 4)
-						.onKeyPress(.return, phases: .down) { press in
-							if press.modifiers.contains(.shift) { return .ignored }
-							start()
+				TextField("", text: $text, prompt: Text(practice ? "What do you want to practice?" : "What do you want to learn?"), axis: .vertical)
+					.textFieldStyle(.plain)
+					.focused($focused)
+					.dictationTarget("draft", .composer, text: $text)
+					.onKeyPress(.return, phases: .down) { press in
+						if press.modifiers.contains(.shift) {
+							// A text field's Return ends editing (selecting it all): ⇧Return
+							// inserts the newline ⌥Return would, at the cursor.
+							NSApp.sendAction(#selector(NSResponder.insertNewlineIgnoringFieldEditor(_:)), to: nil, from: nil)
 							return .handled
 						}
-				}
-				.font(Theme.prose)
-				Button(action: start) { Image(systemName: "return").frame(width: 28, height: 28) }
-					.buttonStyle(.borderedProminent)
+						start()
+						return .handled
+					}
+					.padding(12)
+					.font(Theme.prose)
+				Button(action: start) { Image(systemName: "return") }
+					.buttonStyle(.plain)
 					.disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 					.accessibilityLabel("Send")
-					.padding(.bottom, 4)
+					.padding(12)
 			}
-			.padding(.horizontal, 10)
-			.background(RoundedRectangle(cornerRadius: 12).fill(Theme.card))
-			.overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border))
+			.background(RoundedRectangle(cornerRadius: 8).fill(Theme.card))
+			.overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.border))
 			.frame(maxWidth: DockView.width)
 			.padding(16)
 			DraftStatusBar(model: model)
