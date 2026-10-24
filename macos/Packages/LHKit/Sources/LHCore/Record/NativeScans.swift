@@ -152,6 +152,13 @@ public func activeProblemOf(_ messages: [Message]) -> (toolCallId: String, input
 	return nil
 }
 
+/// Has any problem been posed cleanly? Next Problem waits for one
+/// (docs/native-macos-m8.md: TS counted any problem call, even a refused one).
+public func hasPosedProblem(_ messages: [Message]) -> Bool {
+	let clean = cleanToolCallIds(messages)
+	return messages.contains { $0.assistant?.toolUses.contains { $0.name == PRACTICE_PROBLEM_TOOL && clean.contains($0.id) } ?? false }
+}
+
 /// A problem-dismissal marker waiting for its conclude synthesis → its problem call id.
 public func pendingProblemDismissalOf(_ messages: [Message]) -> String? {
 	let clean = cleanToolCallIds(messages)

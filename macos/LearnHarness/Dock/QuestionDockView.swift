@@ -19,9 +19,6 @@ struct QuestionDockView: View {
 	@State private var text = ""
 	@State private var confIdx = DEFAULT_CONFIDENCE_INDEX
 	@State private var walked: Int?
-	/// The question body's natural height: the scroll area hugs it (a
-	/// ScrollView alone takes every point it's offered) up to `maxBody`.
-	@State private var bodyHeight: CGFloat?
 	static let maxBody: CGFloat = 420
 	@FocusState private var focus: Field?
 
@@ -58,7 +55,7 @@ struct QuestionDockView: View {
 					.buttonStyle(.borderless)
 					.help("Fold the question")
 			}
-			ScrollView {
+			HuggingScroll(maxHeight: Self.maxBody) {
 				VStack(alignment: .leading, spacing: 10) {
 					MarkdownView(qd.question, unit: "dock.q").fontWeight(.medium)
 					if let context = qd.context {
@@ -81,11 +78,7 @@ struct QuestionDockView: View {
 					}
 					if qd.kind == .quiz { confidence(disabled: sel.dontKnow) }
 				}
-				.onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bodyHeight = $0 }
 			}
-			// A height, not .frame(maxHeight:): that frame takes every point
-			// offered up to its max, so the card stretched to the cap.
-			.frame(height: min(bodyHeight ?? Self.maxBody, Self.maxBody))
 			learnerField(qd)
 			HStack {
 				Text(session.compacting ? "compacting session…" : "↵ submits · ⇧↵ newline").font(Theme.ui).foregroundStyle(Theme.faint)
@@ -286,4 +279,21 @@ enum DockKeyRoute: Equatable { case rows, field, submit }
 func dockKeyRoute(_ key: KeyEquivalent, typing: Bool) -> DockKeyRoute {
 	guard typing else { return .rows }
 	return key == .return ? .submit : .field
+}
+
+/// A scroll area that hugs its content up to `maxHeight`, then scrolls. A
+/// ScrollView alone takes every point it's offered, and so does
+/// .frame(maxHeight:) (it fills up to its max), so the content's measured
+/// height sets the frame instead.
+struct HuggingScroll<Content: View>: View {
+	var maxHeight: CGFloat
+	@ViewBuilder var content: Content
+	@State private var height: CGFloat?
+
+	var body: some View {
+		ScrollView {
+			content.onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
+		}
+		.frame(height: min(height ?? maxHeight, maxHeight))
+	}
 }

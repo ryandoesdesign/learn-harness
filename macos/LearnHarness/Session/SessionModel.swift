@@ -57,6 +57,9 @@ final class SessionModel {
 	var revealed = true
 	var readingThinking = ""
 	var lastPendingId: String?
+	// Practice (M8): the dock's thinking draft and fold.
+	var practiceThinking = ""
+	var problemDockExpanded = true
 
 	init(chatId: String, database: AppDatabase, dataDirectory: URL, catalog: ModelCatalog, service: TurnService? = nil) {
 		self.chatId = chatId

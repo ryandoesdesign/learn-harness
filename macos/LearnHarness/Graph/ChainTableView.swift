@@ -4,10 +4,13 @@ import SwiftUI
 /// The chain table (chain-table.tsx): sessions → reasoning chains →
 /// propositions, all collapsed at start; Name / Props / Created sorting;
 /// fuzzy search; node-id selection with partial checkboxes and the floating
-/// bar (Clear, Delete, New Session from Selection…); and per chain row,
+/// bar (Clear, Delete, New Session / Practice from Selection…); and per chain row,
 /// "Delete chain" (your answer: the argument alone).
 struct ChainTableView: View {
 	@Bindable var model: GraphWindowModel
+	/// The graph window's table, or the draft's "Pick Nodes…" sheet (M8):
+	/// the picker's bar shows the count and Clear only — the sheet owns Done.
+	var picker = false
 	@State private var sort = ChainSort.initial
 	@State private var openGroups: Set<String> = []
 	@State private var openChains: Set<String> = []
@@ -149,9 +152,12 @@ struct ChainTableView: View {
 			Text("\(ids.count) \(ids.count == 1 ? "node" : "nodes") → \(chains) \(chains == 1 ? "chain" : "chains")").monospacedDigit()
 			Spacer()
 			Button("Clear") { model.chainSelection = [] }
-			Button("New Session from Selection…") { model.startSession(from: model.chainSelection) }
-			Button("Delete", role: .destructive) { model.requestDelete(ids) }
-				.foregroundStyle(.red)
+			if !picker {
+				Button("New Session from Selection…") { model.startSession(from: model.chainSelection) }
+				Button("Practice from Selection…") { model.startSession(from: model.chainSelection, kind: .practice) }
+				Button("Delete", role: .destructive) { model.requestDelete(ids) }
+					.foregroundStyle(.red)
+			}
 		}
 		.font(.system(size: 12))
 		.padding(10)

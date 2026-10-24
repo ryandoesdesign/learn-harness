@@ -267,13 +267,18 @@ final class GraphWindowModel {
 		importing = false
 	}
 
-	/// New Session from Selection… (the chain table's picks).
-	func startSession(from ids: Set<String>) {
-		let picks = ids.compactMap { nodeById[$0] }.filter { !isImpNodeId($0.id) }
+	/// New Session / Practice from Selection… (the chain table's picks).
+	func startSession(from ids: Set<String>, kind: ChatKind? = nil) {
+		let picks = picks(from: ids)
+		guard !picks.isEmpty else { return }
+		app.newSession(picks: picks, kind: kind)
+	}
+
+	/// The selection as draft picks, by name (implicit nodes left out).
+	func picks(from ids: Set<String>) -> [GraphContextPick] {
+		ids.compactMap { nodeById[$0] }.filter { !isImpNodeId($0.id) }
 			.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
 			.map { GraphContextPick(id: $0.id, name: $0.name, statement: $0.statement) }
-		guard !picks.isEmpty else { return }
-		app.newSession(picks: picks)
 	}
 
 	/// The detail card's sessions: chats link, files are plain.

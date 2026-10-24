@@ -23,6 +23,20 @@ extension SessionModel {
 
 	var busy: Bool { running || status != .idle }
 
+	/// The active practice problem (activeProblemOf): its call id and the
+	/// statement as displayed. The practice dock replaces the composer.
+	var activeProblem: (toolCallId: String, statement: String)? {
+		guard isPractice, let record, let p = activeProblemOf(record.messages) else { return nil }
+		return (p.toolCallId, repairMathForDisplay(restoreLiteralNewlines(p.input["statement"]?.stringValue ?? "")))
+	}
+
+	/// The practice pause: idle, nothing active, and a problem has been posed
+	/// cleanly — the composer's button becomes Next Problem.
+	var nextReady: Bool {
+		guard isPractice, !busy, let record, activeProblemOf(record.messages) == nil else { return false }
+		return hasPosedProblem(record.messages)
+	}
+
 	/// TS canSend: text present, no pending question, not compacting.
 	var canSend: Bool { !draft.jsTrimmed.isEmpty && pending == nil && !compacting }
 
@@ -167,6 +181,55 @@ extension SessionModel {
 		readingThinking = ""
 		Task {
 			do { try await service.dismiss(chatId, toolCallId: p.toolCallId, answer: a) } catch { refused(error, draft: nil) }
+			load()
+		}
+	}
+
+	/// Practice: send the thinking on the active problem — a steer while a
+	/// turn runs (docs/native-macos-m8.md), otherwise a turn.
+	func submitThinking() {
+		let text = practiceThinking
+		guard let service, let problem = activeProblem, !text.jsTrimmed.isEmpty, !compacting else { return }
+		practiceThinking = ""
+		errorText = nil
+		needsKey = false
+		if !busy { status = .submitted }
+		Task {
+			do {
+				switch try await service.submitThinking(chatId, problemCallId: problem.toolCallId, text: text) {
+				case .queued: queuedSteers = await service.queuedSteers(chatId)
+				case .sent: follow()
+				}
+			} catch {
+				if status == .submitted, !running { status = .idle }
+				if practiceThinking.isEmpty { practiceThinking = text }
+				refused(error, draft: nil)
+			}
+		}
+	}
+
+	/// Practice: the learner's go-ahead for the next problem.
+	func requestNext() {
+		guard let service, nextReady else { return }
+		errorText = nil
+		status = .submitted
+		Task {
+			do {
+				try await service.send(chatId, .next)
+				follow()
+			} catch {
+				status = .idle
+				refused(error, draft: nil)
+			}
+		}
+	}
+
+	/// Esc → "Discard this problem?" → Discard (no solution is revealed).
+	func discardProblem() {
+		guard let service, let problem = activeProblem else { return }
+		practiceThinking = ""
+		Task {
+			do { try await service.dismissProblem(chatId, problemCallId: problem.toolCallId) } catch { refused(error, draft: nil) }
 			load()
 		}
 	}

@@ -42,6 +42,10 @@ struct DockView: View {
 				}
 				QuestionDockView(session: session, tool: p.tool, toolCallId: p.toolCallId, input: p.input)
 					.id(p.toolCallId)
+			} else if let problem = session.activeProblem {
+				// Practice (M8): the problem replaces the composer while it's active.
+				PracticeDockView(session: session, problem: problem)
+					.id(problem.toolCallId)
 			} else {
 				ComposerView(session: session)
 			}
@@ -69,11 +73,11 @@ struct ComposerView: View {
 	@FocusState private var focused: Bool
 
 	var body: some View {
-		let action = enterAction(busy: session.busy, canSend: session.canSend)
+		let action = enterAction(busy: session.busy, canSend: session.canSend, nextProblem: session.nextReady)
 		HStack(alignment: .bottom, spacing: 8) {
 			ZStack(alignment: .topLeading) {
 				if session.draft.isEmpty {
-					Text(session.compacting ? "Compacting session…" : placeholder)
+					Text(session.compacting ? "Compacting session…" : session.nextReady ? "Ask anything, or press Enter for the next one." : placeholder)
 						.foregroundStyle(Theme.muted)
 						.padding(.horizontal, 5)
 						.padding(.vertical, 8)
@@ -92,17 +96,31 @@ struct ComposerView: View {
 					}
 			}
 			.font(Theme.prose)
-			Button {
-				act(session.busy && !session.canSend ? .stop : .send)
-			} label: {
-				Image(systemName: session.busy && !session.canSend ? "stop.fill" : "return")
-					.frame(width: 28, height: 28)
+			if action == .next {
+				// The practice pause (composer.tsx): the button becomes Next Problem.
+				Button { act(.next) } label: {
+					HStack(spacing: 4) { Text("Next Problem"); Image(systemName: "arrow.right") }
+						.font(Theme.uiMedium)
+						.frame(height: 28)
+						.padding(.horizontal, 4)
+				}
+				.buttonStyle(.borderedProminent)
+				.tint(Theme.green)
+				.help("The next problem (↩)")
+				.padding(.bottom, 4)
+			} else {
+				Button {
+					act(session.busy && !session.canSend ? .stop : .send)
+				} label: {
+					Image(systemName: session.busy && !session.canSend ? "stop.fill" : "return")
+						.frame(width: 28, height: 28)
+				}
+				.buttonStyle(.borderedProminent)
+				.tint(session.busy && !session.canSend ? Color.secondary : Color.accentColor)
+				.disabled(!session.busy && !session.canSend)
+				.accessibilityLabel(session.busy && !session.canSend ? "Stop" : "Send")
+				.padding(.bottom, 4)
 			}
-			.buttonStyle(.borderedProminent)
-			.tint(session.busy && !session.canSend ? Color.secondary : Color.accentColor)
-			.disabled(!session.busy && !session.canSend)
-			.accessibilityLabel(session.busy && !session.canSend ? "Stop" : "Send")
-			.padding(.bottom, 4)
 		}
 		.padding(.horizontal, 10)
 		.background(RoundedRectangle(cornerRadius: 12).fill(Theme.card))
@@ -116,7 +134,9 @@ struct ComposerView: View {
 			if let onSend { onSend() } else { session.sendDraft() }
 		case .stop:
 			session.abortTurn()
-		case .next, .none:
+		case .next:
+			session.requestNext()
+		case .none:
 			break
 		}
 	}

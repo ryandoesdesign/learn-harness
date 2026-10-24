@@ -30,6 +30,16 @@ struct SessionView: View {
 			}
 			StatusBar(session: session)
 		}
+		.background {
+			// Practice (docs/native-macos-m8.md): Enter with no field focused
+			// submits the thinking or asks for the next problem. A focused text
+			// editor keeps its own Return.
+			if session.nextReady || session.activeProblem != nil {
+				Button("") { session.nextReady ? session.requestNext() : session.submitThinking() }
+					.keyboardShortcut(.defaultAction)
+					.hidden()
+			}
+		}
 		.environment(session)
 		.environment(session.find)
 		.environment(session.overlays)
@@ -81,13 +91,14 @@ struct SessionView: View {
 	private func escape() {
 		if session.find.isOpen { session.find.close(); return }
 		switch escAbortTarget(abortAsk: abortAsk != nil, diagram: session.overlays.diagram != nil, plan: session.overlays.planOpen,
-			setup: false, pending: session.pending != nil, problem: false, busy: session.busy)
+			setup: false, pending: session.pending != nil, problem: session.activeProblem != nil, busy: session.busy)
 		{
 		case .diagram?: session.overlays.diagram = nil
 		case .plan?: session.overlays.planOpen = false
 		case .question?: abortAsk = .question
+		case .problem?: abortAsk = .problem
 		case .turn?: abortAsk = .turn
-		case .setup?, .problem?, nil: break
+		case .setup?, nil: break
 		}
 	}
 
@@ -99,7 +110,8 @@ struct SessionView: View {
 		case .turn:
 			session.abortTurn()
 		case .problem:
-			break
+			if session.busy { session.abortTurn() }
+			session.discardProblem()
 		}
 	}
 }

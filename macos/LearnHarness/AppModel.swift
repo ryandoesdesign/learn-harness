@@ -38,6 +38,8 @@ final class AppModel {
 	private(set) var compactingChats: Set<String> = []
 	/// The ⌘N draft is open in the detail column.
 	var drafting = false
+	/// The draft's mode (M8): nil = a teaching session, .practice = practice.
+	var draftKind: ChatKind?
 	/// The sidebar selection; opening a session builds its model.
 	var selection: String? {
 		didSet {
@@ -107,16 +109,19 @@ final class AppModel {
 	// MARK: - Sessions (M5)
 
 	/// File → New Session (⌘N): the draft in the detail column.
-	func newSession() {
+	func newSession(kind: ChatKind? = nil) {
 		selection = nil
 		draftPicks = []
+		draftKind = kind
 		drafting = true
 	}
 
-	/// New Session from Selection… (M7): the draft, with the picks attached.
-	func newSession(picks: [GraphContextPick]) {
+	/// New Session from Selection… (M7) and Practice from Selection… (M8):
+	/// the draft, with the picks attached.
+	func newSession(picks: [GraphContextPick], kind: ChatKind? = nil) {
 		selection = nil
 		draftPicks = Array(picks.prefix(64))
+		draftKind = kind
 		drafting = true
 		// Bring the sessions window forward (the graph window stays open).
 		NSApp.windows.first { $0.canBecomeMain && $0.isVisible && !($0.identifier?.rawValue.contains("graph") ?? false) }?.makeKeyAndOrderFront(nil)
@@ -129,7 +134,7 @@ final class AppModel {
 		guard !text.isEmpty else { return }
 		do {
 			let repo = ChatRepository(database)
-			let chat = try repo.createChat(title: titleFromPrompt(text))
+			let chat = try repo.createChat(title: titleFromPrompt(text), kind: draftKind)
 			// Picks seed message[0]: the Graph context card (app/api/chats).
 			if !draftPicks.isEmpty {
 				let graph = GraphRepository(database)

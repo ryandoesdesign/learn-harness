@@ -13,6 +13,7 @@
 		29F6B95BB12F72F8278D3539 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C84F44649F29806FC6820DB /* RootView.swift */; };
 		2DD5FDBE6AD6BBED906E8C28 /* PlaygroundModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C753281CFD184086DB7D25 /* PlaygroundModel.swift */; };
 		3460C1B26341E71954F7CB2A /* LHStore in Frameworks */ = {isa = PBXBuildFile; productRef = DF4715D73492700C49DDFE87 /* LHStore */; };
+		3532559E96FE9755EA3E8C49 /* PracticeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B364A0BC0064623E6E5A84B1 /* PracticeUITests.swift */; };
 		4084A495D172E9065EC0E0A9 /* BackgroundAgents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 042C97B0F4E3F66618F5E4B7 /* BackgroundAgents.swift */; };
 		41CA20D3BB3E7CFC6B9A9406 /* LHAgent in Frameworks */ = {isa = PBXBuildFile; productRef = 524CCFF46CB739D0E4B3920F /* LHAgent */; };
 		44F48AC2C5528EC1080FEED7 /* QuestionDockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895FC170F13A1BE13D72206E /* QuestionDockView.swift */; };
@@ -24,6 +25,7 @@
 		69E6F3EB6D5BBDF305719339 /* GraphPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F4F5A900054B197060AEB2 /* GraphPanels.swift */; };
 		6C725DC58FE4108644BF2EEB /* GraphWindowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB60C2FAF867F0D2F492442C /* GraphWindowModel.swift */; };
 		6E2463738B96F689427B4781 /* SteerCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD12B7925DD31AD387962B2 /* SteerCards.swift */; };
+		6EAEF2FBA565E18B671F31F8 /* PracticeDockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AB6E30E7949B9B4A6C787BC /* PracticeDockView.swift */; };
 		772E57E3FABF3BFD5D839EF4 /* PlaygroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB2DF13F0D80C39FEECFACA /* PlaygroundView.swift */; };
 		7A4E2EA5F9769A29CB734743 /* RenderGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D6BE581B40075C9A87E3FA /* RenderGallery.swift */; };
 		7EE96B419D70EC1C524997D8 /* PlanViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB14834B60DF221C4CB9E870 /* PlanViews.swift */; };
@@ -92,6 +94,7 @@
 		3BA431BB50DD08A54F6F116E /* DemoSandboxHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSandboxHostTests.swift; sourceTree = "<group>"; };
 		46DE353BFF880FCA14F35171 /* LHKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LHKit; path = Packages/LHKit; sourceTree = SOURCE_ROOT; };
 		479BA42ACE38D0E862565440 /* SessionLive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionLive.swift; sourceTree = "<group>"; };
+		5AB6E30E7949B9B4A6C787BC /* PracticeDockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeDockView.swift; sourceTree = "<group>"; };
 		5EA3E30B7D6811217919957F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		5EA887CA2144E1284AEEADDB /* TranscriptRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptRows.swift; sourceTree = "<group>"; };
 		6474BA93B85E71DCE9A97E35 /* MermaidBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidBlockView.swift; sourceTree = "<group>"; };
@@ -110,6 +113,7 @@
 		A786448D019074D9C5D5DF6F /* ChainTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainTableView.swift; sourceTree = "<group>"; };
 		AB60C2FAF867F0D2F492442C /* GraphWindowModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphWindowModel.swift; sourceTree = "<group>"; };
 		ABB2DF13F0D80C39FEECFACA /* PlaygroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundView.swift; sourceTree = "<group>"; };
+		B364A0BC0064623E6E5A84B1 /* PracticeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeUITests.swift; sourceTree = "<group>"; };
 		B6AD793186A69DF940CEB0A7 /* chats */ = {isa = PBXFileReference; lastKnownFileType = folder; name = chats; path = "../tests/fixtures/golden-data/chats"; sourceTree = SOURCE_ROOT; };
 		BE87A15DE6632DBA8D5EF9E1 /* LearnHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LearnHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C005D31ED5A2EFEECF18F0C9 /* GraphRegions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphRegions.swift; sourceTree = "<group>"; };
@@ -281,6 +285,7 @@
 				7531E8BFE5854DDA89E26459 /* GraphWindowTests.swift */,
 				EA09B326668A14B029E77026 /* LaunchTests.swift */,
 				D62AB68901A9DBD187B9B30D /* LiveSessionTests.swift */,
+				B364A0BC0064623E6E5A84B1 /* PracticeUITests.swift */,
 				A42572FF68EFE7BA60752D2F /* QuestionDockLayoutTests.swift */,
 				25BFF23D8C953FE56B9EE851 /* ScrollBottomTests.swift */,
 				289B9F29DFF7F198AB7A8E2E /* TranscriptTests.swift */,
@@ -293,6 +298,7 @@
 			isa = PBXGroup;
 			children = (
 				34807431DA9BEFDC4D5BB0E9 /* DockView.swift */,
+				5AB6E30E7949B9B4A6C787BC /* PracticeDockView.swift */,
 				895FC170F13A1BE13D72206E /* QuestionDockView.swift */,
 			);
 			path = Dock;
@@ -473,6 +479,7 @@
 				CBFD4AA0F441BC6A34E21F36 /* GraphWindowTests.swift in Sources */,
 				EE1F5CFE55521435B8A0A7D9 /* LaunchTests.swift in Sources */,
 				9A92C75008E0B2E5FC58CC15 /* LiveSessionTests.swift in Sources */,
+				3532559E96FE9755EA3E8C49 /* PracticeUITests.swift in Sources */,
 				B4C11A330D938FD2BCD9D9BB /* QuestionDockLayoutTests.swift in Sources */,
 				1632EB3C8BD3369394476A89 /* ScrollBottomTests.swift in Sources */,
 				9CB6882DD07FD9A08C617A84 /* TranscriptTests.swift in Sources */,
@@ -509,6 +516,7 @@
 				7EE96B419D70EC1C524997D8 /* PlanViews.swift in Sources */,
 				2DD5FDBE6AD6BBED906E8C28 /* PlaygroundModel.swift in Sources */,
 				772E57E3FABF3BFD5D839EF4 /* PlaygroundView.swift in Sources */,
+				6EAEF2FBA565E18B671F31F8 /* PracticeDockView.swift in Sources */,
 				44F48AC2C5528EC1080FEED7 /* QuestionDockView.swift in Sources */,
 				7A4E2EA5F9769A29CB734743 /* RenderGallery.swift in Sources */,
 				29F6B95BB12F72F8278D3539 /* RootView.swift in Sources */,

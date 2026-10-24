@@ -559,7 +559,7 @@ struct ProblemCard: View {
 	var body: some View {
 		VStack(alignment: .leading, spacing: 4) {
 			Eyebrow("Problem")
-			MarkdownView(repairMathForDisplay(part.input?["statement"]?.stringValue ?? ""), unit: "\(id).s", font: .system(size: 15, design: .serif), fontSize: 15)
+			MarkdownView(repairMathForDisplay(restoreLiteralNewlines(part.input?["statement"]?.stringValue ?? "")), unit: "\(id).s", font: .system(size: 15, design: .serif), fontSize: 15)
 		}
 		.card()
 		.padding(.vertical, 4)
