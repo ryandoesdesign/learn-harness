@@ -89,6 +89,30 @@ extension InlineMathClipTests {
 	}
 }
 
+extension InlineMathClipTests {
+	/// Display math is a centered block when it fits the column.
+	@Test func displayMathIsCentered() async throws {
+		let host = NSHostingView(rootView: DisplayMathView(tex: "x^2", closed: true, fontSize: Theme.proseSize)
+			.frame(width: 500).fixedSize(horizontal: false, vertical: true).foregroundStyle(.black).background(Color.white))
+		let window = NSWindow(contentRect: NSRect(x: -10_000, y: -10_000, width: 500, height: 200), styleMask: [.borderless], backing: .buffered, defer: false)
+		window.contentView = host
+		host.frame.size = host.fittingSize
+		host.layoutSubtreeIfNeeded()
+		try await Task.sleep(for: .milliseconds(200))
+		let rep = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+		host.cacheDisplay(in: host.bounds, to: rep)
+		var minX = Int.max, maxX = Int.min
+		for y in 0..<rep.pixelsHigh {
+			for x in 0..<rep.pixelsWide where (rep.colorAt(x: x, y: y)?.brightnessComponent ?? 1) < 0.5 {
+				minX = min(minX, x)
+				maxX = max(maxX, x)
+			}
+		}
+		let center = Double(minX + maxX) / 2 / Double(rep.pixelsWide)
+		#expect(abs(center - 0.5) < 0.05, "ink centered at \(center) of the width")
+	}
+}
+
 /// Ink rows of a view laid out in a real (off-screen) window — unlike
 /// ImageRenderer, this draws platform views such as ScrollView.
 @MainActor

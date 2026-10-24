@@ -382,14 +382,15 @@ struct DisplayMathView: View {
 			if !closed {
 				ProgressView().controlSize(.small).frame(maxWidth: .infinity)
 			} else if let r = MathImage.render(tex, size: fontSize, display: true) {
-				ScrollView(.horizontal) {
-					Image(nsImage: r.image)
-						.foregroundStyle(.primary)
-						.padding(.vertical, 4)
-						.frame(maxWidth: .infinity)
+				// Centered when it fits (KaTeX's display block); a formula wider
+				// than the column scrolls horizontally instead.
+				let image = Image(nsImage: r.image).foregroundStyle(.primary).padding(.vertical, 4)
+				ViewThatFits(in: .horizontal) {
+					image.frame(maxWidth: .infinity)
+					ScrollView(.horizontal) { image }
+						.scrollIndicators(.never)
+						.fixedSize(horizontal: false, vertical: true)
 				}
-				.scrollIndicators(.never)
-				.fixedSize(horizontal: false, vertical: true)
 			} else {
 				Text(tex)
 					.font(.system(size: fontSize * 0.85, design: .monospaced))
