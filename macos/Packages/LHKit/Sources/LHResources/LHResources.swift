@@ -1,6 +1,6 @@
 import Foundation
 
-/// Bundled read-only resources (models.json, mermaid 11.17.0; prompts
+/// Bundled read-only resources (models.json, mermaid 11.17.0, MathJax 3.2.2; prompts
 /// arrive with the milestones that use them).
 public enum LHResources {
 	public static var modelsJSON: Data {
@@ -16,6 +16,17 @@ public enum LHResources {
 	public static var mermaidJS: String {
 		get throws {
 			guard let url = Bundle.module.url(forResource: "mermaid.min", withExtension: "js") else {
+				throw CocoaError(.fileNoSuchFile)
+			}
+			return try String(contentsOf: url, encoding: .utf8)
+		}
+	}
+
+	/// MathJax 3.2.2 bundled for JavaScriptCore (macos/scripts/build-mathjax.sh):
+	/// defines `lhTex2Svg(tex, display)`.
+	public static var mathJaxJS: String {
+		get throws {
+			guard let url = Bundle.module.url(forResource: "mathjax-svg", withExtension: "js") else {
 				throw CocoaError(.fileNoSuchFile)
 			}
 			return try String(contentsOf: url, encoding: .utf8)

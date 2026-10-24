@@ -6,7 +6,7 @@ This adds detail to `native-macos-plan.md`. It covers M4 only. M4 is **read-only
 | Question | Answer |
 |---|---|
 | Text engine | SwiftUI blocks, as the plan says. Selection is per block; copy corners cover code, math and tables. |
-| Math | **Native SwiftMath** (pinned), not KaTeX. No WebKit for math. KaTeX and the `katex-security` spec are dropped. |
+| Math | **MathJax 3.2.2 in JavaScriptCore → SVG**, drawn natively (revised after review, 2026-10-24; it replaced SwiftMath, whose coverage fell short). No WebKit for math. KaTeX and the `katex-security` spec are dropped. |
 | Mermaid | Snapshot + live overlay: a shared hidden WKWebView renders each diagram to a cached image. Expand opens one live WKWebView in the session overlay. |
 | Look | The TS layout, labels and order, drawn with system type (SF Pro, New York for prose, SF Mono) and semantic system colors. |
 | Demo / figure cards | Figures render now. Demo cards show header, title and Download (.html), plus a placeholder until M6. |
@@ -19,14 +19,14 @@ This adds detail to `native-macos-plan.md`. It covers M4 only. M4 is **read-only
 ## Packages
 These are added, pinned `exact:`:
 - `swift-markdown` 0.9.0
-- `SwiftMath` 1.7.3 (`mgriebling/SwiftMath`)
+- MathJax 3.2.2 (`mathjax-full`, Apache-2.0), bundled for JavaScriptCore as `mathjax-svg.js` in `LHResources`. `macos/scripts/build-mathjax.sh` rebuilds it from `macos/scripts/mathjax/entry.js`.
 - `Highlightr` 2.3.0
 - `mermaid` 11.17.0's `mermaid.min.js`, copied from `node_modules` into `LHResources`.
 
 `swift-collections` is not needed yet.
 
 **New targets:**
-- **`LHMarkdown`** (depends on LHCore and swift-markdown). It is pure, with no SwiftUI, and turns message text into a block model:
+- **`LHMarkdown`** (depends on LHCore, LHResources and swift-markdown). It has no SwiftUI. It turns message text into a block model, and typesets TeX through the MathJax engine:
   - `MDBlock`: paragraph, heading, list, quote, alert callout, code fence, mermaid, display math, table, thematic break.
   - `MDInline` runs: text, emphasis, strong, code, link, inline math, line break.
   - It is fully unit-testable.
@@ -51,13 +51,17 @@ These are added, pinned `exact:`:
 - A `mermaid` fence becomes a mermaid block.
 - A blockquote starting `[!NOTE|TIP|IMPORTANT|WARNING|CAUTION]` becomes an alert callout (port of `parseAlertMarker`), with the marker stripped. A standalone marker line drops its empty paragraph.
 
-**4. SwiftMath rendering.**
-- **Inline math** is drawn to an image embedded in `Text`, baseline-aligned and sized to the prose font.
-- **Display math** is a centered block with a hover copy corner that copies the TeX.
-- **Normalizations before SwiftMath:**
-  - `\text{\textdollar}` → `\$`, so the escaped-dollar transform still renders a dollar.
-  - Any other command SwiftMath lacks is listed in the M4 notes as found.
-- **On a parse error**, the raw TeX shows in red mono. This mirrors KaTeX's `throwOnError:false` fallback.
+**4. Math rendering (MathJax → SVG).**
+- **The engine:** MathJax 3.2.2 runs in one shared JavaScriptCore context, with no WebView. It turns TeX into a standalone SVG with glyphs as paths.
+  - It loads once, in about 50 ms. Each expression then takes 0.3–3 ms, synchronously, and results are cached.
+  - Every TeX package is enabled except `autoload`, `require`, `bussproofs` and `noundefined`. Dropping `noundefined` makes an unknown command an error, as it is in KaTeX.
+- **Drawing:** AppKit draws the SVG natively as an `NSImage`. It is a template image, so math takes the surrounding text colour, and it stays vector-sharp at any size.
+  - The size is KaTeX's 1.21 em of the surrounding text.
+  - Geometry comes from the SVG's `viewBox` at 1000 units per em. Its depth below the baseline is how far inline math drops in `Text`.
+- **Table rules:** MathJax normally styles `array` rules and `\hline` with its stylesheet. A standalone SVG has none, so the bundle writes those styles onto the lines.
+- **Inline math** is an image in `Text`, baseline-aligned. **Display math** is a centered block with a hover copy corner that copies the TeX.
+- **Normalization:** the one rewrite is `\text{\textdollar}` / `\textdollar` → `\$`. That is the escaped-dollar form of the TS delimiter transform, which MathJax rejects (nested `\text`).
+- **On a TeX error**, the raw TeX shows in red mono. This mirrors KaTeX's `throwOnError:false` fallback.
 
 **5. SwiftUI block renderer.**
 - Each block is its own view; `Text` gets `.textSelection(.enabled)`.
@@ -143,7 +147,7 @@ These are added, pinned `exact:`:
 ## Specs ported
 | TS spec | Swift test |
 |---|---|
-| `render-markdown` | LHMarkdown block-model tests. The delimiter transform cases are already in M1. The rest port: dollar math and legacy compatibility, line breaks, mermaid blocks, bold, escaped dollars, the over-escape heal. Each KaTeX DOM assertion becomes "this TeX reaches `MDInline.math` / display math and SwiftMath parses it without error". |
+| `render-markdown` | LHMarkdown block-model tests. The delimiter transform cases are already in M1. The rest port: dollar math and legacy compatibility, line breaks, mermaid blocks, bold, escaped dollars, the over-escape heal. Each KaTeX DOM assertion becomes "this TeX reaches `MDInline.math` / display math and MathJax typesets it without error". |
 | `render-md-blocks` | Code, mermaid, tables, the display-math copy source, `codeSource`, callouts and `parseAlertMarker`, and plain quotes. Hover and DOM-geometry cases become view-model assertions or are dropped. |
 | `repair-math-display` | The composition cases, which already pass, plus "card inputs go through `repairMathForDisplay` and record and history stay raw". |
 | `session-find` | `findSessionTextMatches`, `stepSessionMatch`, and per-block display-text extraction. The DOM, highlight-API and foreground-layer cases are dropped. |
@@ -162,7 +166,7 @@ These are added, pinned `exact:`:
 
 ## Implementation notes (2026-10-24)
 **Additions:**
-- **LHMarkdown also depends on SwiftMath.** `mathParseError` is the shared validity check the renderer and the tests use.
+- **LHMarkdown** holds the MathJax engine: `MathJax.shared`, `mathParseError` and `normalizedTeX`.
 - **LHCore gains:**
   - `viewPhaseTimeline` / `viewTeachStepIndex`. These are new names, because overloading the native ones was ambiguous on `[]`.
   - `latestTree`, `SessionFind`, `SessionNavigation`, `PanZoom`, `PlanLayout`.
@@ -170,41 +174,13 @@ These are added, pinned `exact:`:
   - The two TS slugs: `slugFilename` and `sessionExportSlug`.
   - `QuestionAnswerData(json:)`.
 
-**SwiftMath normalizations** (`normalizedTeX`):
-- **Rewritten:**
-  - `\tfrac` / `\dfrac` / `\cfrac` → `\frac`
-  - `\lVert` / `\rVert` / `\lvert` / `\rvert`
-  - `\varnothing`
-  - `\implies` / `\impliedby`
-  - `\dots`
-  - `\iint` / `\iiint` / `\smallint`
-  - `\longmapsto`
-  - `\boldsymbol` / `\bm` → `\mathbf`
-  - `\emph`
-  - `\mathop`
-  - `\Box`
-  - `\:` / `\>`
-  - `\operatorname{…}` / `\operatorname*{…}` → `\mathrm{…}`
-  - `\pmod{…}`
-  - `\tag{…}`
-  - `\phantom{…}` (dropped)
-  - `\hspace{…}` → `\quad`
-  - the `\big` … `\Bigg` sizers (dropped)
-  - `align(*)` → `aligned`
-  - `gather(ed)` → `matrix`
-  - `equation(*)` (unwrapped)
-  - `\textdollar` → `\$`
-- **Known gaps** (shown as red raw TeX):
-  - `\underbrace`, `\overset` / `\underset` / `\stackrel`
-  - `\xrightarrow`, `\overrightarrow`
-  - `\boxed`, `\cancel`
-  - the `array` environment and `\hline`
-  - `\checkmark`, `\vdash`
-
-  `MathTeXTests` pins both lists.
+**Math, revised after review (2026-10-24):**
+- **Why SwiftMath went:** it fell short on coverage, and you saw math cut off below its top half. The likely cause, not verified because the code is gone: the drawing assumed SwiftMath had placed the formula's baseline at its descent, and nothing guaranteed that.
+- **What replaced it:** MathJax in JavaScriptCore (above), prototyped first. It typesets everything that was a SwiftMath gap: `\underbrace`, `\overset`, `\stackrel`, `\xrightarrow`, `\boxed`, `\cancel`, `array` with `\hline` and dashed rules, `\checkmark`, `\vdash`. It needs no rewrite table. `MathTeXTests` pins this coverage.
+- **Version caveat:** `mathjax-full` 3.x is deprecated upstream in favour of v4 (`@mathjax/src`). v4 loads its fonts asynchronously, which suits JavaScriptCore less well, so 3.2.2 stays until that is worked out.
+- **Clipping fix:** horizontal scroll views (display math, code, tables) now take their content's height. Hosted tests measure the ink drawn in a real window against the bare image, and a deliberately clipped control shows that the measurement catches a clip.
 
 **Behaviour to know:**
-- **Math colour:** math images are template images, so they take the surrounding text colour (muted, red).
 - **Mermaid theme:** it follows the appearance: `default` in light, `dark` in dark. The TS app was dark-only.
 - **Find** searches content: prose, user text, open thinking, card questions, options, verdicts and briefs. It does not search the chrome labels (YOU, CHECK…). A match scrolls its row into view near the top.
 - **Plan diagram:** the arrowhead is a simplified barbed head, not the TS SVG path. Long edges route through dummy-node waypoints.

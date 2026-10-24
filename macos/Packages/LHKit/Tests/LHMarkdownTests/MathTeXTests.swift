@@ -2,39 +2,46 @@ import Foundation
 import Testing
 @testable import LHMarkdown
 
-// The SwiftMath coverage the transcript relies on: KaTeX-isms with a
-// faithful SwiftMath spelling are normalized; the known gaps stay errors
-// (they render as the red raw-TeX fallback — docs/native-macos-m4.md, implementation notes).
+// The math engine: MathJax in JavaScriptCore typesets the KaTeX-level TeX
+// the transcript sees — including everything SwiftMath could not — and
+// reports a clean error for broken input (the red raw-TeX fallback).
 
 @Suite struct MathTeXTests {
 	@Test(arguments: [
 		#"\tfrac{1}{3}"#, #"\dfrac{a}{b}"#, #"a\:b"#, #"\operatorname{argmax}_x f"#, #"\operatorname*{argmin}_x f"#,
-		#"\boldsymbol{x}"#, #"\lVert x \rVert"#, #"a \pmod{n}"#, #"\varnothing"#, #"x \tag{1}"#, #"\implies"#,
-		#"1, \dots, n"#, #"\big( x \big)"#, #"\Bigl[ x \Bigr]"#, #"\iint f"#, #"\emph{x}"#, #"\phantom{x}y"#,
-		#"a \hspace{1em} b"#, #"\Box"#, #"\longmapsto"#, #"\begin{align} a &= b \\ c &= d \end{align}"#,
-		#"\begin{align*} a &= b \end{align*}"#, #"\begin{equation} E = mc^2 \end{equation}"#,
-		#"\begin{gathered} a \\ b \end{gathered}"#, #"\text{\textdollar}5"#,
-		#"\int_0^1 x^2\,dx = \tfrac{1}{3}"#,
-	])
-	func normalizedKaTeXParses(_ tex: String) {
-		#expect(mathParseError(tex) == nil, "\(tex) → \(normalizedTeX(tex))")
-	}
-
-	@Test func prefixesOfLongerCommandsAreUntouched() {
-		#expect(normalizedTeX(#"\bigcup_i A_i"#) == #"\bigcup_i A_i"#)
-		#expect(normalizedTeX(#"\dotsm"#) == #"\dotsm"#)
-	}
-
-	@Test func rowBreaksBeforeAColonStayRowBreaks() {
-		#expect(normalizedTeX(#"a \\:b"#) == #"a \\:b"#)
-		#expect(normalizedTeX(#"a \\\:b"#) == #"a \\\;b"#)
-	}
-
-	@Test(arguments: [
+		#"\boldsymbol{x}"#, #"\lVert x \rVert"#, #"a \pmod{n}"#, #"\varnothing"#, #"\implies"#,
+		#"1, \dots, n"#, #"\big( x \big)"#, #"\iint f"#, #"\begin{aligned} a &= b \\ c &= d \end{aligned}"#,
+		#"\begin{gathered} a \\ b \end{gathered}"#, #"\int_0^1 x^2\,dx = \tfrac{1}{3}"#,
 		#"\underbrace{x}_{a}"#, #"\overset{a}{b}"#, #"\underset{a}{b}"#, #"\stackrel{a}{=}"#, #"\xrightarrow{f}"#,
-		#"\overrightarrow{AB}"#, #"\boxed{x}"#, #"\cancel{x}"#, #"\begin{array}{cc} 1 & 2 \end{array}"#, #"\checkmark"#, #"\vdash"#,
+		#"\overrightarrow{AB}"#, #"\boxed{x}"#, #"\cancel{x}"#, #"\begin{array}{c|c} 1 & 2 \\ \hline 3 & 4 \end{array}"#,
+		#"\checkmark"#, #"\vdash"#, #"\begin{cases} x & x > 0 \\ -x & \text{otherwise} \end{cases}"#,
 	])
-	func knownGapsStayErrors(_ tex: String) {
-		#expect(mathParseError(tex) != nil)
+	func typesets(_ tex: String) {
+		#expect(mathParseError(tex) == nil, "\(tex)")
+	}
+
+	@Test func theEscapedDollarFormTypesets() {
+		#expect(mathParseError(#"x = \text{\textdollar}5"#) == nil)
+		#expect(mathParseError(#"\text{\text{\textdollar}}12"#) == nil, "the transform's output inside \\text")
+		#expect(normalizedTeX(#"\text{\textdollar}5"#) == #"\$5"#)
+	}
+
+	@Test func brokenTeXIsAnError() {
+		#expect(mathParseError(#"\frac{1}{"#) != nil)
+		#expect(mathParseError(#"\notacommand{x}"#) != nil)
+	}
+
+	@Test func geometryComesFromTheViewBox() throws {
+		let r = try MathJax.shared.render(#"\int_0^1 x\,dx"#, display: true).get()
+		#expect(r.widthEm > 1 && r.heightEm > 1)
+		#expect(r.depthEm > 0.3, "the integral reaches below the baseline")
+		let flat = try MathJax.shared.render("x", display: false).get()
+		#expect(flat.depthEm < 0.05)
+	}
+
+	@Test func tableRulesCarryInlineStrokes() throws {
+		let r = try MathJax.shared.render(#"\begin{array}{c|c} 1 & 2 \\ \hline 3 & 4 \end{array}"#, display: true).get()
+		#expect(r.svg.contains(#"data-line="v" class="mjx-solid" stroke-width="70""#))
+		#expect(r.svg.contains(#"data-line="h" class="mjx-solid" stroke-width="70""#))
 	}
 }

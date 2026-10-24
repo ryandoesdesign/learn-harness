@@ -1,120 +1,113 @@
 import Foundation
-import SwiftMath
+import JavaScriptCore
+import LHResources
 
-// The SwiftMath seam (docs/native-macos-m4.md: native math, KaTeX dropped).
-// `normalizedTeX` rewrites the KaTeX-isms that have a faithful SwiftMath
-// spelling; anything else SwiftMath rejects renders as the red raw-TeX
-// fallback. `mathParseError` is the validity check the renderer and the
-// tests share (nil = SwiftMath typesets it).
+// The math engine (docs/native-macos-m4.md, implementation notes): MathJax
+// 3.2.2 in JavaScriptCore turns TeX into a standalone SVG — glyphs as
+// paths, no fonts, no DOM, no WebView — which AppKit draws natively, so
+// math stays vector-sharp at any size. Synchronous: ~1–3 ms per expression
+// after a one-time ~50 ms load.
 
-/// Plain spelling swaps (KaTeX command → SwiftMath command).
-private let renames: [(String, String)] = [
-	("\\tfrac", "\\frac"), ("\\dfrac", "\\frac"), ("\\cfrac", "\\frac"),
-	("\\lVert", "\\|"), ("\\rVert", "\\|"), ("\\lvert", "|"), ("\\rvert", "|"),
-	("\\varnothing", "\\emptyset"),
-	("\\implies", "\\Longrightarrow"), ("\\impliedby", "\\Longleftarrow"),
-	("\\dots", "\\ldots"), ("\\dotsc", "\\ldots"), ("\\dotsb", "\\cdots"),
-	("\\iiint", "\\int\\!\\!\\int\\!\\!\\int"), ("\\iint", "\\int\\!\\!\\int"),
-	("\\smallint", "\\int"), ("\\longmapsto", "\\mapsto"),
-	("\\boldsymbol", "\\mathbf"), ("\\bm", "\\mathbf"), ("\\emph", "\\textit"),
-	("\\mathop", "\\mathrm"), ("\\Box", "\\square"),
-	("\\:", "\\;"), ("\\>", "\\;"),
-]
+/// One typeset expression. Geometry is in em (MathJax's 1000 units per em):
+/// multiply by the font size for points.
+public struct MathSVG: Sendable, Hashable {
+	public var svg: String
+	public var widthEm: Double
+	public var heightEm: Double
+	/// How far the expression reaches below the baseline.
+	public var depthEm: Double
+}
 
-/// Size prefixes on delimiters (`\big(` …): SwiftMath has none — dropped.
-private let sizers = ["\\Biggl", "\\Biggr", "\\Bigg", "\\biggl", "\\biggr", "\\bigg", "\\Bigl", "\\Bigr", "\\Big", "\\bigl", "\\bigr", "\\big"]
+public enum MathRenderError: Error, Sendable, Hashable, CustomStringConvertible {
+	case tex(String)
+	case engine(String)
+	public var description: String {
+		switch self {
+		case .tex(let m): m
+		case .engine(let m): "Math engine unavailable: \(m)"
+		}
+	}
+}
 
-/// Environments with a SwiftMath equivalent.
-private let environments: [(String, String?)] = [
-	("align*", "aligned"), ("align", "aligned"), ("gather*", "matrix"), ("gather", "matrix"), ("gathered", "matrix"),
-	("equation*", nil), ("equation", nil),
-]
-
-/// KaTeX-only spellings → SwiftMath equivalents.
+/// KaTeX-isms the TS pipeline emits that MathJax spells differently:
+/// transformMathDelimiters' escaped-dollar form `\text{\textdollar}` →
+/// `\$`, which MathJax accepts in math AND text mode (the transform also
+/// wraps dollars already inside `\text{…}`, and MathJax rejects nested
+/// `\text`).
 public func normalizedTeX(_ tex: String) -> String {
-	var t = tex
-	// transformMathDelimiters' escaped-dollar form (`\$` inside inline math).
-	t = t.replacingOccurrences(of: "\\text{\\textdollar}", with: "\\$")
-	t = t.replacingOccurrences(of: "\\textdollar", with: "\\$")
-	t = rewriteCommandWithArgument(t, "\\operatorname*") { "\\mathrm{\($0)}" }
-	t = rewriteCommandWithArgument(t, "\\operatorname") { "\\mathrm{\($0)}" }
-	t = rewriteCommandWithArgument(t, "\\pmod") { "\\;(\\mathrm{mod}\\;\($0))" }
-	t = rewriteCommandWithArgument(t, "\\tag") { "\\quad(\($0))" }
-	t = rewriteCommandWithArgument(t, "\\phantom") { _ in "" }
-	t = rewriteCommandWithArgument(t, "\\hspace") { _ in "\\quad" }
-	for (from, to) in renames { t = replaceCommand(t, from, to) }
-	for s in sizers { t = replaceCommand(t, s, "") }
-	for (env, to) in environments {
-		t = t.replacingOccurrences(of: "\\begin{\(env)}", with: to.map { "\\begin{\($0)}" } ?? "")
-		t = t.replacingOccurrences(of: "\\end{\(env)}", with: to.map { "\\end{\($0)}" } ?? "")
-	}
-	return t
+	tex.replacingOccurrences(of: "\\text{\\textdollar}", with: "\\$")
+		.replacingOccurrences(of: "\\textdollar", with: "\\$")
 }
 
-/// SwiftMath's parse error for `tex` (after normalization), or nil.
+/// The shared engine. JSContext is single-threaded; a lock serializes calls,
+/// and results are cached by (TeX, display).
+public final class MathJax: @unchecked Sendable {
+	public static let shared = MathJax()
+
+	private let lock = NSLock()
+	private var context: JSContext?
+	private var convert: JSValue?
+	private var loadError: String?
+	private var cache: [Key: Result<MathSVG, MathRenderError>] = [:]
+
+	private struct Key: Hashable {
+		var tex: String
+		var display: Bool
+	}
+
+	private init() {}
+
+	public func render(_ tex: String, display: Bool) -> Result<MathSVG, MathRenderError> {
+		lock.lock()
+		defer { lock.unlock() }
+		let key = Key(tex: tex, display: display)
+		if let hit = cache[key] { return hit }
+		let result = typeset(normalizedTeX(tex), display: display)
+		if cache.count > 5000 { cache.removeAll() }
+		cache[key] = result
+		return result
+	}
+
+	private func load() {
+		guard context == nil, loadError == nil else { return }
+		guard let ctx = JSContext() else { loadError = "No JavaScript context"; return }
+		var thrown: String?
+		ctx.exceptionHandler = { _, e in thrown = e?.toString() }
+		do {
+			ctx.evaluateScript(try LHResources.mathJaxJS)
+		} catch {
+			loadError = "\(error)"
+			return
+		}
+		if let thrown { loadError = thrown; return }
+		guard let fn = ctx.objectForKeyedSubscript("lhTex2Svg"), !fn.isUndefined else { loadError = "lhTex2Svg missing"; return }
+		context = ctx
+		convert = fn
+	}
+
+	private func typeset(_ tex: String, display: Bool) -> Result<MathSVG, MathRenderError> {
+		load()
+		guard let convert else { return .failure(.engine(loadError ?? "not loaded")) }
+		guard let r = convert.call(withArguments: [tex, display]) else { return .failure(.engine("no result")) }
+		if let err = r.forProperty("error"), !err.isNull, !err.isUndefined { return .failure(.tex(err.toString())) }
+		guard let svg = r.forProperty("svg")?.toString(), let geometry = svgGeometry(svg) else { return .failure(.engine("no svg")) }
+		return .success(MathSVG(svg: svg, widthEm: geometry.width, heightEm: geometry.height, depthEm: geometry.depth))
+	}
+}
+
+/// The root viewBox `minX minY w h` (1000 units per em): the baseline is
+/// y = 0, so the depth below it is minY + h.
+func svgGeometry(_ svg: String) -> (width: Double, height: Double, depth: Double)? {
+	guard let m = svg.firstMatch(of: /<svg\b[^>]*?\bviewBox="([-\d.]+) ([-\d.]+) ([-\d.]+) ([-\d.]+)"/),
+	      let minY = Double(m.2), let w = Double(m.3), let h = Double(m.4)
+	else { return nil }
+	return (w / 1000, h / 1000, max(0, (minY + h) / 1000))
+}
+
+/// MathJax's error for `tex`, or nil when it typesets.
 public func mathParseError(_ tex: String) -> String? {
-	var error: NSError?
-	let list = MTMathListBuilder.build(fromString: normalizedTeX(tex), error: &error)
-	if let error { return error.localizedDescription }
-	return list == nil ? "Unparseable math" : nil
-}
-
-/// Replace a control word only where it ends (not a prefix of a longer
-/// command: `\big` must not hit `\bigcup`). Control symbols (`\:`) always match.
-private func replaceCommand(_ s: String, _ command: String, _ replacement: String) -> String {
-	guard s.contains(command) else { return s }
-	let isWord = command.last?.isLetter == true
-	var out = ""
-	var rest = Substring(s)
-	while let r = rest.range(of: command) {
-		let after = rest[r.upperBound...].first
-		// An odd run of backslashes before the match means its own backslash
-		// closes a `\\` row break — not a command.
-		var run = 0
-		var k = r.lowerBound
-		while k > rest.startIndex, rest[rest.index(before: k)] == "\\" { run += 1; k = rest.index(before: k) }
-		if k == rest.startIndex, out.hasSuffix("\\") { run += out.reversed().prefix { $0 == "\\" }.count }
-		let precededByBackslash = run % 2 == 1
-		if (isWord && after?.isLetter == true) || precededByBackslash {
-			out += rest[..<r.upperBound]
-		} else {
-			out += rest[..<r.lowerBound] + replacement
-		}
-		rest = rest[r.upperBound...]
+	switch MathJax.shared.render(tex, display: false) {
+	case .success: nil
+	case .failure(let e): e.description
 	}
-	return out + rest
-}
-
-/// `\cmd{arg}` → transform(arg), brace-balanced; a missing brace leaves it.
-private func rewriteCommandWithArgument(_ s: String, _ command: String, _ transform: (String) -> String) -> String {
-	guard s.contains(command) else { return s }
-	var out = ""
-	var rest = Substring(s)
-	while let r = rest.range(of: command) {
-		var i = r.upperBound
-		if command.last?.isLetter == true, i < rest.endIndex, rest[i].isLetter || rest[i] == "*" {
-			out += rest[..<i]
-			rest = rest[i...]
-			continue
-		}
-		while i < rest.endIndex, rest[i] == " " { i = rest.index(after: i) }
-		guard i < rest.endIndex, rest[i] == "{" else {
-			out += rest[..<r.upperBound]
-			rest = rest[r.upperBound...]
-			continue
-		}
-		var depth = 0
-		var j = i
-		var close: Substring.Index?
-		while j < rest.endIndex {
-			if rest[j] == "\\" { j = rest.index(after: j); if j < rest.endIndex { j = rest.index(after: j) }; continue }
-			if rest[j] == "{" { depth += 1 }
-			if rest[j] == "}" { depth -= 1; if depth == 0 { close = j; break } }
-			j = rest.index(after: j)
-		}
-		guard let close else { out += rest; return out }
-		out += rest[..<r.lowerBound] + transform(String(rest[rest.index(after: i)..<close]))
-		rest = rest[rest.index(after: close)...]
-	}
-	return out + rest
 }

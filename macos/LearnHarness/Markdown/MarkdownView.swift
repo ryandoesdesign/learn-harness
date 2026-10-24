@@ -106,7 +106,7 @@ struct BlockView: View {
 }
 
 /// One unit's inline runs as a single selectable Text: math as baseline-
-/// aligned template images (raw red TeX when SwiftMath can't parse it),
+/// aligned template images (raw red TeX when MathJax can't typeset it),
 /// inline code as the muted pill, find highlights as backgrounds.
 struct InlineText: View {
 	var runs: [MDInline]
@@ -335,6 +335,7 @@ struct TableBlock: View {
 			}
 		}
 		.scrollIndicators(.automatic)
+		.fixedSize(horizontal: false, vertical: true)
 		.copyCorner(label: "Copy table") { tableMarkdown() }
 	}
 
@@ -380,7 +381,7 @@ struct DisplayMathView: View {
 		Group {
 			if !closed {
 				ProgressView().controlSize(.small).frame(maxWidth: .infinity)
-			} else if let r = MathImage.render(tex, size: fontSize * 1.1, display: true) {
+			} else if let r = MathImage.render(tex, size: fontSize, display: true) {
 				ScrollView(.horizontal) {
 					Image(nsImage: r.image)
 						.foregroundStyle(.primary)
@@ -388,6 +389,7 @@ struct DisplayMathView: View {
 						.frame(maxWidth: .infinity)
 				}
 				.scrollIndicators(.never)
+				.fixedSize(horizontal: false, vertical: true)
 			} else {
 				Text(tex)
 					.font(.system(size: fontSize * 0.85, design: .monospaced))
@@ -431,6 +433,7 @@ struct CodeBlockView: View {
 			}
 			.padding(12)
 		}
+		.fixedSize(horizontal: false, vertical: true)
 		.background(RoundedRectangle(cornerRadius: 8).fill(Theme.mutedFill))
 		.copyCorner(label: "Copy code") { source }
 	}

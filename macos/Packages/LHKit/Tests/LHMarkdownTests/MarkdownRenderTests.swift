@@ -6,7 +6,7 @@ import Testing
 // Port of tests/render-markdown.test.tsx and tests/render-md-blocks.test.tsx
 // to the block model. A KaTeX DOM assertion ("renders katex", "no
 // katex-error") becomes "the TeX reaches MDInline.math / displayMath and
-// SwiftMath parses it". Hover/DOM-geometry cases have no native analogue.
+// MathJax typesets it". Hover/DOM-geometry cases have no native analogue.
 
 private func parse(_ s: String) -> [MDBlock] { parseMessageMarkdown(s) }
 
