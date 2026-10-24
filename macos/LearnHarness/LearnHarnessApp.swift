@@ -3,20 +3,44 @@ import SwiftUI
 
 @main
 struct LearnHarnessApp: App {
-	@State private var model = AppModel()
+	@State private var model = Self.makeModel()
+
+	private static func makeModel() -> AppModel {
+		#if DEBUG
+		// `-LHScratch YES`: a throwaway database in the container's temp
+		// folder, so debug checks never touch the real library.
+		if UserDefaults.standard.bool(forKey: "LHScratch") {
+			let dir = FileManager.default.temporaryDirectory.appending(path: "lh-scratch-\(UUID().uuidString)", directoryHint: .isDirectory)
+			return AppModel(dataDirectory: dir)
+		}
+		#endif
+		return AppModel()
+	}
 
 	var body: some Scene {
 		WindowGroup {
 			RootView(model: model)
 				.task { await model.observeSessions() }
+				#if DEBUG
+				// `-LHOpenGallery YES` (with -LHScratch): open the Render Gallery.
+				.task { if UserDefaults.standard.bool(forKey: "LHOpenGallery"), UserDefaults.standard.bool(forKey: "LHScratch") { model.addRenderGallery() } }
+				#endif
 		}
 		.commands {
 			CommandGroup(after: .newItem) {
 				Divider()
 				ImportCommand(model: model)
+				ExportCommand(model: model)
+			}
+			CommandGroup(after: .textEditing) {
+				Divider()
+				FindCommands()
 			}
 			#if DEBUG
-			CommandMenu("Debug") { PlaygroundCommand() }
+			CommandMenu("Debug") {
+				PlaygroundCommand()
+				Button("Add Render Gallery Session") { model.addRenderGallery() }
+			}
 			#endif
 		}
 		#if DEBUG

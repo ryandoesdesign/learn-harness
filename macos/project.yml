@@ -20,6 +20,9 @@ settings:
 packages:
   LHKit:
     path: Packages/LHKit
+  Highlightr:
+    url: https://github.com/raspu/Highlightr
+    exactVersion: 2.3.0
 targets:
   LearnHarness:
     type: application
@@ -38,6 +41,11 @@ targets:
         product: LHAnthropic
       - package: LHKit
         product: LHAgent
+      - package: LHKit
+        product: LHMarkdown
+      - package: LHKit
+        product: LHWeb
+      - package: Highlightr
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryandoesdesign.LearnHarness
@@ -54,7 +62,12 @@ targets:
   LearnHarnessTests:
     type: bundle.unit-test
     platform: macOS
-    sources: [LearnHarnessTests]
+    sources:
+      - LearnHarnessTests
+      # The golden chats, readable inside the sandboxed host.
+      - path: ../tests/fixtures/golden-data/chats
+        type: folder
+        buildPhase: resources
     dependencies:
       - target: LearnHarness
     settings:
@@ -79,3 +92,5 @@ schemes:
         - package: LHKit/LHImportTests
         - package: LHKit/LHAnthropicTests
         - package: LHKit/LHAgentTests
+        - package: LHKit/LHMarkdownTests
+        - package: LHKit/LHWebTests

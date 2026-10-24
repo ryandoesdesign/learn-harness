@@ -241,6 +241,10 @@ public struct QuestionAnswerData: Sendable, Hashable {
 	public struct OptionSnapshot: Sendable, Hashable {
 		public var index: Int
 		public var label: String
+		public init(index: Int, label: String) {
+			self.index = index
+			self.label = label
+		}
 	}
 
 	public var kind: QuestionKind
@@ -277,6 +281,39 @@ public struct QuestionAnswerData: Sendable, Hashable {
 		self.dontKnow = dontKnow
 		self.answers = answers
 		self.answeredAt = answeredAt
+	}
+
+	/// Read a stored record (an answer toolResult's `details`); nil when
+	/// the shape isn't an answer.
+	public init?(json: JSONValue) {
+		guard let kind = json["kind"]?.stringValue.flatMap(QuestionKind.init(rawValue:)),
+		      let questionText = json["questionText"]?.stringValue
+		else { return nil }
+		self.kind = kind
+		self.questionText = questionText
+		dontKnow = json["dontKnow"]?.boolValue ?? false
+		answers = (json["answers"]?.arrayValue ?? []).compactMap { a in
+			guard let index = a["index"]?.intValue else { return nil }
+			return OptionAnswer(label: a["label"]?.stringValue ?? "", value: a["value"]?.stringValue ?? "", index: index)
+		}
+		answeredAt = json["answeredAt"]?.stringValue ?? ""
+		tool = json["tool"]?.stringValue
+		questionType = json["questionType"]?.stringValue.flatMap(QuizQuestionType.init(rawValue:))
+		options = json["options"]?.arrayValue?.compactMap { o in
+			guard let index = o["index"]?.intValue else { return nil }
+			return OptionSnapshot(index: index, label: o["label"]?.stringValue ?? "")
+		}
+		other = json["other"]?.stringValue
+		text = json["text"]?.stringValue
+		thinking = json["thinking"]?.stringValue
+		note = json["note"]?.stringValue
+		readingThinking = json["readingThinking"]?.stringValue
+		confidence = json["confidence"]?.doubleValue
+		correct = json["correct"]?.boolValue
+		correctIndices = json["correctIndices"]?.arrayValue?.compactMap(\.intValue)
+		committed = json["committed"]?.stringValue
+		explanation = json["explanation"]?.stringValue
+		dismissed = json["dismissed"]?.boolValue
 	}
 
 	/// The record JSON, keyed in the TS construction order.

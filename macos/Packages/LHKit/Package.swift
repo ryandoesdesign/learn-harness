@@ -11,14 +11,18 @@ let package = Package(
 		.library(name: "LHImport", targets: ["LHImport"]),
 		.library(name: "LHAnthropic", targets: ["LHAnthropic"]),
 		.library(name: "LHAgent", targets: ["LHAgent"]),
+		.library(name: "LHMarkdown", targets: ["LHMarkdown"]),
+		.library(name: "LHWeb", targets: ["LHWeb"]),
 	],
 	dependencies: [
 		.package(url: "https://github.com/groue/GRDB.swift.git", exact: "7.11.1"),
+		.package(url: "https://github.com/swiftlang/swift-markdown.git", exact: "0.9.0"),
+		.package(url: "https://github.com/mgriebling/SwiftMath.git", exact: "1.7.3"),
 	],
 	targets: [
 		// Pure domain ports of src/core — Foundation + CryptoKit only.
 		.target(name: "LHCore"),
-		.target(name: "LHResources", resources: [.copy("Resources/models.json")]),
+		.target(name: "LHResources", resources: [.copy("Resources/models.json"), .copy("Resources/mermaid.min.js")]),
 		// GRDB schema/migrations/repositories, Keychain, security-scoped bookmarks.
 		.target(name: "LHStore", dependencies: ["LHCore", .product(name: "GRDB", package: "GRDB.swift")]),
 		// One-time importer from the TS app's data dir.
@@ -27,6 +31,16 @@ let package = Package(
 		.target(name: "LHAnthropic", dependencies: ["LHCore"]),
 		// Agent loop, wire projection, tools, session engine.
 		.target(name: "LHAgent", dependencies: ["LHCore", "LHAnthropic"]),
+		// Message text → block model (math split out, GFM, mermaid, callouts).
+		.target(name: "LHMarkdown", dependencies: [
+			"LHCore",
+			.product(name: "Markdown", package: "swift-markdown"),
+			.product(name: "SwiftMath", package: "SwiftMath"),
+		]),
+		// The shared hidden WKWebView: mermaid and figure snapshots, live diagram overlay.
+		.target(name: "LHWeb", dependencies: ["LHCore", "LHResources"]),
+		.testTarget(name: "LHMarkdownTests", dependencies: ["LHMarkdown", "LHCore"]),
+		.testTarget(name: "LHWebTests", dependencies: ["LHWeb"]),
 		.testTarget(name: "LHAnthropicTests", dependencies: ["LHAnthropic", "LHCore"], resources: [.copy("Fixtures")]),
 		.testTarget(name: "LHAgentTests", dependencies: ["LHAgent", "LHAnthropic", "LHCore"], resources: [.copy("Fixtures")]),
 		.testTarget(name: "LHStoreTests", dependencies: ["LHStore", "LHCore"]),
