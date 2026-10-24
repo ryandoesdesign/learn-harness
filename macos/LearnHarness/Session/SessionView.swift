@@ -3,7 +3,7 @@ import LHMarkdown
 import LHWeb
 import SwiftUI
 
-/// One session: toolbar (title — click to rename —, PLAN, phase), the Find
+/// One session: toolbar (title — click to rename —, PLAN, coverage), the Find
 /// bar, the transcript with the pinned dock, the bottom status bar, the
 /// session-scoped overlays, and the layered Esc (overlays first, then
 /// "Dismiss this question?", then "Abort this turn?").
@@ -57,19 +57,6 @@ struct SessionView: View {
 					.help("Open the plan")
 				}
 				if !session.isPractice { CoverageRing(chatId: session.chatId) }
-				if session.isPractice {
-					Label("Practice", systemImage: "dumbbell")
-						.labelStyle(.titleAndIcon)
-						.font(Theme.uiMedium)
-						.foregroundStyle(Theme.muted)
-						.allowsHitTesting(false)
-				} else {
-					Text(phaseLabel(session.phase).uppercased())
-						.font(Theme.uiMedium)
-						.tracking(0.6)
-						.foregroundStyle(Theme.muted)
-						.allowsHitTesting(false)
-				}
 			}
 		}
 		.onExitCommand(perform: escape)
@@ -358,7 +345,10 @@ struct StatusBar: View {
 		VStack(spacing: 0) {
 			Divider()
 			HStack {
+				// The session's mode (your call, 2026-10-24: moved from the toolbar).
+				ModeIndicator(session: session)
 				if !turns.isEmpty {
+					Text("·").font(Theme.ui).foregroundStyle(Theme.faint)
 					let cost = sessionCost(turns, catalog: session.catalog)
 					let ctx = contextWindow(turns, catalog: session.catalog)
 					Button { open.toggle() } label: {
@@ -378,6 +368,25 @@ struct StatusBar: View {
 			.padding(.horizontal, 12)
 			.frame(height: 28)
 		}
+	}
+}
+
+/// The phase (PROBING / PLANNING / TEACHING) or PRACTICE, at the far left of
+/// the status bar.
+struct ModeIndicator: View {
+	var session: SessionModel
+	var body: some View {
+		Group {
+			if session.isPractice {
+				Label("PRACTICE", systemImage: "dumbbell").labelStyle(.titleAndIcon)
+			} else {
+				Text(phaseLabel(session.phase).uppercased())
+			}
+		}
+		.font(Theme.uiMedium)
+		.tracking(0.6)
+		.foregroundStyle(Theme.muted)
+		.accessibilityLabel(session.isPractice ? "Practice session" : "Phase: \(phaseLabel(session.phase))")
 	}
 }
 
