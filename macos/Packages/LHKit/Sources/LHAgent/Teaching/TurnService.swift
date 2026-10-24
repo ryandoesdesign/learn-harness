@@ -61,7 +61,7 @@ public actor TurnService {
 	public let coordinator = TurnCoordinator()
 	let compaction: CompactionService
 
-	private var parkedDismissals: [String: (toolCallId: String, answer: QuestionAnswerData)] = [:]
+	private var parkedDismissals: [String: DismissInput] = [:]
 	private var handoffQueued: Set<String> = []
 	private var subscribers: [UUID: AsyncStream<Event>.Continuation] = [:]
 	private var running: Set<String> = []
@@ -171,18 +171,42 @@ public actor TurnService {
 	/// Dismiss the open question (no turn). Mid-turn it is parked and applied
 	/// at settle (dismissal-park.ts).
 	public func dismiss(_ chatId: String, toolCallId: String, answer: QuestionAnswerData) throws(Refusal) {
+		try dismiss(chatId, .dismiss(toolCallId: toolCallId, answer: answer))
+	}
+
+	/// Discard the active practice problem (no turn; parked mid-turn).
+	public func dismissProblem(_ chatId: String, problemCallId: String) throws(Refusal) {
+		try dismiss(chatId, .dismissProblem(problemCallId: problemCallId))
+	}
+
+	private func dismiss(_ chatId: String, _ input: DismissInput) throws(Refusal) {
 		if running.contains(chatId) {
-			parkedDismissals[chatId] = (toolCallId, answer)
+			parkedDismissals[chatId] = input
 			return
 		}
 		let repo = ChatRepository(database)
 		guard let record = (try? repo.get(chatId)) ?? nil else { throw .noChat }
 		do {
-			let appends = try dismissAppends(record.messages, .dismiss(toolCallId: toolCallId, answer: answer))
+			let appends = try dismissAppends(record.messages, input)
 			try? repo.append(appends, to: chatId)
 		} catch {
 			throw .invalid(error.message)
 		}
+	}
+
+	/// The learner's thinking on the active problem (docs/native-macos-m8.md):
+	/// mid-turn it is a steer, delivered to the running loop like a teaching
+	/// steer; with no turn running it is a plain send.
+	public func submitThinking(_ chatId: String, problemCallId: String, text: String) async throws(Refusal) -> SteerResult {
+		guard running.contains(chatId) else {
+			try await send(chatId, .thinking(problemCallId: problemCallId, text: text))
+			return .sent
+		}
+		guard !text.jsTrimmed.isEmpty else { throw .invalid("thinking input requires non-empty text") }
+		let message = newThinkingMessage(problemCallId: problemCallId, text: text, id: "steer_\(MessageID.mint())")
+		try? SteerOutboxRepository(database).enqueue(message, chatId: chatId)
+		await handOff(chatId, [message])
+		return .queued(id: message.id)
 	}
 
 	/// The remote kill: the partial is recorded as aborted.
@@ -258,7 +282,7 @@ public actor TurnService {
 		if needsContinuation(messages) { return true }
 		switch last.body {
 		case .user: return true
-		case .marker(let m): return m.kind == .probeHandoff || m.kind == .subagentSteer || m.kind == .subagentAbort
+		case .marker(let m): return m.kind == .probeHandoff || m.kind == .subagentSteer || m.kind == .subagentAbort || m.kind == .practiceThinking || m.kind == .practiceNext
 		default: return false
 		}
 	}
@@ -332,7 +356,7 @@ public actor TurnService {
 			try? repo.append(blocks, to: chatId)
 		}
 		if let parked = parkedDismissals.removeValue(forKey: chatId), let record = (try? repo.get(chatId)) ?? nil,
-		   let appends = try? dismissAppends(record.messages, .dismiss(toolCallId: parked.toolCallId, answer: parked.answer))
+		   let appends = try? dismissAppends(record.messages, parked)
 		{
 			try? repo.append(appends, to: chatId)
 		}
@@ -367,7 +391,7 @@ public actor TurnService {
 
 	// MARK: - Agent construction
 
-	/// The prober or teacher config for this record (teacher-agent.ts).
+	/// The prober, teacher or practice config for this record (teacher-agent.ts).
 	func agentConfig(_ record: ChatRecord) -> AgentConfig {
 		let settings = (try? SettingsRepository(database).read()) ?? nil
 		let spec = conversationSpec(record, settings)
@@ -382,9 +406,19 @@ public actor TurnService {
 		let graph: GraphToolDeps? = graphToolsEnabled(resolveSettings(settings, catalog: catalog))
 			? GraphToolDeps { [database] in GraphDeps(chatStore: ChatRepository(database), graphStore: GraphRepository(database)) }
 			: nil
-		let tools = teaching ? teacherTools(ctx, enabled: enabled, background: wiring)
-			: proberTools(ctx, enabled: enabled, background: wiring, graph: graph)
-		let system = composer(settings).compose(teaching ? .teacher : .prober, tools: Set(tools.map(\.name)))
+		let agent: PromptAgent = record.kind == .practice ? .practice : teaching ? .teacher : .prober
+		let tools: [any AgentTool]
+		switch agent {
+		case .practice:
+			// M8: one agent from the first turn; the gate seeds from the record
+			// as this turn's tools are built (practice.ts createPracticeGate).
+			tools = practiceTools(gate: PracticeGate(messages: record.messages),
+				graphNodes: { [database] in GraphRepository(database).readNodes() },
+				enabled: enabled, background: wiring, graph: graph)
+		case .teacher: tools = teacherTools(ctx, enabled: enabled, background: wiring)
+		case .prober: tools = proberTools(ctx, enabled: enabled, background: wiring, graph: graph)
+		}
+		let system = composer(settings).compose(agent, tools: Set(tools.map(\.name)))
 		let maxTokens = min(64_000, catalog.model(spec.model)?.maxTokens ?? 64_000)
 		return AgentConfig(
 			model: spec.model, effort: spec.effort, system: system, tools: tools,

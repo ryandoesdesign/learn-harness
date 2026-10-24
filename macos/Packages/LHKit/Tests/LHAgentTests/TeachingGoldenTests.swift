@@ -59,6 +59,29 @@ private struct NoGraph: GraphStore {
 	}
 }
 
+/// M8 (docs/native-macos-m8.md): the practice registry against the TS, with
+/// the one recorded schema difference applied to the golden first —
+/// `conclude.outcome` drops `dismissed` (only the app writes it).
+@Suite struct PracticeToolGoldenTests {
+	@Test func definitionsMatchTheTSButForTheRecordedDifference() throws {
+		let tools = practiceTools(gate: PracticeGate(problemActive: false), graphNodes: nil, enabled: nil, background: wiring, graph: graphDeps)
+		var expected = try #require(try golden("tools-practice").arrayValue)
+		let ci = try #require(expected.firstIndex { $0["name"]?.stringValue == "conclude" })
+		var outcome = try #require(expected[ci]["input_schema"]?["properties"]?["outcome"])
+		outcome["anyOf"] = .array((outcome["anyOf"]?.arrayValue ?? []).filter { $0["const"]?.stringValue != "dismissed" })
+		expected[ci]["input_schema"]?["properties"]?["outcome"] = outcome
+		#expect(tools.map(\.name) == expected.compactMap { $0["name"]?.stringValue })
+		for (tool, want) in zip(tools, expected) {
+			#expect(tool.description == want["description"]?.stringValue, "\(tool.name) description")
+			#expect(canonical(tool.schema.json) == canonical(want["input_schema"]!), "\(tool.name) schema")
+		}
+	}
+
+	@Test func thePracticePromptMatchesTheTS() throws {
+		#expect(PromptComposer().compose(.practice, tools: nil) == (try golden("prompt-practice").stringValue))
+	}
+}
+
 @Suite struct PromptComposerGoldenTests {
 	@Test func segmentOrderMatchesTheTS() throws {
 		let g = try golden("prompt-segments")

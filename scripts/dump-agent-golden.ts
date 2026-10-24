@@ -1,7 +1,7 @@
 /**
  * Golden dumps for the native port's agent layer (docs/native-macos-m5.md):
  * the TS teaching-tool definitions (name, description, input schema) for
- * both agents in both quiz mechanics, and the composed system prompts with
+ * both agents in both quiz mechanics, the practice registry (M8), and the composed system prompts with
  * their segment order. LHAgentTests compares the Swift registries and the
  * PromptComposer against these.
  *
@@ -11,6 +11,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createProberTools, createTeacherTools } from "../src/agent/tools.ts";
+import { practiceTools } from "../src/agent/tools/practice.ts";
 import { composeInstructions } from "../src/agent/teacher-agent.ts";
 import { listSourceSegments } from "../src/agent/prompt-segments.ts";
 import { auditorGraphTools } from "../src/agent/tools/graph.ts";
@@ -28,6 +29,7 @@ const TEACHING = new Set([
 	"probe", "recall", "quiz", "explain", "ask_user_question", "probe_done", "plan_init",
 	"research", "demo", "visual", "pdf", "read", "ls", "find", "grep",
 	"list_sessions", "list_propositions",
+	"problem", "conclude",
 ]);
 
 const ctx = {
@@ -63,6 +65,10 @@ const dumps: Record<string, unknown> = {
 			})),
 		],
 	},
+	// M8 (docs/native-macos-m8.md): the practice registry, every optional
+	// tool present (research live, map readers on).
+	"tools-practice": defs(practiceTools({ ...(ctx as object), jobs: ctx, graph: ctx } as never)),
+	"prompt-practice": composeInstructions("practice"),
 	"prompt-prober": composeInstructions("prober"),
 	"prompt-teacher": composeInstructions("teacher"),
 	"prompt-segments": {
