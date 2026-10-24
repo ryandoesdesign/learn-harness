@@ -31,21 +31,36 @@ public struct ChatSettings: Sendable, Hashable, Codable {
 	}
 }
 
-/// One model call's token accounting (nil = not reported; render absent, never zero).
+/// One model call's token accounting, Anthropic-native (docs/native-macos-m3.md):
+/// `inputTokens` is the UNCACHED input only; cache reads and writes are
+/// separate classes. nil = not reported (render absent, never zero).
 public struct CallUsage: Sendable, Hashable, Codable {
-	/// Total input tokens, cached portion included.
+	/// Uncached input tokens (API `input_tokens`).
 	public var inputTokens: Int?
 	public var outputTokens: Int?
+	/// Cache-hit input tokens (`cache_read_input_tokens`).
 	public var cacheReadTokens: Int?
+	/// All cache-write tokens (`cache_creation_input_tokens`), both TTLs.
 	public var cacheWriteTokens: Int?
+	/// The 1-hour-TTL subset of `cacheWriteTokens`.
+	public var cacheWrite1hTokens: Int?
 	public var reasoningTokens: Int?
-	public init(inputTokens: Int? = nil, outputTokens: Int? = nil, cacheReadTokens: Int? = nil, cacheWriteTokens: Int? = nil, reasoningTokens: Int? = nil) {
+	/// Server tool requests (`usage.server_tool_use`).
+	public var webSearchRequests: Int?
+	public var webFetchRequests: Int?
+	public init(inputTokens: Int? = nil, outputTokens: Int? = nil, cacheReadTokens: Int? = nil, cacheWriteTokens: Int? = nil, cacheWrite1hTokens: Int? = nil, reasoningTokens: Int? = nil, webSearchRequests: Int? = nil, webFetchRequests: Int? = nil) {
 		self.inputTokens = inputTokens
 		self.outputTokens = outputTokens
 		self.cacheReadTokens = cacheReadTokens
 		self.cacheWriteTokens = cacheWriteTokens
+		self.cacheWrite1hTokens = cacheWrite1hTokens
 		self.reasoningTokens = reasoningTokens
+		self.webSearchRequests = webSearchRequests
+		self.webFetchRequests = webFetchRequests
 	}
+
+	/// The whole prompt: uncached input + cache reads + cache writes.
+	public var promptTokens: Int { (inputTokens ?? 0) + (cacheReadTokens ?? 0) + (cacheWriteTokens ?? 0) }
 }
 
 /// One billing turn: one full invocation of the conversation agent.

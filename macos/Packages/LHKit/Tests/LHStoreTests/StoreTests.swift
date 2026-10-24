@@ -69,7 +69,7 @@ private func tempDir() throws -> URL {
 		let repo = ChatRepository(try AppDatabase.inMemory())
 		let chat = try repo.createChat(title: "t")
 		let turn = TurnUsage(id: "turn_1", messageId: "m1", at: "2026-01-01T00:00:00.000Z", model: "claude-opus-5-5",
-			steps: [CallUsage(inputTokens: 10, outputTokens: 5, cacheReadTokens: nil, cacheWriteTokens: 2, reasoningTokens: nil)])
+			steps: [CallUsage(inputTokens: 10, outputTokens: 5, cacheReadTokens: nil, cacheWriteTokens: 2, cacheWrite1hTokens: 2, reasoningTokens: nil, webSearchRequests: 1)])
 		try repo.appendTurnUsage(turn, chatId: chat.id)
 		try repo.appendTurnUsage(turn, chatId: chat.id)
 		let run = ExtractionRunUsage(startedAt: 7, at: "x", durationMs: 3, stats: EmissionStats(nodes: 2, chains: 1),

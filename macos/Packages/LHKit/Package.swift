@@ -9,6 +9,8 @@ let package = Package(
 		.library(name: "LHResources", targets: ["LHResources"]),
 		.library(name: "LHStore", targets: ["LHStore"]),
 		.library(name: "LHImport", targets: ["LHImport"]),
+		.library(name: "LHAnthropic", targets: ["LHAnthropic"]),
+		.library(name: "LHAgent", targets: ["LHAgent"]),
 	],
 	dependencies: [
 		.package(url: "https://github.com/groue/GRDB.swift.git", exact: "7.11.1"),
@@ -21,6 +23,12 @@ let package = Package(
 		.target(name: "LHStore", dependencies: ["LHCore", .product(name: "GRDB", package: "GRDB.swift")]),
 		// One-time importer from the TS app's data dir.
 		.target(name: "LHImport", dependencies: ["LHCore", "LHStore"]),
+		// Messages API client: request building, SSE streaming, retries, transports.
+		.target(name: "LHAnthropic", dependencies: ["LHCore"]),
+		// Agent loop, wire projection, tools, session engine.
+		.target(name: "LHAgent", dependencies: ["LHCore", "LHAnthropic"]),
+		.testTarget(name: "LHAnthropicTests", dependencies: ["LHAnthropic", "LHCore"], resources: [.copy("Fixtures")]),
+		.testTarget(name: "LHAgentTests", dependencies: ["LHAgent", "LHAnthropic", "LHCore"], resources: [.copy("Fixtures")]),
 		.testTarget(name: "LHStoreTests", dependencies: ["LHStore", "LHCore"]),
 		.testTarget(name: "LHImportTests", dependencies: ["LHImport", "LHStore", "LHCore"]),
 		.testTarget(

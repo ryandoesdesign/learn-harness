@@ -10,16 +10,18 @@ enum UsageRows {
 		for (i, s) in steps.enumerated() {
 			try db.execute(sql: """
 				INSERT INTO usage_step (owner_kind, owner_id, step_index, model, input_tokens, output_tokens,
-					cache_read_tokens, cache_write_tokens, reasoning_tokens)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-				""", arguments: [ownerKind, ownerId, i, model, s.inputTokens, s.outputTokens, s.cacheReadTokens, s.cacheWriteTokens, s.reasoningTokens])
+					cache_read_tokens, cache_write_tokens, cache_write_1h_tokens, reasoning_tokens, web_search_requests, web_fetch_requests)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				""", arguments: [ownerKind, ownerId, i, model, s.inputTokens, s.outputTokens, s.cacheReadTokens, s.cacheWriteTokens,
+					s.cacheWrite1hTokens, s.reasoningTokens, s.webSearchRequests, s.webFetchRequests])
 		}
 	}
 
 	static func steps(ownerKind: String, ownerId: String, db: Database) throws -> [CallUsage] {
 		try Row.fetchAll(db, sql: "SELECT * FROM usage_step WHERE owner_kind = ? AND owner_id = ? ORDER BY step_index", arguments: [ownerKind, ownerId]).map {
 			CallUsage(inputTokens: $0["input_tokens"], outputTokens: $0["output_tokens"], cacheReadTokens: $0["cache_read_tokens"],
-				cacheWriteTokens: $0["cache_write_tokens"], reasoningTokens: $0["reasoning_tokens"])
+				cacheWriteTokens: $0["cache_write_tokens"], cacheWrite1hTokens: $0["cache_write_1h_tokens"], reasoningTokens: $0["reasoning_tokens"],
+				webSearchRequests: $0["web_search_requests"], webFetchRequests: $0["web_fetch_requests"])
 		}
 	}
 

@@ -11,12 +11,16 @@ public struct PriceRates: Sendable, Hashable, Codable {
 	public var input: Double
 	public var output: Double
 	public var cacheRead: Double?
+	/// The 5-minute cache-write rate.
 	public var cacheWrite: Double?
-	public init(input: Double, output: Double, cacheRead: Double? = nil, cacheWrite: Double? = nil) {
+	/// The 1-hour cache-write rate (2× input on every current model).
+	public var cacheWrite1h: Double?
+	public init(input: Double, output: Double, cacheRead: Double? = nil, cacheWrite: Double? = nil, cacheWrite1h: Double? = nil) {
 		self.input = input
 		self.output = output
 		self.cacheRead = cacheRead
 		self.cacheWrite = cacheWrite
+		self.cacheWrite1h = cacheWrite1h
 	}
 }
 
@@ -28,15 +32,17 @@ public struct PriceTier: Sendable, Hashable, Codable {
 	public var output: Double
 	public var cacheRead: Double?
 	public var cacheWrite: Double?
-	public init(inputTokensAbove: Int, input: Double, output: Double, cacheRead: Double? = nil, cacheWrite: Double? = nil) {
+	public var cacheWrite1h: Double?
+	public init(inputTokensAbove: Int, input: Double, output: Double, cacheRead: Double? = nil, cacheWrite: Double? = nil, cacheWrite1h: Double? = nil) {
 		self.inputTokensAbove = inputTokensAbove
 		self.input = input
 		self.output = output
 		self.cacheRead = cacheRead
 		self.cacheWrite = cacheWrite
+		self.cacheWrite1h = cacheWrite1h
 	}
 
-	public var rates: PriceRates { PriceRates(input: input, output: output, cacheRead: cacheRead, cacheWrite: cacheWrite) }
+	public var rates: PriceRates { PriceRates(input: input, output: output, cacheRead: cacheRead, cacheWrite: cacheWrite, cacheWrite1h: cacheWrite1h) }
 }
 
 /// One model's price: base rates plus optional input-size tiers.
@@ -45,22 +51,28 @@ public struct ModelPrice: Sendable, Hashable, Codable {
 	public var output: Double
 	public var cacheRead: Double?
 	public var cacheWrite: Double?
+	public var cacheWrite1h: Double?
+	/// USD per 1,000 web searches (server tool); nil = not billed.
+	public var webSearchPer1k: Double?
 	public var tiers: [PriceTier]?
-	public init(input: Double, output: Double, cacheRead: Double? = nil, cacheWrite: Double? = nil, tiers: [PriceTier]? = nil) {
+	public init(input: Double, output: Double, cacheRead: Double? = nil, cacheWrite: Double? = nil, cacheWrite1h: Double? = nil, webSearchPer1k: Double? = nil, tiers: [PriceTier]? = nil) {
 		self.input = input
 		self.output = output
 		self.cacheRead = cacheRead
 		self.cacheWrite = cacheWrite
+		self.cacheWrite1h = cacheWrite1h
+		self.webSearchPer1k = webSearchPer1k
 		self.tiers = tiers
 	}
 
-	/// The rates a call with `inputTokens` of input bills at: the highest
-	/// tier whose threshold the input exceeds, else the base rates.
+	/// The rates a call with `inputTokens` of total prompt (uncached input +
+	/// cache reads + cache writes) bills at: the highest tier whose threshold
+	/// it exceeds, else the base rates.
 	public func rates(inputTokens: Int) -> PriceRates {
 		let tier = (tiers ?? [])
 			.filter { inputTokens > $0.inputTokensAbove }
 			.max { $0.inputTokensAbove < $1.inputTokensAbove }
-		return tier?.rates ?? PriceRates(input: input, output: output, cacheRead: cacheRead, cacheWrite: cacheWrite)
+		return tier?.rates ?? PriceRates(input: input, output: output, cacheRead: cacheRead, cacheWrite: cacheWrite, cacheWrite1h: cacheWrite1h)
 	}
 }
 

@@ -199,6 +199,13 @@ public final class AppDatabase: Sendable {
 				);
 				""")
 		}
+		// M3 (docs/native-macos-m3.md): Anthropic-native usage — the 1-hour
+		// cache-write subset joins the step row.
+		m.registerMigration("v2") { db in
+			try db.execute(sql: "ALTER TABLE usage_step ADD COLUMN cache_write_1h_tokens INTEGER")
+			// Refusal cards keep the API's stop_details.
+			try db.execute(sql: "ALTER TABLE message ADD COLUMN stop_details_json TEXT")
+		}
 		return m
 	}
 }

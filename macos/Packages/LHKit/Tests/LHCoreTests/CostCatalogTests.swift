@@ -43,17 +43,21 @@ private let catalog = TestCatalog.shared
 
 @Suite struct PriceFoldTests {
 	@Test func callCostFreshInputCacheReadCacheWriteOutput() throws {
-		// Opus 5.5: fresh 90k @ $4 + cached 10k @ $0.2 + write 5k @ $5 + out 20k @ $20.
-		let c = try #require(callCost(CallUsage(inputTokens: 100_000, outputTokens: 20_000, cacheReadTokens: 10_000, cacheWriteTokens: 5_000), model: "claude-opus-5-5", catalog: catalog))
-		#expect(abs(c - (0.36 + 0.002 + 0.025 + 0.4)) < 1e-12)
+		// Opus 5.5, Anthropic-native classes: uncached 90k @ $4 + cached 10k @ $0.2
+		// + 5m write 3k @ $5 + 1h write 2k @ $8 + out 20k @ $20 + 3 searches @ $10/1k.
+		let c = try #require(callCost(CallUsage(inputTokens: 90_000, outputTokens: 20_000, cacheReadTokens: 10_000, cacheWriteTokens: 5_000, cacheWrite1hTokens: 2_000, webSearchRequests: 3), model: "claude-opus-5-5", catalog: catalog))
+		#expect(abs(c - (0.36 + 0.002 + 0.015 + 0.016 + 0.4 + 0.03)) < 1e-12)
 	}
 
 	@Test func callCostAppliesTheTierAboveOneHundredK() throws {
 		let base = try #require(callCost(CallUsage(inputTokens: 100_000, outputTokens: 1_000), model: "claude-haiku-5-5", catalog: catalog))
 		#expect(abs(base - (0.01 + 0.0005)) < 1e-12, "exactly 100k is NOT above the threshold")
-		let tiered = try #require(callCost(CallUsage(inputTokens: 200_000, outputTokens: 1_000, cacheReadTokens: 50_000, cacheWriteTokens: 10_000), model: "claude-haiku-5-5", catalog: catalog))
-		// Every class at tier rates: fresh 150k @ 0.5, cached 50k @ 0.05, write 10k @ 0.625, out 1k @ 2.5.
-		#expect(abs(tiered - (0.075 + 0.0025 + 0.00625 + 0.0025)) < 1e-12)
+		// The tier keys on the whole prompt: 60k uncached + 50k read + 10k write = 120k > 100k.
+		let tiered = try #require(callCost(CallUsage(inputTokens: 60_000, outputTokens: 1_000, cacheReadTokens: 50_000, cacheWriteTokens: 10_000), model: "claude-haiku-5-5", catalog: catalog))
+		// Every class at tier rates: uncached 60k @ 0.5, cached 50k @ 0.05, write 10k @ 0.625, out 1k @ 2.5.
+		#expect(abs(tiered - (0.03 + 0.0025 + 0.00625 + 0.0025)) < 1e-12)
+		let under = try #require(callCost(CallUsage(inputTokens: 60_000, outputTokens: 0, cacheReadTokens: 30_000), model: "claude-haiku-5-5", catalog: catalog))
+		#expect(abs(under - (0.006 + 0.0003)) < 1e-12, "90k prompt stays on base rates")
 		// Untiered models ignore size.
 		let opus = try #require(callCost(CallUsage(inputTokens: 200_000, outputTokens: 0), model: "claude-opus-5-5", catalog: catalog))
 		#expect(abs(opus - 0.8) < 1e-12)

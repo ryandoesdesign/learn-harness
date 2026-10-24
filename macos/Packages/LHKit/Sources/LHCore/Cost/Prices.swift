@@ -15,23 +15,29 @@ public func sumSteps(_ steps: [CallUsage]) -> CallUsage {
 		outputTokens: sumIfAny(steps.map(\.outputTokens)),
 		cacheReadTokens: sumIfAny(steps.map(\.cacheReadTokens)),
 		cacheWriteTokens: sumIfAny(steps.map(\.cacheWriteTokens)),
-		reasoningTokens: sumIfAny(steps.map(\.reasoningTokens)))
+		cacheWrite1hTokens: sumIfAny(steps.map(\.cacheWrite1hTokens)),
+		reasoningTokens: sumIfAny(steps.map(\.reasoningTokens)),
+		webSearchRequests: sumIfAny(steps.map(\.webSearchRequests)),
+		webFetchRequests: sumIfAny(steps.map(\.webFetchRequests)))
 }
 
 /// One model call's inferred cost in USD — nil when the model is unpriced
-/// or input/output are absent (never guess a price). Cached input bills at
-/// the cache-read rate; cache writes bill separately where priced. A call
-/// whose input exceeds a tier's threshold bills at that tier's rates.
+/// or input/output are absent (never guess a price). Anthropic-native
+/// classes (docs/native-macos-m3.md): uncached input, cache reads, 5-minute
+/// and 1-hour cache writes and output each bill at their own rate; web
+/// searches bill per request. A call whose whole prompt (input + cache
+/// reads + cache writes) exceeds a tier's threshold bills at that tier.
 public func callCost(_ usage: CallUsage, model: String, catalog: ModelCatalog) -> Double? {
 	guard let price = catalog.price(model), let inputTokens = usage.inputTokens, let outputTokens = usage.outputTokens else { return nil }
-	let rates = price.rates(inputTokens: inputTokens)
-	let cacheRead = Double(usage.cacheReadTokens ?? 0)
-	let freshInput = Swift.max(0, Double(inputTokens) - cacheRead)
-	let cacheWriteCost = Double(usage.cacheWriteTokens ?? 0) / 1e6 * (rates.cacheWrite ?? 0)
-	return (freshInput / 1e6) * rates.input
-		+ (cacheRead / 1e6) * (rates.cacheRead ?? rates.input)
-		+ (Double(outputTokens) / 1e6) * rates.output
-		+ cacheWriteCost
+	let rates = price.rates(inputTokens: usage.promptTokens)
+	let write1h = Double(usage.cacheWrite1hTokens ?? 0)
+	let write5m = Swift.max(0, Double(usage.cacheWriteTokens ?? 0) - write1h)
+	return Double(inputTokens) / 1e6 * rates.input
+		+ Double(usage.cacheReadTokens ?? 0) / 1e6 * (rates.cacheRead ?? rates.input)
+		+ write5m / 1e6 * (rates.cacheWrite ?? 0)
+		+ write1h / 1e6 * (rates.cacheWrite1h ?? rates.cacheWrite ?? 0)
+		+ Double(outputTokens) / 1e6 * rates.output
+		+ Double(usage.webSearchRequests ?? 0) / 1000 * (price.webSearchPer1k ?? 0)
 }
 
 /// One turn's inferred cost — the sum over its steps; nil when unpriceable.

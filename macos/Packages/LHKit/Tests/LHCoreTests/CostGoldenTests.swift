@@ -39,6 +39,22 @@ private func stageJSON(_ s: StageCost) -> JSONValue {
 	["dollars": .number(s.dollars), "unpricedRuns": .number(s.unpricedRuns), "runs": .number(s.runs), "tokens": s.tokens.json]
 }
 
+/// `raw` with every dollar-valued field taken from `priced`.
+private func withDollars(_ raw: JSONValue, from priced: JSONValue) -> JSONValue {
+	switch (raw, priced) {
+	case (.object(var r), .object(let p)):
+		for key in r.keys {
+			if ["dollars", "totalDollars", "unpricedRuns", "unpriced"].contains(key) { r[key] = p[key] }
+			else if let rv = r[key], let pv = p[key] { r[key] = withDollars(rv, from: pv) }
+		}
+		return .object(r)
+	case (.array(let r), .array(let p)) where r.count == p.count:
+		return .array(zip(r, p).map(withDollars))
+	default:
+		return raw
+	}
+}
+
 private func summaryJSON(_ s: GraphCostSummary) -> JSONValue {
 	[
 		"totalDollars": .number(s.totalDollars),
@@ -55,6 +71,29 @@ private func summaryJSON(_ s: GraphCostSummary) -> JSONValue {
 	]
 }
 
+/// The golden usage is TS-era (OpenRouter: input INCLUDES the cached
+/// portion). The native folds take Anthropic-native classes, so the dollar
+/// comparisons convert each step first: native input = input − cacheRead.
+/// Under that conversion the native formula equals the TS one exactly.
+private func native(_ s: CallUsage) -> CallUsage {
+	var n = s
+	if let input = s.inputTokens { n.inputTokens = max(0, input - (s.cacheReadTokens ?? 0)) }
+	return n
+}
+
+private func native(_ t: TurnUsage) -> TurnUsage {
+	var n = t
+	n.steps = t.steps.map(native)
+	return n
+}
+
+private func native(_ r: ExtractionRunUsage) -> ExtractionRunUsage {
+	var n = r
+	n.stages.extractor.steps = r.stages.extractor.steps.map(native)
+	n.stages.auditor.steps = r.stages.auditor.steps.map(native)
+	return n
+}
+
 @Suite struct CostGoldenTests {
 	@Test func usageFoldsMatchTS() throws {
 		let golden = try Golden.load("cost.usage")
@@ -66,10 +105,12 @@ private func summaryJSON(_ s: GraphCostSummary) -> JSONValue {
 			#expect(row["id"]?.stringValue == chat.id)
 			let turns = chat.turns ?? []
 			let actualTurns = JSONValue.array(turns.map { t in
-				["id": .string(t.id), "cost": turnCost(t, catalog: catalog).json, "sum": sumSteps(t.steps).json]
+				["id": .string(t.id), "cost": turnCost(native(t), catalog: catalog).json, "sum": sumSteps(t.steps).json]
 			})
 			expectJSONEqual(actualTurns, row["turns"]!, tolerance: 1e-12)
-			let sc = sessionCost(chat, catalog: catalog)
+			var nativeChat = chat
+			nativeChat.turns = chat.turns?.map(native)
+			let sc = sessionCost(nativeChat, catalog: catalog)
 			expectJSONEqual(["cost": .number(sc.cost), "unpriced": .number(sc.unpriced)], row["sessionCost"]!, tolerance: 1e-12)
 			expectJSONEqual(readingJSON(contextWindow(chat, catalog: catalog)), row["contextWindow"]!)
 			var zeroed = turns
@@ -81,7 +122,11 @@ private func summaryJSON(_ s: GraphCostSummary) -> JSONValue {
 		}
 
 		let jobs = try goldenJobs()
-		let actualJobs = JSONValue.array(jobs.map { ["id": .string($0.id), "cost": jobCost($0.usage, catalog: catalog).json] })
+		let actualJobs = JSONValue.array(jobs.map { job -> JSONValue in
+			var usage = job.usage
+			if let u = usage, let input = u.inputTokens { usage?.inputTokens = max(0, input - (u.cacheReadTokens ?? 0)) }
+			return ["id": .string(job.id), "cost": jobCost(usage, catalog: catalog).json]
+		})
 		expectJSONEqual(actualJobs, golden["jobs"]!, tolerance: 1e-12)
 
 		let stageSums = JSONValue.array(try goldenSources().flatMap { s in
@@ -95,17 +140,30 @@ private func summaryJSON(_ s: GraphCostSummary) -> JSONValue {
 	@Test func graphCostSummaryMatchesTS() throws {
 		let catalog = try goldenCatalog(try Golden.load("cost.usage"))
 		let golden = try Golden.load("cost.graphCostSummary")
-		let chats = try [Fixtures.teachChat, Fixtures.practiceChat].map { CostSummaryInput.ChatRuns(title: $0.title, extractions: $0.extractions ?? []) }
-		let sources = try goldenSources().map { CostSummaryInput.SourceRuns(filePath: $0.filePath, extractions: $0.extractions ?? []) }
+		// Token totals compare on the raw (TS-era) usage; dollars on the
+		// native-converted usage (see `native` above).
+		func inputs(_ convert: Bool) throws -> ([CostSummaryInput.ChatRuns], [CostSummaryInput.SourceRuns]) {
+			let chats = try [Fixtures.teachChat, Fixtures.practiceChat].map {
+				CostSummaryInput.ChatRuns(title: $0.title, extractions: ($0.extractions ?? []).map { convert ? native($0) : $0 })
+			}
+			let sources = try goldenSources().map {
+				CostSummaryInput.SourceRuns(filePath: $0.filePath, extractions: ($0.extractions ?? []).map { convert ? native($0) : $0 })
+			}
+			return (chats, sources)
+		}
+		let (chats, sources) = try inputs(false)
+		let (nativeChats, nativeSources) = try inputs(true)
 		#expect(sources.contains { !$0.extractions.isEmpty }, "the golden notes source carries runs")
+		for (cap, key) in [(10, "default"), (1, "capped")] {
+			let raw = summaryJSON(graphCostSummary(CostSummaryInput(chats: chats, sources: sources, recentCap: cap), catalog: catalog))
+			let priced = summaryJSON(graphCostSummary(CostSummaryInput(chats: nativeChats, sources: nativeSources, recentCap: cap), catalog: catalog))
+			expectJSONEqual(withDollars(raw, from: priced), golden[key]!, tolerance: 1e-12)
+		}
 		let full = graphCostSummary(CostSummaryInput(chats: chats, sources: sources), catalog: catalog)
-		expectJSONEqual(summaryJSON(full), golden["default"]!, tolerance: 1e-12)
-		let capped = graphCostSummary(CostSummaryInput(chats: chats, sources: sources, recentCap: 1), catalog: catalog)
-		expectJSONEqual(summaryJSON(capped), golden["capped"]!, tolerance: 1e-12)
 		// In the native catalog the same data is honestly unpriced.
-		let native = graphCostSummary(CostSummaryInput(chats: chats, sources: sources), catalog: TestCatalog.shared)
-		#expect(native.totalDollars == 0)
-		#expect(native.unpricedRuns == full.stages.extraction.runs)
-		#expect(native.stages.extraction.tokens == full.stages.extraction.tokens)
+		let inNativeCatalog = graphCostSummary(CostSummaryInput(chats: chats, sources: sources), catalog: TestCatalog.shared)
+		#expect(inNativeCatalog.totalDollars == 0)
+		#expect(inNativeCatalog.unpricedRuns == full.stages.extraction.runs)
+		#expect(inNativeCatalog.stages.extraction.tokens == full.stages.extraction.tokens)
 	}
 }

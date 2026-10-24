@@ -57,13 +57,16 @@ public struct AssistantBody: Sendable, Hashable {
 	public var stopReason: String
 	public var usage: MessageUsage?
 	public var errorMessage: String?
+	/// The API's `stop_details` (refusals: category + explanation).
+	public var stopDetails: JSONValue?
 
-	public init(content: [Block], model: String, stopReason: String, usage: MessageUsage? = nil, errorMessage: String? = nil) {
+	public init(content: [Block], model: String, stopReason: String, usage: MessageUsage? = nil, errorMessage: String? = nil, stopDetails: JSONValue? = nil) {
 		self.content = content
 		self.model = model
 		self.stopReason = stopReason
 		self.usage = usage
 		self.errorMessage = errorMessage
+		self.stopDetails = stopDetails
 	}
 
 	/// The `tool_use` blocks, in order.
@@ -219,6 +222,7 @@ extension Message {
 				o["usage"] = ["input": .number(u.input), "output": .number(u.output), "cacheRead": .number(u.cacheRead), "cacheWrite": .number(u.cacheWrite)]
 			}
 			if let e = a.errorMessage { o["errorMessage"] = .string(e) }
+			if let d = a.stopDetails { o["stopDetails"] = d }
 		case .toolResult(let t):
 			o["toolUseId"] = .string(t.toolUseId)
 			o["toolName"] = .string(t.toolName)
@@ -247,7 +251,7 @@ extension Message {
 			}
 			self.init(id: id, timestamp: ts, body: .assistant(AssistantBody(
 				content: blocks, model: json["model"]?.stringValue ?? "", stopReason: json["stopReason"]?.stringValue ?? "end_turn",
-				usage: usage, errorMessage: json["errorMessage"]?.stringValue)))
+				usage: usage, errorMessage: json["errorMessage"]?.stringValue, stopDetails: json["stopDetails"]?.nonNull)))
 		case .toolResult:
 			self.init(id: id, timestamp: ts, body: .toolResult(ToolResultBody(
 				toolUseId: json["toolUseId"]?.stringValue ?? "", toolName: json["toolName"]?.stringValue ?? "",

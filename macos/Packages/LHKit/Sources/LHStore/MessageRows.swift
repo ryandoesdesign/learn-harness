@@ -8,7 +8,7 @@ import LHCore
 enum MessageRow {
 	static func insert(_ m: Message, chatId: String, seq: Int, db: Database) throws {
 		var customType: String?, toolCallId: String?, toolName: String?, model: String?, stopReason: String?
-		var details: String?, usage: String?, errorMessage: String?, isError: Bool?, display: Bool?
+		var details: String?, usage: String?, errorMessage: String?, isError: Bool?, display: Bool?, stopDetails: String?
 		let payload: JSONValue
 		switch m.body {
 		case .user(let u):
@@ -18,6 +18,7 @@ enum MessageRow {
 			model = a.model
 			stopReason = a.stopReason
 			errorMessage = a.errorMessage
+			stopDetails = a.stopDetails?.serialized()
 			usage = a.usage.map { u -> String in
 				JSONValue.object(JSONObject(["input": .number(u.input), "output": .number(u.output), "cacheRead": .number(u.cacheRead), "cacheWrite": .number(u.cacheWrite)])).serialized()
 			}
@@ -35,10 +36,10 @@ enum MessageRow {
 		}
 		try db.execute(sql: """
 			INSERT INTO message (chat_id, seq, id, role, custom_type, tool_call_id, tool_name, model, stop_reason,
-				timestamp, payload_json, details_json, usage_json, error_message, is_error, display)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				timestamp, payload_json, details_json, usage_json, error_message, is_error, display, stop_details_json)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			""", arguments: [chatId, seq, m.id, m.role.rawValue, customType, toolCallId, toolName, model, stopReason,
-				m.timestamp, payload.serialized(), details, usage, errorMessage, isError, display])
+				m.timestamp, payload.serialized(), details, usage, errorMessage, isError, display, stopDetails])
 		let body = searchText(m)
 		if !body.isEmpty {
 			try db.execute(sql: "INSERT INTO message_fts (chat_id, message_id, body) VALUES (?, ?, ?)", arguments: [chatId, m.id, body])
@@ -59,7 +60,8 @@ enum MessageRow {
 				MessageUsage(input: $0["input"]?.intValue ?? 0, output: $0["output"]?.intValue ?? 0, cacheRead: $0["cacheRead"]?.intValue ?? 0, cacheWrite: $0["cacheWrite"]?.intValue ?? 0)
 			}
 			return Message(id: id, timestamp: ts, body: .assistant(AssistantBody(
-				content: blocks, model: row["model"] ?? "", stopReason: row["stop_reason"] ?? "end_turn", usage: usage, errorMessage: row["error_message"])))
+				content: blocks, model: row["model"] ?? "", stopReason: row["stop_reason"] ?? "end_turn", usage: usage, errorMessage: row["error_message"],
+				stopDetails: try (row["stop_details_json"] as String?).map(JSONValue.parse))))
 		case .toolResult?:
 			return Message(id: id, timestamp: ts, body: .toolResult(ToolResultBody(
 				toolUseId: row["tool_call_id"] ?? "", toolName: row["tool_name"] ?? "", content: blocks,
