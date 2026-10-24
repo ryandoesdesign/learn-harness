@@ -42,6 +42,7 @@
 		A33882B7A9FFE5AA58FA641B /* Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94F8535212754EDDC96D37D7 /* Cards.swift */; };
 		A556EB7E5D70669343730E58 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43B3900E202814D386BCC7D /* Theme.swift */; };
 		AFB5B9BAE08D8AF304A8BDCD /* FindModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22021EA11C44929384FB781 /* FindModel.swift */; };
+		B4C11A330D938FD2BCD9D9BB /* QuestionDockLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42572FF68EFE7BA60752D2F /* QuestionDockLayoutTests.swift */; };
 		C4A332BEF47766310AE53717 /* LHCore in Frameworks */ = {isa = PBXBuildFile; productRef = F64AFC2AD1FBED6B337A4C95 /* LHCore */; };
 		C7E3CBB2CD6FA9463C809175 /* GraphCanvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F4B149EE9C60DFB21BF26F /* GraphCanvas.swift */; };
 		CBFD4AA0F441BC6A34E21F36 /* GraphWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7531E8BFE5854DDA89E26459 /* GraphWindowTests.swift */; };
@@ -105,6 +106,7 @@
 		94F8535212754EDDC96D37D7 /* Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cards.swift; sourceTree = "<group>"; };
 		9D35D006AE2576BA7CBAB041 /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
 		A1C87B8F3F1CA96293D3BD67 /* LearnHarness.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LearnHarness.entitlements; sourceTree = "<group>"; };
+		A42572FF68EFE7BA60752D2F /* QuestionDockLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionDockLayoutTests.swift; sourceTree = "<group>"; };
 		A786448D019074D9C5D5DF6F /* ChainTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainTableView.swift; sourceTree = "<group>"; };
 		AB60C2FAF867F0D2F492442C /* GraphWindowModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphWindowModel.swift; sourceTree = "<group>"; };
 		ABB2DF13F0D80C39FEECFACA /* PlaygroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundView.swift; sourceTree = "<group>"; };
@@ -279,6 +281,7 @@
 				7531E8BFE5854DDA89E26459 /* GraphWindowTests.swift */,
 				EA09B326668A14B029E77026 /* LaunchTests.swift */,
 				D62AB68901A9DBD187B9B30D /* LiveSessionTests.swift */,
+				A42572FF68EFE7BA60752D2F /* QuestionDockLayoutTests.swift */,
 				25BFF23D8C953FE56B9EE851 /* ScrollBottomTests.swift */,
 				289B9F29DFF7F198AB7A8E2E /* TranscriptTests.swift */,
 				1E61FE2777BEEED3E136E53A /* WebRendererTests.swift */,
@@ -470,6 +473,7 @@
 				CBFD4AA0F441BC6A34E21F36 /* GraphWindowTests.swift in Sources */,
 				EE1F5CFE55521435B8A0A7D9 /* LaunchTests.swift in Sources */,
 				9A92C75008E0B2E5FC58CC15 /* LiveSessionTests.swift in Sources */,
+				B4C11A330D938FD2BCD9D9BB /* QuestionDockLayoutTests.swift in Sources */,
 				1632EB3C8BD3369394476A89 /* ScrollBottomTests.swift in Sources */,
 				9CB6882DD07FD9A08C617A84 /* TranscriptTests.swift in Sources */,
 				9B3A4B4A81B696274423F1AB /* WebRendererTests.swift in Sources */,

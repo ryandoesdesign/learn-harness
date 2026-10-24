@@ -100,3 +100,89 @@ extension ScrollBottomTests {
 		#expect(isBottom(back), "the button's own scroll must land at what isBottom calls the bottom")
 	}
 }
+
+// The dock growing (a question expanding) must not cover the transcript:
+// at the bottom the view stays at the bottom; scrolled up, the rows that
+// were on screen stay on screen.
+
+@MainActor
+@Observable private final class DockDriver {
+	var dock: CGFloat = 80
+	var atBottom = true
+	var last: ScrollGeometry?
+	var proxy: ScrollViewProxy?
+	var scrollY: CGFloat?
+}
+
+private struct GrowingDock: View {
+	let driver: DockDriver
+	@State private var position = ScrollPosition(edge: .bottom)
+	var body: some View {
+		ScrollViewReader { proxy in
+			ScrollView {
+				LazyVStack(alignment: .leading, spacing: 0) {
+					ForEach(0..<60, id: \.self) { Text("row \($0)").frame(height: 30).id($0) }
+					Color.clear.frame(height: 1).id("bottom")
+				}
+			}
+			.scrollPosition($position)
+			.defaultScrollAnchor(.bottom)
+			.safeAreaInset(edge: .bottom, spacing: 0) { Color.red.frame(height: driver.dock) }
+			.followsBottomInset(position: $position, atBottom: driver.atBottom) { proxy.scrollTo("bottom", anchor: .bottom) }
+			.onScrollGeometryChange(for: ScrollGeometry.self) { $0 } action: { _, g in driver.last = g }
+			.onAppear { driver.proxy = proxy }
+			.onChange(of: driver.scrollY) { if let y = driver.scrollY { position.scrollTo(y: y) } }
+		}
+		.frame(width: 300, height: 500)
+	}
+}
+
+extension ScrollBottomTests {
+	private func show(_ driver: DockDriver) async throws -> NSWindow {
+		let window = NSWindow(contentRect: NSRect(x: -10_000, y: -10_000, width: 300, height: 500), styleMask: [.borderless], backing: .buffered, defer: false)
+		window.contentView = NSHostingView(rootView: GrowingDock(driver: driver))
+		window.orderFrontRegardless()
+		try await Task.sleep(for: .milliseconds(400))
+		return window
+	}
+
+	@Test func aGrowingDockKeepsTheBottomInView() async throws {
+		let driver = DockDriver()
+		let window = try await show(driver)
+		defer { window.orderOut(nil) }
+		#expect(isBottom(try #require(driver.last)))
+		driver.dock = 380
+		try await Task.sleep(for: .milliseconds(400))
+		let g = try #require(driver.last)
+		#expect(g.contentInsets.bottom == 380)
+		#expect(isBottom(g), "the last rows sit above the expanded dock: \(g)")
+	}
+
+	@Test func aGrowingDockShiftsAScrolledUpTranscript() async throws {
+		let driver = DockDriver()
+		let window = try await show(driver)
+		defer { window.orderOut(nil) }
+		driver.atBottom = false
+		driver.proxy?.scrollTo(20, anchor: .top)
+		try await Task.sleep(for: .milliseconds(300))
+		let before = try #require(driver.last).contentOffset.y
+		driver.dock = 280
+		try await Task.sleep(for: .milliseconds(400))
+		let after = try #require(driver.last).contentOffset.y
+		#expect(abs(after - before - 200) < 1, "the offset moves by the dock's growth: \(before) → \(after)")
+	}
+
+	/// "At the bottom" allows 24pt of slack; the scroll view's own bottom
+	/// anchor only holds at the exact bottom, so 10pt up it would let the dock cover.
+	@Test func aGrowingDockKeepsTheBottomInViewFromNearTheBottom() async throws {
+		let driver = DockDriver()
+		let window = try await show(driver)
+		defer { window.orderOut(nil) }
+		driver.scrollY = try #require(driver.last).contentOffset.y - 10
+		try await Task.sleep(for: .milliseconds(300))
+		#expect(isBottom(try #require(driver.last)), "10pt up still counts as the bottom")
+		driver.dock = 380
+		try await Task.sleep(for: .milliseconds(400))
+		#expect(isBottom(try #require(driver.last)), "\(driver.last!)")
+	}
+}

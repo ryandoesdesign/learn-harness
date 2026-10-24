@@ -19,6 +19,10 @@ struct QuestionDockView: View {
 	@State private var text = ""
 	@State private var confIdx = DEFAULT_CONFIDENCE_INDEX
 	@State private var walked: Int?
+	/// The question body's natural height: the scroll area hugs it (a
+	/// ScrollView alone takes every point it's offered) up to `maxBody`.
+	@State private var bodyHeight: CGFloat?
+	static let maxBody: CGFloat = 420
 	@FocusState private var focus: Field?
 
 	enum Field: Hashable { case rows, other, learner }
@@ -77,8 +81,11 @@ struct QuestionDockView: View {
 					}
 					if qd.kind == .quiz { confidence(disabled: sel.dontKnow) }
 				}
+				.onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bodyHeight = $0 }
 			}
-			.frame(maxHeight: 420)
+			// A height, not .frame(maxHeight:): that frame takes every point
+			// offered up to its max, so the card stretched to the cap.
+			.frame(height: min(bodyHeight ?? Self.maxBody, Self.maxBody))
 			learnerField(qd)
 			HStack {
 				Text(session.compacting ? "compacting session…" : "↵ submits · ⇧↵ newline").font(Theme.ui).foregroundStyle(Theme.faint)

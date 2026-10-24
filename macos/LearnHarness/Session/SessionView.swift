@@ -111,6 +111,30 @@ struct SessionView: View {
 /// container 298). So the bottom is offset + container + top inset =
 /// content height. Ignoring the top inset left the toolbar's height short
 /// of the 24pt tolerance: the button never hid.
+/// The dock growing (a question expanding) or shrinking moves the scroll
+/// view by the same amount, so what was on screen stays there: at the
+/// bottom it stays at the bottom, otherwise the offset shifts by the delta.
+extension View {
+	func followsBottomInset(position: Binding<ScrollPosition>, atBottom: Bool, toBottom: @escaping () -> Void) -> some View {
+		onScrollGeometryChange(for: BottomInset.self) { geo in
+			BottomInset(inset: geo.contentInsets.bottom, offset: geo.contentOffset.y)
+		} action: { old, new in
+			guard new.inset != old.inset else { return }
+			if atBottom {
+				toBottom()
+			} else {
+				position.wrappedValue.scrollTo(y: old.offset + new.inset - old.inset)
+			}
+		}
+	}
+}
+
+/// The bottom inset with the offset it was seen at.
+struct BottomInset: Equatable {
+	var inset: CGFloat
+	var offset: CGFloat
+}
+
 func isBottom(_ geo: ScrollGeometry) -> Bool {
 	geo.contentOffset.y + geo.containerSize.height + geo.contentInsets.top >= geo.contentSize.height - 24
 }
@@ -168,6 +192,9 @@ struct TranscriptView: View {
 				isBottom(geo)
 			} action: { _, atBottom in
 				if atBottom { session.isAtBottom = true }
+			}
+			.followsBottomInset(position: $position, atBottom: session.isAtBottom) {
+				proxy.scrollTo("bottom", anchor: .bottom)
 			}
 			.onScrollPhaseChange { old, new, context in
 				if new == .idle, old == .interacting || old == .decelerating {
