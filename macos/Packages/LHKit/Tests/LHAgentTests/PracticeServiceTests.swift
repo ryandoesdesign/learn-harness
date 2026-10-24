@@ -207,3 +207,14 @@ private func resultText(_ r: ChatRecord, _ callId: String) -> (text: String, isE
 		#expect(tool.prepare(raw)["mode"] == "recall")
 	}
 }
+
+@Suite struct PracticeToolSwitchTests {
+	@Test func practiceSideToolsObeyTheSwitchesButTheSessionPairStays() {
+		let wiring = BackgroundWiring(files: FileAccess(folders: { [] })) { _, _, _, _ in "stub" }
+		let names = practiceTools(gate: PracticeGate(problemActive: false), graphNodes: nil,
+			enabled: ["research": false, "pdf": false], background: wiring).map(\.name)
+		#expect(names.contains("problem") && names.contains("conclude"))
+		#expect(!names.contains("research") && !names.contains("pdf"))
+		#expect(names.contains("read"), "file tools stay")
+	}
+}
