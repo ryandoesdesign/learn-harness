@@ -95,15 +95,17 @@ public func transformMathDelimiters(_ markdown: String) -> String {
 			if run == 1 {
 				let closeAt = findInlineDollarCloseEscapeAware(s, i + 1)
 				if closeAt != -1 {
+					// The whole balanced span is copied, escapes replaced. DELIBERATE
+					// DIVERGENCE from math-delims.ts (owner, 2026-10-24): TS copies
+					// only the opening `$` of a clean span and rescans inside it, so
+					// the span's closing `$` reopens a bogus span that swallows any
+					// later `\(…\)`, `\[…\]` or `\$` up to the next dollar.
 					let content = Array(s[(i + 1)..<closeAt])
-					let replaced = replaceEscapedDollars(content)
-					if replaced != content {
-						out.append(U.dollar)
-						out.append(contentsOf: replaced)
-						out.append(U.dollar)
-						i = closeAt + 1
-						continue
-					}
+					out.append(U.dollar)
+					out.append(contentsOf: replaceEscapedDollars(content))
+					out.append(U.dollar)
+					i = closeAt + 1
+					continue
 				}
 			} else {
 				out.append(contentsOf: s[i..<(i + run)])

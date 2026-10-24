@@ -316,3 +316,16 @@ private let unchanged: [String] = [
 		}
 	}
 }
+
+// Deliberate divergence from math-delims.ts (owner, 2026-10-24): a clean
+// inline span's closing `$` must not reopen a span over later delimiters.
+@Suite struct CleanInlineSpanTests {
+	@Test func laterLegacyDelimitersAndEscapesSurviveACleanSpan() {
+		let src = #"inline $e^{i\pi} + 1 = 0$, legacy \(\nabla u\), and an escaped \$5 price."#
+		#expect(transformMathDelimiters(src) == #"inline $e^{i\pi} + 1 = 0$, legacy $$\nabla u$$, and an escaped \$5 price."#)
+	}
+	@Test func aDisplayBlockAfterACleanSpanStillConverts() {
+		let src = "a $x$ b\n\n\\[\ny\n\\]\n\nend $$"
+		#expect(transformMathDelimiters(src) == "a $x$ b\n\n$$\ny\n$$\n\nend $$")
+	}
+}

@@ -27,7 +27,7 @@ enum RenderGallery {
 		\\begin{aligned} a &= b + c \\\\ d &= \\operatorname{argmax}_x f(x) \\end{aligned}
 		\\]
 
-		An unsupported command renders as raw TeX: $\\underbrace{x+y}_{n}$.
+		Braces under: $\\underbrace{x+y}_{n}$. An undefined command renders as raw TeX: $\\notacommand{x}$.
 
 		- A bullet with $\\alpha$
 		- [x] A finished task

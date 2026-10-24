@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import LHCore
+import LHMarkdown
 import LHResources
 import LHStore
 import SwiftUI
@@ -52,6 +53,39 @@ import Testing
 		let s = try session(for: RenderGallery.record())
 		let blocks = s.rows.compactMap { if case .textBlock(let b, _) = $0.kind { return String(describing: b).components(separatedBy: "(").first }; return nil }
 		#expect(Set(blocks).isSuperset(of: ["paragraph", "heading", "list", "quote", "callout", "code", "mermaid", "displayMath", "table", "thematicBreak"]))
+	}
+
+	/// The reported gallery bug: no TeX leaks into prose, and every math
+	/// span typesets (the clean-span fix in transformMathDelimiters).
+	@Test func theGalleryMathAllTypesets() throws {
+		let s = try session(for: RenderGallery.record())
+		var maths: [String] = []
+		var prose = ""
+		func walk(_ runs: [MDInline]) {
+			for r in runs {
+				switch r {
+				case .math(let t): maths.append(t)
+				case .text(let t): prose += t
+				case .emphasis(let c), .strong(let c), .strikethrough(let c), .link(_, let c): walk(c)
+				default: break
+				}
+			}
+		}
+		for row in s.rows {
+			guard case .textBlock(let b, _) = row.kind else { continue }
+			switch b {
+			case .paragraph(let r), .heading(_, let r): walk(r)
+			case .displayMath(let t, _): maths.append(t)
+			case .list(_, _, let items): for i in items { for case .paragraph(let r) in i.blocks { walk(r) } }
+			default: break
+			}
+		}
+		#expect(!prose.contains("\\"), "TeX leaked into prose: \(prose)")
+		#expect(maths.contains { $0.contains("aligned") })
+		#expect(maths.contains { $0.contains("nabla") })
+		// Every span typesets except the deliberate raw-TeX example.
+		let failing = maths.filter { mathParseError($0) != nil }
+		#expect(failing == [#"\notacommand{x}"#], "\(failing)")
 	}
 
 	@Test func findSearchesVisibleUnitsAndSkipsCollapsedOnes() throws {

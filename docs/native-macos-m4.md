@@ -180,6 +180,11 @@ These are added, pinned `exact:`:
 - **Version caveat:** `mathjax-full` 3.x is deprecated upstream in favour of v4 (`@mathjax/src`). v4 loads its fonts asynchronously, which suits JavaScriptCore less well, so 3.2.2 stays until that is worked out.
 - **Clipping fix:** horizontal scroll views (display math, code, tables) now take their content's height. Hosted tests measure the ink drawn in a real window against the bare image, and a deliberately clipped control shows that the measurement catches a clip.
 
+**Delimiter transform: a deliberate divergence from TS** (you chose Swift-only, 2026-10-24):
+- **The TS bug:** `math-delims.ts` copies only the opening `$` of a clean inline `$…$` span, then rescans inside it. The span's closing `$` then opens a bogus span, which swallows any later `\(…\)`, `\[…\]` or `\$` up to the next dollar. The result is TeX leaking into prose, and `\text{\textdollar}` showing in the text.
+- **The Swift fix:** the port now copies the whole balanced span. The TS app keeps the bug.
+- **Tests:** `CleanInlineSpanTests` and the hosted `theGalleryMathAllTypesets` pin the fix.
+
 **Behaviour to know:**
 - **Mermaid theme:** it follows the appearance: `default` in light, `dark` in dark. The TS app was dark-only.
 - **Find** searches content: prose, user text, open thinking, card questions, options, verdicts and briefs. It does not search the chrome labels (YOU, CHECK…). A match scrolls its row into view near the top.
