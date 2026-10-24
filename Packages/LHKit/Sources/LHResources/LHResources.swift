@@ -22,7 +22,7 @@ public enum LHResources {
 		}
 	}
 
-	/// MathJax 3.2.2 bundled for JavaScriptCore (macos/scripts/build-mathjax.sh):
+	/// MathJax 3.2.2 bundled for JavaScriptCore (scripts/build-mathjax.sh):
 	/// defines `lhTex2Svg(tex, display)`.
 	public static var mathJaxJS: String {
 		get throws {

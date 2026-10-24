@@ -9,3 +9,8 @@ real-data-extraction/
 # the old web app's local key store: repo-root auth.json — secrets never committed
 auth.json
 
+# Xcode and SwiftPM
+xcuserdata/
+DerivedData/
+*.xcuserstate
+build/

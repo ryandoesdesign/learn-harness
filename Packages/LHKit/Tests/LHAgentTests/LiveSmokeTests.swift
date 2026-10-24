@@ -24,7 +24,7 @@ struct LiveSmokeTests {
 
 	@Test func opusStreamsCallsTheToolAndTheSecondTurnReadsTheCache() async throws {
 		let key = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
-		let fixtures = Repo.root.appending(path: "macos/Packages/LHKit/Tests/LHAgentTests/Fixtures")
+		let fixtures = Repo.root.appending(path: "Packages/LHKit/Tests/LHAgentTests/Fixtures")
 		let n = Box(0)
 		let transport = RecordingTransport(URLSessionTransport(), directory: fixtures) { n.mutate { $0 += 1 }; return "live-\(n.value)" }
 		let client = MessagesClient(transport: transport, apiKey: { key })

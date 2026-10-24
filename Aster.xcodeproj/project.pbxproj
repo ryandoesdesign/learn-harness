@@ -15,7 +15,6 @@
 		13B87FF4EF90A4E8B17679E4 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1D8BE8345A9BE08BA850B9 /* SidebarView.swift */; };
 		1666DABDC81E48041B8CA65A /* DemoSandboxHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997176B7DBA723B4CF513C66 /* DemoSandboxHostTests.swift */; };
 		1AE09079B2C6C8EAAF524B40 /* QuestionArrivalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815E1F57D14C159E860F4A72 /* QuestionArrivalTests.swift */; };
-		21E3EA73C48B36B4F66E0A34 /* chats in Resources */ = {isa = PBXBuildFile; fileRef = CA3F10A2BB3AD92DA32DE407 /* chats */; };
 		24B0CC9C3F4A67F8B57F32F4 /* AppCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CEB318DB188E7FC572927C0 /* AppCommands.swift */; };
 		2C69179DB9DC647B857585AC /* LaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5056CD0D756F780309E0E735 /* LaunchTests.swift */; };
 		308EA6488E1996C4F2D2BB6D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8749DA43AF06738B9BAA5AE /* SettingsView.swift */; };
@@ -66,6 +65,7 @@
 		CB4159109E1581D487A2CDCD /* LHStore in Frameworks */ = {isa = PBXBuildFile; productRef = 64EA8A4F0DB387F5939289C1 /* LHStore */; };
 		CD097F0D1C5AA34407052E60 /* HomeSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1B30D375E97D3C69E419BD /* HomeSummary.swift */; };
 		D08D26B143EDFBEEDCB15A09 /* MathImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CC343389A42DCBB0E5B274D /* MathImage.swift */; };
+		D0DE5A111D09403664D62F0E /* chats in Resources */ = {isa = PBXBuildFile; fileRef = D7444165D171FBF5305F9693 /* chats */; };
 		D3D85FCFB899970A73B5742C /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000BDA698789A83D41FDB436 /* Commands.swift */; };
 		D4A09DEB00FAD6805B262BE5 /* AsterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BD6598C1A39196DBFF511A /* AsterApp.swift */; };
 		D934A05A4C4F5C1F67247384 /* QuestionDockLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05014DA1D7B1B00F8F719F5E /* QuestionDockLayoutTests.swift */; };
@@ -135,11 +135,11 @@
 		B5BB9E359655B6F0B04CB5FC /* FocusOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusOverlay.swift; sourceTree = "<group>"; };
 		BABBB1FF2CCA760AE296390E /* Aster.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Aster.entitlements; sourceTree = "<group>"; };
 		BB8F50816498E884AF489C7A /* LiveSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSessionTests.swift; sourceTree = "<group>"; };
-		CA3F10A2BB3AD92DA32DE407 /* chats */ = {isa = PBXFileReference; lastKnownFileType = folder; name = chats; path = "../tests/fixtures/golden-data/chats"; sourceTree = SOURCE_ROOT; };
 		CBC53A03F2D51D56066510D2 /* PlaygroundModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundModel.swift; sourceTree = "<group>"; };
 		CDF5B95C40E49420E3973C0D /* Aster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Aster.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D428FC657A98AA8CED118249 /* GraphPhysics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphPhysics.swift; sourceTree = "<group>"; };
 		D4BC0BA535DE32A0ECB918CB /* MarkdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownView.swift; sourceTree = "<group>"; };
+		D7444165D171FBF5305F9693 /* chats */ = {isa = PBXFileReference; lastKnownFileType = folder; name = chats; path = "tests/fixtures/golden-data/chats"; sourceTree = SOURCE_ROOT; };
 		D8504D087B8D644533A9F2EB /* DictationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationTests.swift; sourceTree = "<group>"; };
 		D8749DA43AF06738B9BAA5AE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E327793A3E73EF1D4C1F9443 /* SettingsPaneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPaneTests.swift; sourceTree = "<group>"; };
@@ -209,12 +209,12 @@
 			path = AsterTests;
 			sourceTree = "<group>";
 		};
-		61FB188F04F4D74B9770A19C /* fixtures */ = {
+		5D5E1E1504378A6D96B9379C /* tests */ = {
 			isa = PBXGroup;
 			children = (
-				B46DD10B312A6354D9317631 /* golden-data */,
+				EC3427C2B947673D3F7DEA07 /* fixtures */,
 			);
-			path = fixtures;
+			path = tests;
 			sourceTree = "<group>";
 		};
 		64FD929DF73304271D2A9E93 /* Packages */ = {
@@ -266,9 +266,9 @@
 			isa = PBXGroup;
 			children = (
 				C2452DB96E309F21C868593B /* Aster */,
-				BE507B6FB3F3D3D5410836A2 /* aster */,
 				57348A0346322A81BFBA7786 /* AsterTests */,
 				64FD929DF73304271D2A9E93 /* Packages */,
+				5D5E1E1504378A6D96B9379C /* tests */,
 				CC27F93FED78DB135292D4E1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -306,14 +306,6 @@
 			path = Graph;
 			sourceTree = "<group>";
 		};
-		B46DD10B312A6354D9317631 /* golden-data */ = {
-			isa = PBXGroup;
-			children = (
-				CA3F10A2BB3AD92DA32DE407 /* chats */,
-			);
-			path = "golden-data";
-			sourceTree = "<group>";
-		};
 		B80A0A610C159D0D40B74D4C /* Sidebar */ = {
 			isa = PBXGroup;
 			children = (
@@ -335,13 +327,12 @@
 			path = Session;
 			sourceTree = "<group>";
 		};
-		BE507B6FB3F3D3D5410836A2 /* aster */ = {
+		BB6E689F6E3AEC790FEC6B27 /* golden-data */ = {
 			isa = PBXGroup;
 			children = (
-				CF8E0215C2392FEBE48F9D31 /* tests */,
+				D7444165D171FBF5305F9693 /* chats */,
 			);
-			name = aster;
-			path = ..;
+			path = "golden-data";
 			sourceTree = "<group>";
 		};
 		C2452DB96E309F21C868593B /* Aster */ = {
@@ -382,14 +373,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		CF8E0215C2392FEBE48F9D31 /* tests */ = {
-			isa = PBXGroup;
-			children = (
-				61FB188F04F4D74B9770A19C /* fixtures */,
-			);
-			path = tests;
-			sourceTree = "<group>";
-		};
 		D10E373F0EA79AF77041566F /* Debug */ = {
 			isa = PBXGroup;
 			children = (
@@ -398,6 +381,14 @@
 				2A2A1AC29D83CDF9AA3E11E0 /* RenderGallery.swift */,
 			);
 			path = Debug;
+			sourceTree = "<group>";
+		};
+		EC3427C2B947673D3F7DEA07 /* fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				BB6E689F6E3AEC790FEC6B27 /* golden-data */,
+			);
+			path = fixtures;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -498,7 +489,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21E3EA73C48B36B4F66E0A34 /* chats in Resources */,
+				D0DE5A111D09403664D62F0E /* chats in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,7 +9,6 @@ A native macOS app (Swift 6, SwiftUI).
 Requires macOS 27, Xcode with the macOS 27 SDK, and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```bash
-cd macos
 xcodegen            # regenerates Aster.xcodeproj from project.yml
 open Aster.xcodeproj
 ```
@@ -19,16 +18,15 @@ Run the `Aster` scheme. Add your Anthropic API key when the first session starts
 ## Test
 
 ```bash
-cd macos
 xcodebuild test -project Aster.xcodeproj -scheme Aster -destination 'platform=macOS'
 swift test --package-path Packages/LHKit
-cd .. && python3 -B -m unittest discover -s tests/skills
+python3 -B -m unittest discover -s tests/skills
 ```
 
 ## Layout
 
-- `macos/Aster/` — the app; `macos/AsterTests/` — hosted tests.
-- `macos/Packages/LHKit/` — the domain, store, agent and rendering packages.
+- `Aster/` — the app; `AsterTests/` — hosted tests.
+- `Packages/LHKit/` — the domain, store, agent and rendering packages.
 - `skills/aster/` — an Agent Skill that reads Aster's database read-only.
 - `docs/` — the native build notes (`native-macos-plan.md`, M1–M8), keyboard shortcuts, and the teaching approach (`vision.md`, `teaching-methodology.md`, `probe-teach-split.md`).
 

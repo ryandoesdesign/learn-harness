@@ -7,9 +7,9 @@ import Testing
 /// by scripts/dump-core-golden.ts).
 enum Fixtures {
 	static let repoRoot: URL = {
-		// …/macos/Packages/LHKit/Tests/LHCoreTests/Support/GoldenSupport.swift
+		// …/Packages/LHKit/Tests/LHCoreTests/Support/GoldenSupport.swift
 		var url = URL(fileURLWithPath: #filePath)
-		for _ in 0..<7 { url.deleteLastPathComponent() }
+		for _ in 0..<6 { url.deleteLastPathComponent() }
 		return url
 	}()
 

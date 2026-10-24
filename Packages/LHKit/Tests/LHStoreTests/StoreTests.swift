@@ -6,7 +6,7 @@ import LHCore
 enum Repo {
 	static let root: URL = {
 		var url = URL(fileURLWithPath: #filePath)
-		for _ in 0..<6 { url.deleteLastPathComponent() }
+		for _ in 0..<5 { url.deleteLastPathComponent() }
 		return url
 	}()
 	static let goldenData = root.appending(path: "tests/fixtures/golden-data")
@@ -84,7 +84,7 @@ private func tempDir() throws -> URL {
 	@Test func summariesMatchTheTSListProjection() throws {
 		let repo = ChatRepository(try AppDatabase.inMemory())
 		for id in ["chat_mv27rrra_feff23b6", "chat_mv293wv5_10656952"] { try repo.insert(try Repo.goldenChat(id), origin: .import) }
-		let golden = try JSONValue.parse(Data(contentsOf: Repo.root.appending(path: "macos/Packages/LHKit/Tests/LHCoreTests/Golden/store.summaries.json")))
+		let golden = try JSONValue.parse(Data(contentsOf: Repo.root.appending(path: "Packages/LHKit/Tests/LHCoreTests/Golden/store.summaries.json")))
 		let actual = try repo.summaries()
 		#expect(actual.map(\.id) == golden.arrayValue?.compactMap { $0["id"]?.stringValue })
 		for (s, g) in zip(actual, golden.arrayValue ?? []) {

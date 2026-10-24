@@ -5,7 +5,7 @@
 Decided 2026-10-24 (`docs/native-macos-m8.md`). The native app follows Mac
 conventions.
 
-- **One table:** `macos/Aster/AppCommands.swift` (`AppShortcut`)
+- **One table:** `Aster/AppCommands.swift` (`AppShortcut`)
   drives the menus and Help → Keyboard Shortcuts. `ShortcutTests` checks
   that no two items share a key and none takes a standard macOS shortcut.
 - **Rebinding:** none in the app. Every shortcut is a menu item, so macOS

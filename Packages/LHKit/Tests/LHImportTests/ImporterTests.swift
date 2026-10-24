@@ -8,12 +8,12 @@ import LHCore
 private enum Repo {
 	static let root: URL = {
 		var url = URL(fileURLWithPath: #filePath)
-		for _ in 0..<6 { url.deleteLastPathComponent() }
+		for _ in 0..<5 { url.deleteLastPathComponent() }
 		return url
 	}()
 	static let goldenData = root.appending(path: "tests/fixtures/golden-data")
 	static func golden(_ name: String) throws -> JSONValue {
-		try JSONValue.parse(Data(contentsOf: root.appending(path: "macos/Packages/LHKit/Tests/LHCoreTests/Golden/\(name).json")))
+		try JSONValue.parse(Data(contentsOf: root.appending(path: "Packages/LHKit/Tests/LHCoreTests/Golden/\(name).json")))
 	}
 }
 
@@ -211,7 +211,7 @@ private func userDataCopy(auth: JSONValue?) throws -> URL {
 /// The bundled catalog's bytes (LHResources is not a dependency of this target).
 enum LHCatalogFixture {
 	static var data: Data {
-		get throws { try Data(contentsOf: Repo.root.appending(path: "macos/Packages/LHKit/Sources/LHResources/Resources/models.json")) }
+		get throws { try Data(contentsOf: Repo.root.appending(path: "Packages/LHKit/Sources/LHResources/Resources/models.json")) }
 	}
 }
 

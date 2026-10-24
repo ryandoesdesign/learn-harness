@@ -68,7 +68,7 @@ targets:
     sources:
       - AsterTests
       # The golden chats, readable inside the sandboxed host.
-      - path: ../tests/fixtures/golden-data/chats
+      - path: tests/fixtures/golden-data/chats
         type: folder
         buildPhase: resources
     dependencies:

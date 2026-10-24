@@ -18,11 +18,11 @@ repository and invokes both output formats from an unrelated working directory,
 checking that no cache or data files appear.
 
 Both fixtures are drift-tested on the Swift side
-(`macos/Packages/LHKit/Tests/LHImportTests/SkillFixtureTests.swift`). After a schema
+(`Packages/LHKit/Tests/LHImportTests/SkillFixtureTests.swift`). After a schema
 migration or an importer change, regenerate and commit them:
 
 ```sh
-LH_WRITE_FIXTURE=1 swift test --package-path macos/Packages/LHKit --filter SkillFixtureTests
+LH_WRITE_FIXTURE=1 swift test --package-path Packages/LHKit --filter SkillFixtureTests
 ```
 
 and add the new migration identifier to `KNOWN_MIGRATIONS` in

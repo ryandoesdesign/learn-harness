@@ -13,7 +13,7 @@ import LHCore
 @Suite(.serialized) struct SkillFixtureTests {
 	static let root: URL = {
 		var url = URL(fileURLWithPath: #filePath)
-		for _ in 0..<6 { url.deleteLastPathComponent() }
+		for _ in 0..<5 { url.deleteLastPathComponent() }
 		return url
 	}()
 	static let goldenData = root.appending(path: "tests/fixtures/golden-data")
