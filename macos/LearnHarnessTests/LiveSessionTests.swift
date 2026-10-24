@@ -1,5 +1,6 @@
 import Foundation
 import LHCore
+import SwiftUI
 import Testing
 @testable import LearnHarness
 
@@ -63,5 +64,16 @@ import Testing
 		#expect(explain.mode == .text && explain.committedAnswer == "Because.")
 		#expect(dockLabel(tool: "recall", question: explain) == "Recall")
 		#expect(dockQuestion(tool: "quiz", toolCallId: "c3", input: ["question": "Q?"]) == nil, "malformed")
+	}
+
+	/// The reported bug: keys typed in the "Other…" field walked/toggled the
+	/// option rows. The field keeps its keys; Return submits.
+	@Test func theOtherFieldKeepsItsKeys() {
+		for key: KeyEquivalent in [.space, .upArrow, .downArrow, .leftArrow, .rightArrow, "a"] {
+			#expect(dockKeyRoute(key, typing: true) == .field)
+		}
+		#expect(dockKeyRoute(.return, typing: true) == .submit)
+		#expect(dockKeyRoute(.space, typing: false) == .rows)
+		#expect(dockKeyRoute(.return, typing: false) == .rows)
 	}
 }

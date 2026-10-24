@@ -66,7 +66,7 @@ struct QuestionDockView: View {
 								optionRow(opt, index: i, mode: mode, kind: qd.kind, walkedHere: walked == i)
 							}
 							if qd.kind == .quiz { dontKnowRow(walkedHere: walked == qd.options.count) }
-							if qd.kind == .ask { otherRow(mode: mode, walkedHere: walked == qd.options.count) }
+							if qd.kind == .ask { otherRow(mode: mode, index: qd.options.count, walkedHere: walked == qd.options.count) }
 						}
 						.focusable()
 						.focused($focus, equals: .rows)
@@ -147,7 +147,7 @@ struct QuestionDockView: View {
 		.buttonStyle(.plain)
 	}
 
-	private func otherRow(mode: SelectMode, walkedHere: Bool) -> some View {
+	private func otherRow(mode: SelectMode, index: Int, walkedHere: Bool) -> some View {
 		HStack(spacing: 10) {
 			Button { sel = toggleOther(mode, sel) } label: { indicator(selected: sel.otherSelected, multi: mode == .multiSelect) }
 				.buttonStyle(.plain)
@@ -158,7 +158,12 @@ struct QuestionDockView: View {
 				.onChange(of: other) { _, v in
 					if !v.isEmpty, !sel.otherSelected { sel = toggleOther(mode, sel) }
 				}
-				.onSubmit { focus = .rows }
+				// Esc leaves the field and parks the row cursor on "Other".
+				.onKeyPress(.escape) {
+					walked = index
+					focus = .rows
+					return .handled
+				}
 		}
 		.padding(.horizontal, 12)
 		.padding(.vertical, 8)
@@ -215,6 +220,15 @@ struct QuestionDockView: View {
 	}
 
 	private func handleRowKey(_ key: KeyEquivalent, qd: QuestionData, mode: SelectMode, rows: Int) -> KeyPress.Result {
+		switch dockKeyRoute(key, typing: focus == .other) {
+		case .field:
+			return .ignored
+		case .submit:
+			submit(qd)
+			return .handled
+		case .rows:
+			break
+		}
 		switch key {
 		case .downArrow:
 			walked = min((walked ?? -1) + 1, rows - 1)
@@ -255,4 +269,14 @@ struct QuestionDockView: View {
 			confidence: qd.kind == .quiz ? CONFIDENCE_STOPS[confIdx] : nil)
 		session.submitAnswer(buildAnswer(qd, req, tool: tool), toolCallId: toolCallId)
 	}
+}
+
+/// Where a key pressed inside the option rows goes (question-dock.tsx: a
+/// typing field keeps its keys). In the "Other…" field every key belongs to
+/// the field except Return, which submits.
+enum DockKeyRoute: Equatable { case rows, field, submit }
+
+func dockKeyRoute(_ key: KeyEquivalent, typing: Bool) -> DockKeyRoute {
+	guard typing else { return .rows }
+	return key == .return ? .submit : .field
 }
