@@ -1,0 +1,24 @@
+[
+	{
+		"id": "chat_mv293wv5_10656952",
+		"title": "test session. ask a few questions",
+		"createdAt": "2026-10-10T10:28:13.985Z",
+		"updatedAt": "2026-10-10T10:33:58.033Z",
+		"kind": "practice",
+		"messageCount": 18,
+		"phase": "probe",
+		"pendingQuestion": false,
+		"activeProblem": false
+	},
+	{
+		"id": "chat_mv27rrra_feff23b6",
+		"title": "test session, no probing or teaching required. follow my orders:…",
+		"createdAt": "2026-10-10T09:50:47.878Z",
+		"updatedAt": "2026-10-10T10:23:02.643Z",
+		"kind": "teach",
+		"messageCount": 95,
+		"phase": "teach",
+		"pendingQuestion": false,
+		"activeProblem": false
+	}
+]

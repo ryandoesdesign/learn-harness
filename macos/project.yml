@@ -30,6 +30,10 @@ targets:
         product: LHCore
       - package: LHKit
         product: LHResources
+      - package: LHKit
+        product: LHStore
+      - package: LHKit
+        product: LHImport
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryandoesdesign.LearnHarness
@@ -67,3 +71,5 @@ schemes:
       targets:
         - LearnHarnessTests
         - package: LHKit/LHCoreTests
+        - package: LHKit/LHStoreTests
+        - package: LHKit/LHImportTests

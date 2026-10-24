@@ -61,6 +61,28 @@
                ReferencedContainer = "container:Packages/LHKit">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "LHStoreTests"
+               BuildableName = "LHStoreTests"
+               BlueprintName = "LHStoreTests"
+               ReferencedContainer = "container:Packages/LHKit">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "LHImportTests"
+               BuildableName = "LHImportTests"
+               BlueprintName = "LHImportTests"
+               ReferencedContainer = "container:Packages/LHKit">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

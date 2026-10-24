@@ -8,10 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		29F6B95BB12F72F8278D3539 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C84F44649F29806FC6820DB /* RootView.swift */; };
+		3460C1B26341E71954F7CB2A /* LHStore in Frameworks */ = {isa = PBXBuildFile; productRef = DF4715D73492700C49DDFE87 /* LHStore */; };
+		572ED57A386A07E026EDCA74 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65642BEE29DC429C524A3A4E /* ImportView.swift */; };
+		9C3EE5AAECF639EDF505E692 /* LHImport in Frameworks */ = {isa = PBXBuildFile; productRef = 5E1F006E5AE550C8636889FD /* LHImport */; };
 		C4A332BEF47766310AE53717 /* LHCore in Frameworks */ = {isa = PBXBuildFile; productRef = F64AFC2AD1FBED6B337A4C95 /* LHCore */; };
 		D464E6B9E818B38D81CF55F9 /* LHResources in Frameworks */ = {isa = PBXBuildFile; productRef = 45AAD480C7B356BFAA61B92F /* LHResources */; };
 		DD3BFEE3A36B7A68841C70F2 /* LearnHarnessApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF66A05E71DF8368D500E8F4 /* LearnHarnessApp.swift */; };
 		EE1F5CFE55521435B8A0A7D9 /* LaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA09B326668A14B029E77026 /* LaunchTests.swift */; };
+		F9D2A5921B3FD9481043D7BF /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA3E30B7D6811217919957F /* AppModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +32,8 @@
 		1C84F44649F29806FC6820DB /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		1D17B359F9EC7AB64627BD8A /* LearnHarnessTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LearnHarnessTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		46DE353BFF880FCA14F35171 /* LHKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LHKit; path = Packages/LHKit; sourceTree = SOURCE_ROOT; };
+		5EA3E30B7D6811217919957F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		65642BEE29DC429C524A3A4E /* ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportView.swift; sourceTree = "<group>"; };
 		A1C87B8F3F1CA96293D3BD67 /* LearnHarness.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LearnHarness.entitlements; sourceTree = "<group>"; };
 		BE87A15DE6632DBA8D5EF9E1 /* LearnHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LearnHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF66A05E71DF8368D500E8F4 /* LearnHarnessApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnHarnessApp.swift; sourceTree = "<group>"; };
@@ -41,6 +47,8 @@
 			files = (
 				C4A332BEF47766310AE53717 /* LHCore in Frameworks */,
 				D464E6B9E818B38D81CF55F9 /* LHResources in Frameworks */,
+				3460C1B26341E71954F7CB2A /* LHStore in Frameworks */,
+				9C3EE5AAECF639EDF505E692 /* LHImport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,6 +58,8 @@
 		26D5266D659CDCF571C62B79 /* LearnHarness */ = {
 			isa = PBXGroup;
 			children = (
+				5EA3E30B7D6811217919957F /* AppModel.swift */,
+				65642BEE29DC429C524A3A4E /* ImportView.swift */,
 				A1C87B8F3F1CA96293D3BD67 /* LearnHarness.entitlements */,
 				DF66A05E71DF8368D500E8F4 /* LearnHarnessApp.swift */,
 				1C84F44649F29806FC6820DB /* RootView.swift */,
@@ -128,6 +138,8 @@
 			packageProductDependencies = (
 				F64AFC2AD1FBED6B337A4C95 /* LHCore */,
 				45AAD480C7B356BFAA61B92F /* LHResources */,
+				DF4715D73492700C49DDFE87 /* LHStore */,
+				5E1F006E5AE550C8636889FD /* LHImport */,
 			);
 			productName = LearnHarness;
 			productReference = BE87A15DE6632DBA8D5EF9E1 /* LearnHarness.app */;
@@ -188,6 +200,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9D2A5921B3FD9481043D7BF /* AppModel.swift in Sources */,
+				572ED57A386A07E026EDCA74 /* ImportView.swift in Sources */,
 				DD3BFEE3A36B7A68841C70F2 /* LearnHarnessApp.swift in Sources */,
 				29F6B95BB12F72F8278D3539 /* RootView.swift in Sources */,
 			);
@@ -462,6 +476,14 @@
 		45AAD480C7B356BFAA61B92F /* LHResources */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LHResources;
+		};
+		5E1F006E5AE550C8636889FD /* LHImport */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LHImport;
+		};
+		DF4715D73492700C49DDFE87 /* LHStore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LHStore;
 		};
 		F64AFC2AD1FBED6B337A4C95 /* LHCore */ = {
 			isa = XCSwiftPackageProductDependency;
