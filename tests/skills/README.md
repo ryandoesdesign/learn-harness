@@ -1,4 +1,4 @@
-# LearnHarness data skill tests
+# Aster data skill tests
 
 Run independently of the application, with Python 3.10+ and no dependencies:
 
@@ -6,7 +6,7 @@ Run independently of the application, with Python 3.10+ and no dependencies:
 python3 -B -m unittest discover -s tests/skills -v
 ```
 
-These tests exercise the self-contained readers in `skills/learnharness/` against
+These tests exercise the self-contained readers in `skills/aster/` against
 `tests/fixtures/golden-data.sqlite` (the golden JSON data in
 `tests/fixtures/golden-data/`, run through the native app's importer) and small
 synthetic databases built from `tests/fixtures/schema.sql` (the app's migrated
@@ -26,7 +26,7 @@ LH_WRITE_FIXTURE=1 swift test --package-path macos/Packages/LHKit --filter Skill
 ```
 
 and add the new migration identifier to `KNOWN_MIGRATIONS` in
-`skills/learnharness/scripts/_data.py` once the readers handle it.
+`skills/aster/scripts/_data.py` once the readers handle it.
 
 No real installed-user profile, provider keys, app, LLM, or network is used.
 The test command is intentionally separate from the app's test suites; the skill

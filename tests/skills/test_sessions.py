@@ -64,7 +64,7 @@ snapshot = _db.snapshot
 def stored(value):
     """The record as the reader returns it after a trip through native rows."""
     with tempfile.TemporaryDirectory() as directory:
-        path = _db.create(Path(directory) / "learnharness.sqlite")
+        path = _db.create(Path(directory) / "aster.sqlite")
         _db.insert_chat(path, value)
         connection = _data.open_database(path)
         try:
@@ -359,7 +359,7 @@ class SessionsTest(unittest.TestCase):
     def test_cli_errors_isolated_list_and_missing_defaults(self):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)
-            db = _db.create(folder / "learnharness.sqlite")
+            db = _db.create(folder / "aster.sqlite")
             _db.insert_chat(db, record())
             _db.insert_chat(db, record(session_id="future", version=2))
             _db.insert_chat(db, record([user("torn")], session_id="broken"))
@@ -389,7 +389,7 @@ class SessionsTest(unittest.TestCase):
             self.assertTrue(selected["reading_notes"])
             self.assertNotEqual(self.cli(db, "read", "sample", "--format", "json").returncode, 0)
             self.assertEqual(before, snapshot(folder))
-            absent = folder / "not-created" / "learnharness.sqlite"
+            absent = folder / "not-created" / "aster.sqlite"
             missing = self.cli(absent, "list")
             self.assertNotEqual(missing.returncode, 0)
             self.assertFalse(absent.parent.exists())

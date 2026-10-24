@@ -1,4 +1,4 @@
-"""Synthetic LearnHarness databases for the skill tests.
+"""Synthetic Aster databases for the skill tests.
 
 `tests/fixtures/schema.sql` is the app's migrated schema (drift-tested by
 SkillFixtureTests in LHImportTests). `insert_chat` writes a session given in
@@ -16,7 +16,7 @@ import sys
 
 sys.dont_write_bytecode = True
 REPO = Path(__file__).resolve().parents[2]
-SCRIPTS = REPO / "skills" / "learnharness" / "scripts"
+SCRIPTS = REPO / "skills" / "aster" / "scripts"
 FIXTURES = REPO / "tests" / "fixtures"
 SCHEMA = FIXTURES / "schema.sql"
 GOLDEN_DB = FIXTURES / "golden-data.sqlite"

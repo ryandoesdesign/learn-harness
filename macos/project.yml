@@ -1,6 +1,6 @@
-# XcodeGen spec — the source of truth for LearnHarness.xcodeproj (both are
+# XcodeGen spec — the source of truth for Aster.xcodeproj (both are
 # committed; regenerate with `xcodegen` from this directory after editing).
-name: LearnHarness
+name: Aster
 options:
   bundleIdPrefix: com.ryandoesdesign
   deploymentTarget:
@@ -24,10 +24,10 @@ packages:
     url: https://github.com/raspu/Highlightr
     exactVersion: 2.3.0
 targets:
-  LearnHarness:
+  Aster:
     type: application
     platform: macOS
-    sources: [LearnHarness]
+    sources: [Aster]
     dependencies:
       - package: LHKit
         product: LHCore
@@ -48,48 +48,48 @@ targets:
       - package: Highlightr
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.ryandoesdesign.LearnHarness
-        PRODUCT_NAME: LearnHarness
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryandoesdesign.Aster
+        PRODUCT_NAME: Aster
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: LearnHarness
+        INFOPLIST_KEY_CFBundleDisplayName: Aster
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.education
         INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Ryan Tessier"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        INFOPLIST_KEY_NSMicrophoneUsageDescription: "LearnHarness uses the microphone for dictation. Speech is transcribed on this Mac and never leaves it."
-        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "LearnHarness transcribes your dictation on this Mac."
-        CODE_SIGN_ENTITLEMENTS: LearnHarness/LearnHarness.entitlements
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Aster uses the microphone for dictation. Speech is transcribed on this Mac and never leaves it."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Aster transcribes your dictation on this Mac."
+        CODE_SIGN_ENTITLEMENTS: Aster/Aster.entitlements
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES
-  LearnHarnessTests:
+  AsterTests:
     type: bundle.unit-test
     platform: macOS
     sources:
-      - LearnHarnessTests
+      - AsterTests
       # The golden chats, readable inside the sandboxed host.
       - path: ../tests/fixtures/golden-data/chats
         type: folder
         buildPhase: resources
     dependencies:
-      - target: LearnHarness
+      - target: Aster
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.ryandoesdesign.LearnHarnessTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.ryandoesdesign.AsterTests
         GENERATE_INFOPLIST_FILE: YES
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/LearnHarness.app/Contents/MacOS/LearnHarness"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Aster.app/Contents/MacOS/Aster"
         BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
-  LearnHarness:
+  Aster:
     build:
       targets:
-        LearnHarness: all
+        Aster: all
     run:
       config: Debug
     test:
       config: Debug
       targets:
-        - LearnHarnessTests
+        - AsterTests
         - package: LHKit/LHCoreTests
         - package: LHKit/LHStoreTests
         - package: LHKit/LHImportTests

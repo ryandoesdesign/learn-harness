@@ -65,7 +65,7 @@ import LHCore
 			try db.writer.writeWithoutTransaction { _ = try $0.checkpoint(.truncate) }
 			try (db.writer as? DatabasePool)?.close()
 		}
-		let path = dbDir.appending(path: "learnharness.sqlite")
+		let path = dbDir.appending(path: "aster.sqlite")
 		let queue = try DatabaseQueue(path: path.path)
 		try queue.writeWithoutTransaction { db in
 			try db.execute(sql: "PRAGMA journal_mode=DELETE")

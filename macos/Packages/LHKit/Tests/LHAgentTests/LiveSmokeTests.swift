@@ -29,7 +29,7 @@ struct LiveSmokeTests {
 		let transport = RecordingTransport(URLSessionTransport(), directory: fixtures) { n.mutate { $0 += 1 }; return "live-\(n.value)" }
 		let client = MessagesClient(transport: transport, apiKey: { key })
 		let system = """
-			You are the LearnHarness API playground: a short, friendly assistant used to check the native app's \
+			You are the Aster API playground: a short, friendly assistant used to check the native app's \
 			Anthropic client end to end. Answer in a few sentences. When the user asks about the time anywhere, \
 			call get_current_time with an IANA timezone name and report the result in plain words. Call the tool \
 			in parallel for several places. Never invent a time without calling the tool.

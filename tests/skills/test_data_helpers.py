@@ -26,7 +26,7 @@ class DataHelpersTest(unittest.TestCase):
         self.base = Path(self.temp.name)
         self.folder = self.base / "data"
         self.folder.mkdir()
-        self.db = _db.create(self.folder / "learnharness.sqlite")
+        self.db = _db.create(self.folder / "aster.sqlite")
 
     def tearDown(self):
         self.temp.cleanup()
@@ -59,19 +59,19 @@ class DataHelpersTest(unittest.TestCase):
         self.assertEqual(_data.database_path(str(self.db)), self.db.resolve())
 
     def test_missing_database_is_not_created(self):
-        target = self.base / "not-created" / "learnharness.sqlite"
+        target = self.base / "not-created" / "aster.sqlite"
         with self.assertRaisesRegex(_data.DataError, "nothing was created"):
             _data.database_path(str(target))
         self.assertFalse(target.parent.exists())
 
     def test_sandbox_container_is_the_default(self):
-        expected = self.installed("Library", "Containers", "com.ryandoesdesign.LearnHarness", "Data", "Library",
-                                  "Application Support", "LearnHarness", "learnharness.sqlite")
+        expected = self.installed("Library", "Containers", "com.ryandoesdesign.Aster", "Data", "Library",
+                                  "Application Support", "Aster", "aster.sqlite")
         with patch.object(Path, "home", return_value=self.base):
             self.assertEqual(_data.database_path(), expected.resolve())
 
     def test_unsandboxed_location_is_the_fallback(self):
-        expected = self.installed("Library", "Application Support", "LearnHarness", "learnharness.sqlite")
+        expected = self.installed("Library", "Application Support", "Aster", "aster.sqlite")
         with patch.object(Path, "home", return_value=self.base):
             self.assertEqual(_data.database_path(), expected.resolve())
 
@@ -82,9 +82,9 @@ class DataHelpersTest(unittest.TestCase):
         self.assertFalse((self.base / "Library").exists())
 
     def test_container_wins_over_unsandboxed_copy(self):
-        container = self.installed("Library", "Containers", "com.ryandoesdesign.LearnHarness", "Data", "Library",
-                                   "Application Support", "LearnHarness", "learnharness.sqlite")
-        self.installed("Library", "Application Support", "LearnHarness", "learnharness.sqlite")
+        container = self.installed("Library", "Containers", "com.ryandoesdesign.Aster", "Data", "Library",
+                                   "Application Support", "Aster", "aster.sqlite")
+        self.installed("Library", "Application Support", "Aster", "aster.sqlite")
         with patch.object(Path, "home", return_value=self.base):
             self.assertEqual(_data.database_path(), container.resolve())
 
@@ -114,7 +114,7 @@ class DataHelpersTest(unittest.TestCase):
             _data.open_database(other)
         bare = self.base / "bare.sqlite"
         _db.execute(bare, "CREATE TABLE unrelated (x)")
-        with self.assertRaisesRegex(_data.DataError, "not a LearnHarness database"):
+        with self.assertRaisesRegex(_data.DataError, "not a Aster database"):
             _data.open_database(bare)
 
     def test_unreadable_stored_json_is_an_error_without_writes(self):
@@ -136,7 +136,7 @@ class DataHelpersTest(unittest.TestCase):
         before = _db.snapshot(self.folder)
         self.assertEqual(self.read(), self.record())
         self.assertEqual(_db.snapshot(self.folder), before)
-        self.assertEqual(sorted(before), ["learnharness.sqlite"])
+        self.assertEqual(sorted(before), ["aster.sqlite"])
 
     def test_future_chat_version_is_refused(self):
         self.save_chat(version=2)

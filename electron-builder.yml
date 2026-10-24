@@ -1,4 +1,4 @@
-# electron-builder config — LearnHarness desktop (macOS arm64; Windows/Linux x64).
+# electron-builder config — Aster desktop (macOS arm64; Windows/Linux x64).
 #
 # Shape (fact-checked 2026-09-17):
 #   - the app's real server (.next/standalone, curated by

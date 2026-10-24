@@ -1,5 +1,5 @@
 /**
- * LearnHarness — the Electron shell (wrapper milestone, 2026-09-17).
+ * Aster — the Electron shell (wrapper milestone, 2026-09-17).
  *
  * What this process is and is not:
  *   IS:  a thin launcher + security guard around the app's real server —
@@ -425,7 +425,7 @@ function checkForUpdates({ manual = false } = {}) {
 			// update-downloaded. Manual checks additionally answer directly.
 			if (!manual) return;
 			const version = result?.updateInfo?.version;
-			if (!version) dialog.showMessageBox({ type: "info", message: "You're up to date.", detail: `LearnHarness ${app.getVersion()} is the latest version.` });
+			if (!version) dialog.showMessageBox({ type: "info", message: "You're up to date.", detail: `Aster ${app.getVersion()} is the latest version.` });
 		})
 		.catch((err) => {
 			log(`update check failed: ${err?.message ?? err}`);

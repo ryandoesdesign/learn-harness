@@ -65,7 +65,7 @@ public struct FileAccess: Sendable {
 		let resolved = url.standardizedFileURL.resolvingSymlinksInPath()
 		guard isAllowed(resolved, roots: roots) else {
 			let list = roots.map(\.path).joined(separator: ", ")
-			throw FileToolError("\"\(p.isEmpty ? url.path : p)\" is outside the folders LearnHarness can read (\(list)). Ask the learner to add its folder in Settings → Learner folders.")
+			throw FileToolError("\"\(p.isEmpty ? url.path : p)\" is outside the folders Aster can read (\(list)). Ask the learner to add its folder in Settings → Learner folders.")
 		}
 		return resolved
 	}

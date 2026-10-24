@@ -182,7 +182,7 @@ private func failure(_ tool: any AgentTool, _ input: JSONValue) async -> String?
 	@Test func pathsOutsideTheFoldersAreRefusedWithTheSettingsHint() async throws {
 		let t = try Tools()
 		let msg = await failure(t.read, ["path": "/etc/hosts"])
-		#expect(msg?.hasPrefix("\"/etc/hosts\" is outside the folders LearnHarness can read (\(t.root.path)).") == true, "\(msg ?? "")")
+		#expect(msg?.hasPrefix("\"/etc/hosts\" is outside the folders Aster can read (\(t.root.path)).") == true, "\(msg ?? "")")
 		#expect(await failure(t.read, ["path": "../outside.txt"])?.contains("is outside the folders") == true, "no escaping by ..")
 	}
 	@Test func tildeExpandsToTheRealHome() async throws {

@@ -12,12 +12,12 @@ public final class AppDatabase: Sendable {
 		try Self.migrator.migrate(writer)
 	}
 
-	/// `<directory>/learnharness.sqlite` (created if missing).
+	/// `<directory>/aster.sqlite` (created if missing).
 	public static func open(directory: URL) throws -> AppDatabase {
 		try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 		var config = Configuration()
 		config.foreignKeysEnabled = true
-		let pool = try DatabasePool(path: directory.appending(path: "learnharness.sqlite").path, configuration: config)
+		let pool = try DatabasePool(path: directory.appending(path: "aster.sqlite").path, configuration: config)
 		return try AppDatabase(pool)
 	}
 
@@ -29,7 +29,7 @@ public final class AppDatabase: Sendable {
 
 	/// The app's data directory inside the sandbox container.
 	public static var defaultDirectory: URL {
-		URL.applicationSupportDirectory.appending(path: "LearnHarness", directoryHint: .isDirectory)
+		URL.applicationSupportDirectory.appending(path: "Aster", directoryHint: .isDirectory)
 	}
 
 	static var migrator: DatabaseMigrator {

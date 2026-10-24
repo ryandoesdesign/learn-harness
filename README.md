@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/lh_banner_dark.png">
     <source media="(prefers-color-scheme: light)" srcset="docs/assets/lh_banner_light.png">
-    <img src="docs/assets/lh_banner_light.png" alt="LearnHarness" width="640">
+    <img src="docs/assets/lh_banner_light.png" alt="Aster" width="640">
   </picture>
 </p>
 
@@ -15,11 +15,11 @@
   <a href="https://github.com/amosblomqvist/learnharness/issues">Issues</a>
 </p>
 
-LearnHarness uses AI agents to plan and teach lessons from your current understanding to your goal. It builds a detailed picture of what you understand and how you reason. That picture is updated as you learn.
+Aster uses AI agents to plan and teach lessons from your current understanding to your goal. It builds a detailed picture of what you understand and how you reason. That picture is updated as you learn.
 
 Instead of just giving you an explanation, it uses your answers and thinking to decide what you need next. Teaching builds understanding one reasoning step at a time. Practice makes it usable. A persistent knowledge graph carries it across sessions.
 
-![LearnHarness teaching session](docs/assets/teaching-session.png)
+![Aster teaching session](docs/assets/teaching-session.png)
 
 ## How it works
 
@@ -38,7 +38,7 @@ What you are taught accumulates as propositions and reasoning chains: individual
 
 Future teaching sessions can read the graph instead of starting from scratch. Practice sessions can draw their material from it. It stores the ideas and their connections, not ratings of your ability.
 
-![LearnHarness knowledge graph](docs/assets/knowledge-graph.png)
+![Aster knowledge graph](docs/assets/knowledge-graph.png)
 
 ## Download and get started
 
@@ -48,13 +48,13 @@ Future teaching sessions can read the graph instead of starting from scratch. Pr
 - **Windows (x64):** run the installer. It is currently unsigned; Windows may show an “unknown publisher” or SmartScreen warning.
 - **Linux (x64):** make the AppImage executable and open it, or install the Debian/Ubuntu `.deb`.
 
-Add your provider API key and choose your models, then start a session with what you want to understand. LearnHarness supports 30+ provider options, including OpenAI, Anthropic, Google, DeepSeek, and OpenRouter. Optional dictation and web search use separate service keys.
+Add your provider API key and choose your models, then start a session with what you want to understand. Aster supports 30+ provider options, including OpenAI, Anthropic, Google, DeepSeek, and OpenRouter. Optional dictation and web search use separate service keys.
 
 All three platforms support in-app updates.
 
 ## Your keys, your data
 
-- **Your keys and models.** No LearnHarness subscription or markup. You pay your providers for usage; a live cost meter shows model costs.
+- **Your keys and models.** No Aster subscription or markup. You pay your providers for usage; a live cost meter shows model costs.
 - **Local storage.** Your chats, graph, settings, and API keys live on your machine. Learning records are plain files you can inspect.
 - **External services.** Models run through your configured providers. Model requests send the context needed for the task; web research and dictation also contact external services. Local storage does not mean offline processing.
 - **Inspectable behavior.** System prompts are visible and editable. The app is open source under the AGPL-3.0 license.

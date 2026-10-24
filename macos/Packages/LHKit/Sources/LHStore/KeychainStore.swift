@@ -14,13 +14,13 @@ public struct KeychainError: Error, Equatable, CustomStringConvertible {
 	public var description: String { "Keychain error \(status): \(SecCopyErrorMessageString(status, nil) as String? ?? "unknown")" }
 }
 
-/// SecItem generic password: service com.ryandoesdesign.LearnHarness,
+/// SecItem generic password: service com.ryandoesdesign.Aster,
 /// account anthropic-api-key.
 public struct SystemKeychain: KeychainStore {
 	public let service: String
 	public let account: String
 
-	public init(service: String = "com.ryandoesdesign.LearnHarness", account: String = "anthropic-api-key") {
+	public init(service: String = "com.ryandoesdesign.Aster", account: String = "anthropic-api-key") {
 		self.service = service
 		self.account = account
 	}

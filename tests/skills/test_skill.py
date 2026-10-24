@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import _db
 
 REPO = _db.REPO
-SKILL = REPO / "skills" / "learnharness"
+SKILL = REPO / "skills" / "aster"
 GOLDEN = _db.GOLDEN_DB
 snapshot = _db.snapshot
 COMMANDS = [
@@ -59,7 +59,7 @@ class SkillFolderTest(unittest.TestCase):
         self.assertLess(len(text.splitlines()), 500)
         self.assertIn("references/data-format.md", text)
         self.assertTrue((SKILL / "references" / "data-format.md").is_file())
-        self.assertIn("Never modify LearnHarness's data", text)
+        self.assertIn("Never modify Aster's data", text)
         self.assertIn("archival view", text)
         self.assertNotIn("/Users/amos/", text)
 
@@ -75,13 +75,13 @@ class SkillFolderTest(unittest.TestCase):
     def test_copied_skill_runs_outside_repository_and_creates_no_cache_or_data(self):
         with tempfile.TemporaryDirectory() as temporary:
             base = Path(temporary)
-            skill = base / "standalone" / "learnharness"
+            skill = base / "standalone" / "aster"
             data = base / "learning-data"
             elsewhere = base / "unrelated-working-directory"
             elsewhere.mkdir()
             data.mkdir()
             shutil.copytree(SKILL, skill)
-            db = data / "learnharness.sqlite"
+            db = data / "aster.sqlite"
             shutil.copy2(GOLDEN, db)
             before_skill = snapshot(skill)
             before_data = snapshot(data)
@@ -127,13 +127,13 @@ class SkillFolderTest(unittest.TestCase):
             live, copied = base / "live", base / "copied"
             live.mkdir()
             copied.mkdir()
-            db = live / "learnharness.sqlite"
+            db = live / "aster.sqlite"
             shutil.copy2(GOLDEN, db)
             app = subprocess.Popen([sys.executable, "-B", "-c", APP, str(db)], stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE, text=True)
             try:
                 self.assertEqual(app.stdout.readline().strip(), "ready")
-                for sibling in ("learnharness.sqlite-wal", "learnharness.sqlite-shm"):
+                for sibling in ("aster.sqlite-wal", "aster.sqlite-shm"):
                     self.assertTrue((live / sibling).is_file(), sibling)
                     shutil.copy2(live / sibling, copied / sibling)
                 shutil.copy2(db, copied / db.name)
@@ -156,12 +156,12 @@ class SkillFolderTest(unittest.TestCase):
             with sqlite3.connect(bare / db.name) as connection:
                 connection.execute("PRAGMA journal_mode=WAL")
             connection.close()
-            for sibling in ("learnharness.sqlite-wal", "learnharness.sqlite-shm"):
+            for sibling in ("aster.sqlite-wal", "aster.sqlite-shm"):
                 (bare / sibling).unlink(missing_ok=True)
             before = snapshot(bare)
             self.run_all(bare / db.name)
             self.assertEqual(snapshot(bare), before)
-            self.assertEqual(sorted(before), ["learnharness.sqlite"])
+            self.assertEqual(sorted(before), ["aster.sqlite"])
 
 
 if __name__ == "__main__":

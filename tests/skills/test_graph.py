@@ -52,7 +52,7 @@ class GraphTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        self.db = _db.create(self.root / "learnharness.sqlite")
+        self.db = _db.create(self.root / "aster.sqlite")
 
     def write_chat(self, identifier, title, updated, **extra):
         _db.insert_chat(self.db, {"id": identifier, "title": title, "createdAt": "2026-01-01T00:00:00Z",
