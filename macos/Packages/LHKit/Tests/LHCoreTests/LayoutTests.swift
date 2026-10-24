@@ -462,7 +462,10 @@ private func maxDrift(_ a: JSONValue, _ b: JSONValue) -> Double {
 		expectJSONEqual(actual, golden, tolerance: PARITY_TOLERANCE)
 	}
 
-	@Test(arguments: ["full", "subset", "bootstrap", "subsetVertical", "subsetRadial"])
+	// "bootstrap" left parity on purpose: new clusters seed as groups apart
+	// from each other (the graph opened with every cluster in one spot);
+	// LayoutSettleTests pins the separation instead.
+	@Test(arguments: ["full", "subset", "subsetVertical", "subsetRadial"])
 	func incrementalLayoutMatchesTS(name: String) throws {
 		let input = try GoldenLayoutInput()
 		let golden = try #require(try Golden.load("layout.incremental")[name])
@@ -470,7 +473,6 @@ private func maxDrift(_ a: JSONValue, _ b: JSONValue) -> Double {
 		let previous: [String: Position]
 		switch name {
 		case "full": previous = input.previous
-		case "bootstrap": previous = [:]
 		default: previous = input.previousSubset
 		}
 		if name == "subsetVertical" {

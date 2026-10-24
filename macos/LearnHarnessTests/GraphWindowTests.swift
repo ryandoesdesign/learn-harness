@@ -83,4 +83,46 @@ import Testing
 		#expect(m.details["chains"]?.arrayValue?.count == 1, "the picked chain rides along")
 		#expect(app.draftPicks.isEmpty)
 	}
+
+	/// The reported bug: a layout settled with every cluster in one spot.
+	/// Opening the window anneals the clusters apart and commits the rest —
+	/// once: the next open loads that layout as stored.
+	@Test func overlappingClustersAreRepairedOnceOnOpen() async throws {
+		// The host is the app: leave its own repair mark as it was.
+		let saved = UserDefaults.standard.string(forKey: "lh.graph.repaired.v1")
+		defer { UserDefaults.standard.set(saved, forKey: "lh.graph.repaired.v1") }
+		UserDefaults.standard.removeObject(forKey: "lh.graph.repaired.v1")
+		let dir = FileManager.default.temporaryDirectory.appending(path: "lhgraph-\(UUID().uuidString)", directoryHint: .isDirectory)
+		let app = AppModel(dataDirectory: dir, keychain: InMemoryKeychain())
+		let g = GraphRepository(app.database)
+		var clusters: [[String]] = []
+		var stacked: [String: Position] = [:]
+		for title in ["Joins", "Indexes"] {
+			let chat = try ChatRepository(app.database).createChat(title: title)
+			let ids = (0..<5).map { "n_\(title)_\($0)" }
+			for (i, id) in ids.enumerated() {
+				try g.appendNode(GraphNode(id: id, name: id, statement: id, aliases: [], createdAt: "2026-10-24T00:00:00.000Z",
+					provenance: [ProvenancePoint(chatId: chat.id, messageId: "m_\(id)")]))
+				stacked[id] = Position(x: Double(i) * 20, y: Double(i % 2) * 20)
+			}
+			clusters.append(ids)
+		}
+		try g.writePositions(stacked)
+		#expect(clustersOverlap(clusters, positions: stacked))
+
+		let model = GraphWindowModel(app: app)
+		model.reload()
+		#expect(model.simActive, "the repair runs hot from the open")
+		let deadline = ContinuousClock.now + .seconds(15)
+		while ContinuousClock.now < deadline, UserDefaults.standard.string(forKey: "lh.graph.repaired.v1") == nil {
+			try await Task.sleep(for: .milliseconds(50))
+		}
+		let repaired = g.readPositions()
+		#expect(repaired != stacked, "the rest was committed")
+		#expect(!clustersOverlap(clusters, positions: repaired))
+
+		let reopened = GraphWindowModel(app: app)
+		reopened.reload()
+		#expect(!reopened.simActive, "a repaired layout opens as stored")
+	}
 }

@@ -230,6 +230,25 @@ public func isNodeVisible(name: String, statement: String, query: String) -> Boo
 	return q.isEmpty || name.lowercased().contains(q) || statement.lowercased().contains(q)
 }
 
+/// Two clusters' circles (centroid, farthest member) intersect — the graph
+/// window repairs such a layout on open. Implication nodes and unplaced
+/// members are ignored.
+public func clustersOverlap(_ clusters: [[String]], positions: [String: Position]) -> Bool {
+	let circles: [(x: Double, y: Double, r: Double)] = clusters.compactMap { members in
+		let pts = members.filter { !isImpNodeId($0) }.compactMap { positions[$0] }
+		guard !pts.isEmpty else { return nil }
+		let x = pts.map(\.x).reduce(0, +) / Double(pts.count)
+		let y = pts.map(\.y).reduce(0, +) / Double(pts.count)
+		return (x, y, pts.map { hypot($0.x - x, $0.y - y) }.max()!)
+	}
+	for i in circles.indices {
+		for j in circles.indices where j > i {
+			if hypot(circles[i].x - circles[j].x, circles[i].y - circles[j].y) < circles[i].r + circles[j].r { return true }
+		}
+	}
+	return false
+}
+
 /// graph-view.tsx seedMissingNodePositions: missing nodes on a deterministic
 /// ring (FNV-1a angle + golden-angle step) around the known bbox.
 public func seedMissingNodePositions(_ ids: [String], _ positions: [String: Position]) -> [String: Position] {

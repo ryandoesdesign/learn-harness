@@ -582,6 +582,23 @@ public func incrementalLayout(
 	}
 	rimRadius += 4
 
+	// A cluster with no anchored member arrives as a group: one seed spot
+	// per new cluster, beyond the rim (or on a ring when there's no core),
+	// so it settles beside the graph instead of at its centre.
+	var groupSeeds: [String: (center: Position, spread: Double)] = [:]
+	let newClusters = (options.clusters ?? []).filter { m in !m.isEmpty && !m.contains { anchors[$0] != nil } }
+	if hasCore || newClusters.count > 1 {
+		let spreads = newClusters.map { 30 * Double($0.count).squareRoot() }
+		let ring = hasCore ? 0 : spreads.reduce(0, +) / Double.pi + (spreads.max() ?? 0)
+		for (k, members) in newClusters.enumerated() {
+			var rand = LayoutSeededRandom(members[0])
+			let angle = rand.next() * Double.pi * 2 + Double(k) * 2.39996323
+			let dist = hasCore ? rimRadius + spreads[k] : ring
+			let center = Position(x: cx + JSMath.cos(angle) * dist, y: cy + JSMath.sin(angle) * dist)
+			for id in members { groupSeeds[id] = (center, spreads[k]) }
+		}
+	}
+
 	var simNodes: [LayoutNode] = []
 	simNodes.reserveCapacity(nodeIds.count)
 	for id in nodeIds {
@@ -605,6 +622,10 @@ public func incrementalLayout(
 			if found > 0 {
 				x = sx / Double(found) + (rand.next() - 0.5) * 8
 				y = sy / Double(found) + (rand.next() - 0.5) * 8
+			} else if let g = groupSeeds[id] {
+				x = g.center.x + (rand.next() - 0.5) * g.spread
+				y = g.center.y + (rand.next() - 0.5) * g.spread
+				setAnchor(id, Position(x: x, y: y))
 			} else if hasCore {
 				let angle = rand.next() * Double.pi * 2
 				let radius = rimRadius + rand.next() * 8
