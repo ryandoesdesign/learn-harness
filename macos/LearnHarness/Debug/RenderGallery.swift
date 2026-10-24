@@ -122,7 +122,19 @@ enum RenderGallery {
 		let visual = SubagentResult.visual(VisualResult(svg: """
 			<svg xmlns="http://www.w3.org/2000/svg" width="320" height="140" viewBox="0 0 320 140"><rect x="10" y="20" width="120" height="100" fill="none" stroke="#1565c0" stroke-width="3"/><circle cx="230" cy="70" r="50" fill="#ef6c00" opacity="0.8"/><text x="70" y="75" text-anchor="middle" font-family="sans-serif" font-size="14">table A</text></svg>
 			"""))
-		let demo = SubagentResult.demo(DemoResult(title: "Join Explorer", html: "<!doctype html><p>demo</p>"))
+		let demo = SubagentResult.demo(DemoResult(title: "Join Explorer", html: """
+			<!doctype html><html><head><style>body{font:14px -apple-system,sans-serif;margin:16px}canvas{border:1px solid #ccc;display:block;margin:8px 0}</style></head>
+			<body><label>Overlap <input id="k" type="range" min="0" max="100" value="40"></label> <span id="v">40%</span>
+			<canvas id="c" width="420" height="140"></canvas><button id="boom">Throw an error</button>
+			<script>
+			const c = document.getElementById("c").getContext("2d"), k = document.getElementById("k"), v = document.getElementById("v");
+			function draw() { const o = +k.value; v.textContent = o + "%"; c.clearRect(0, 0, 420, 140);
+				c.globalAlpha = 0.6; c.fillStyle = "#1565c0"; c.beginPath(); c.arc(150, 70, 60, 0, 7); c.fill();
+				c.fillStyle = "#ef6c00"; c.beginPath(); c.arc(270 - o, 70, 60, 0, 7); c.fill(); }
+			k.oninput = draw; draw();
+			document.getElementById("boom").onclick = () => { null.rows; };
+			</script></body></html>
+			"""))
 
 		var messages: [Message] = []
 		messages.append(newGraphContextMessage(picks: [GraphContextPick(id: "n_1", name: "Relation", statement: "A set of tuples sharing a schema.")], chains: ["Relation, Key → Join"], id: "gc", now: tick()))

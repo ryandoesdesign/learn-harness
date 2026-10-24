@@ -31,7 +31,8 @@ final class SessionModel {
 
 	/// Disclosure state by element id (rows and their sub-sections).
 	private var openState: [String: Bool] = [:]
-	private var jobCache: [String: JobRecord?] = [:]
+	/// This chat's jobs by dispatching tool call (observed: the cards are live).
+	private(set) var jobsByToolCall: [String: JobRecord] = [:]
 	private var nodeNames: [String: String]?
 
 	// MARK: Live (M5)
@@ -65,8 +66,10 @@ final class SessionModel {
 		self.catalog = catalog
 	}
 
-	/// Mirror the record for as long as the session is shown.
+	/// Mirror the record (and its jobs) for as long as the session is shown.
 	func observe() async {
+		let jobsTask = Task { await observeJobs() }
+		defer { jobsTask.cancel() }
 		do {
 			for try await next in ChatRepository(database).observe(chatId) {
 				apply(next)
@@ -76,9 +79,19 @@ final class SessionModel {
 		}
 	}
 
+	private func observeJobs() async {
+		do {
+			for try await list in jobs.observe(chatId: chatId) {
+				jobsByToolCall = Dictionary(list.map { ($0.toolCallId, $0) }, uniquingKeysWith: { a, _ in a })
+			}
+		} catch {}
+	}
+
 	/// One read of the record (no observation) — tests and previews.
 	func load() {
 		apply(try? ChatRepository(database).get(chatId))
+		let list = (try? jobs.listJobs(chatId: chatId)) ?? []
+		jobsByToolCall = Dictionary(list.map { ($0.toolCallId, $0) }, uniquingKeysWith: { a, _ in a })
 	}
 
 	private func apply(_ next: ChatRecord?) {
@@ -91,7 +104,6 @@ final class SessionModel {
 		missing = false
 		record = next
 		if let s = streaming, next.messages.contains(where: { $0.id == s.id }) { streaming = nil }
-		jobCache.removeAll()
 		rebuild()
 	}
 
@@ -148,11 +160,11 @@ final class SessionModel {
 	// MARK: - Lookups
 
 	/// The job a dispatch box reports on (matched by tool call id).
-	func job(toolCallId: String) -> JobRecord? {
-		if let hit = jobCache[toolCallId] { return hit }
-		let job = try? jobs.findJob(chatId: chatId, toolCallId: toolCallId)
-		jobCache[toolCallId] = job
-		return job
+	func job(toolCallId: String) -> JobRecord? { jobsByToolCall[toolCallId] }
+
+	/// The demo/figure card's invert toggle, persisted to `message_ui`.
+	func setInverted(_ inverted: Bool, messageId: String) {
+		try? ChatRepository(database).setArtifactInverted(inverted, messageId: messageId, chatId: chatId)
 	}
 
 	/// A delivered artifact's text: inline (imported steers) or its file.

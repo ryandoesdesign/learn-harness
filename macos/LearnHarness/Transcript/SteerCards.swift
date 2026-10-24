@@ -23,7 +23,7 @@ struct SteerCard: View {
 				case "visual":
 					FigureCard(result: result, messageId: message.id, initialInverted: data["ui"]?["inverted"]?.boolValue ?? false)
 				case "demo":
-					DemoPlaceholderCard(result: result)
+					DemoCard(result: result, messageId: message.id, initialInverted: data["ui"]?["inverted"]?.boolValue ?? false)
 				default:
 					unreadable
 				}
@@ -160,8 +160,7 @@ struct BriefCard: View {
 
 /// visual-card.tsx VisualOutputCard: no card chrome — the figure on its
 /// white backing (natural width when declared), then the caption row:
-/// FIGURE, invert, Download, Fullscreen. Invert is read-only in M4 (the
-/// stored `message_ui` state seeds it; writing it back arrives with M5).
+/// FIGURE, invert (persisted to `message_ui`), Download, Fullscreen.
 struct FigureCard: View {
 	var result: JSONValue
 	var messageId: String
@@ -213,7 +212,7 @@ struct FigureCard: View {
 			HStack {
 				Eyebrow("Figure")
 				Spacer()
-				Toggle(isOn: Binding(get: { isInverted }, set: { inverted = $0 })) {
+				Toggle(isOn: Binding(get: { isInverted }, set: { inverted = $0; session.setInverted($0, messageId: messageId) })) {
 					Image(systemName: "circle.lefthalf.filled")
 				}
 				.toggleStyle(.button)
@@ -245,11 +244,17 @@ struct FigureCard: View {
 	}
 }
 
-/// demo-card.tsx, M4 placeholder: the caption header (INTERACTIVE DEMO +
-/// title) and Download (.html); the live sandboxed demo arrives with M6.
-struct DemoPlaceholderCard: View {
+/// demo-card.tsx DemoOutputCard: the caption header (INTERACTIVE DEMO +
+/// title, invert, Download), the error chip, and the live sandboxed demo
+/// (docs/native-macos-m6.md): 360pt until the page reports its height.
+struct DemoCard: View {
 	var result: JSONValue
+	var messageId: String
+	var initialInverted: Bool
 	@Environment(SessionModel.self) private var session
+	@State private var inverted: Bool?
+	@State private var height: CGFloat = 360
+	@State private var error: String?
 
 	var body: some View {
 		let html = session.artifactText(result, key: "html")
@@ -265,28 +270,54 @@ struct DemoPlaceholderCard: View {
 				}
 				.card()
 			} else {
-				VStack(alignment: .leading, spacing: 8) {
-					HStack(spacing: 8) {
-						Eyebrow("Interactive demo")
-						Text(title).font(Theme.uiMedium).lineLimit(1)
-						Spacer()
-						Button {
-							saveFile(name: "\(slugFilename(title)).html", contents: html, type: .html)
-						} label: { Image(systemName: "arrow.down.to.line") }
-							.buttonStyle(.borderless)
-							.help("Download as HTML")
-					}
-					Text("The interactive demo view arrives with the background-jobs milestone (M6).")
-						.font(Theme.small)
-						.foregroundStyle(Theme.muted)
-						.frame(maxWidth: .infinity, minHeight: 80)
-						.background(RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.border, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
-				}
-				.padding(.vertical, 12)
+				live(html, title: title)
 			}
 		} else {
 			Text("Demo completed, but the result could not be displayed.").font(Theme.small).foregroundStyle(Theme.muted).card()
 		}
+	}
+
+	private func live(_ html: String, title: String) -> some View {
+		let isInverted = inverted ?? initialInverted
+		return VStack(alignment: .leading, spacing: 8) {
+			HStack(spacing: 8) {
+				Eyebrow("Interactive demo")
+				Text(title).font(Theme.uiMedium).lineLimit(1).truncationMode(.tail)
+				Spacer()
+				Toggle(isOn: Binding(get: { isInverted }, set: { inverted = $0; session.setInverted($0, messageId: messageId) })) {
+					Image(systemName: "circle.lefthalf.filled")
+				}
+				.toggleStyle(.button)
+				.help("Invert colors")
+				Button {
+					saveFile(name: "\(slugFilename(title)).html", contents: html, type: .html)
+				} label: { Image(systemName: "arrow.down.to.line") }
+					.help("Download as HTML")
+			}
+			.buttonStyle(.borderless)
+			.controlSize(.small)
+			if let error {
+				HStack(spacing: 8) {
+					Text("This demo threw an error").font(Theme.uiMedium)
+					Text(error).font(Theme.monoSmall).lineLimit(1).truncationMode(.tail).help(error).frame(maxWidth: .infinity, alignment: .leading)
+					Button("Send to teacher") { session.sendText("The demo \"\(title)\" threw an error: \(error)") }
+						.buttonStyle(.bordered)
+						.controlSize(.small)
+				}
+				.foregroundStyle(Theme.red)
+				.padding(.horizontal, 12)
+				.padding(.vertical, 8)
+				.background(RoundedRectangle(cornerRadius: 8).fill(Theme.red.opacity(0.1)))
+			}
+			DemoWebView(html: html, height: $height) { errors in
+				if error == nil, let first = errors.first { error = first.jsTrimmed.isEmpty ? "unknown error" : first }
+			}
+			.frame(height: height)
+			.colorInvertedHueRotated(isInverted)
+			.clipShape(RoundedRectangle(cornerRadius: 8))
+			.overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.border))
+		}
+		.card()
 	}
 }
 

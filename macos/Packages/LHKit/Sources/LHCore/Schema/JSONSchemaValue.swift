@@ -15,8 +15,12 @@ extension JSONSchema {
 			guard let s = value.stringValue else { return false }
 			return minLength.map { s.jsLength >= $0 } ?? true
 		case .boolean: return value.boolValue != nil
-		case .number: return value.doubleValue?.isFinite == true
-		case .integer: return value.doubleValue.map { $0.isFinite && $0 == $0.rounded(.towardZero) } == true
+		case .number:
+			guard let d = value.doubleValue, d.isFinite else { return false }
+			return minimum.map { d >= $0 } ?? true
+		case .integer:
+			guard let d = value.doubleValue, d.isFinite, d == d.rounded(.towardZero) else { return false }
+			return minimum.map { d >= $0 } ?? true
 		case .null: return value.isNull
 		case .literal(let c): return TypeboxTry.jsDeepEqual(c, value)
 		case .enumeration(let values): return values.contains { TypeboxTry.jsDeepEqual($0, value) }

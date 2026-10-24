@@ -85,6 +85,7 @@ struct SidebarView: View {
 				}
 			}
 			.listStyle(.sidebar)
+			BackgroundAgentsSection(model: model)
 		}
 		.padding(.top, 8)
 		.padding(.horizontal, 8)

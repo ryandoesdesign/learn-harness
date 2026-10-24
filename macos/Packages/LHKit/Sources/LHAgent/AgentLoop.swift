@@ -55,6 +55,9 @@ public struct AgentConfig: Sendable {
 	public var toolTimeout: Duration
 	/// Coalescing window for streaming snapshots.
 	public var updateInterval: Duration
+	/// The sub-agent turn budget (pi-run maxTurns): the run ends after this
+	/// many assistant messages. nil = unbounded (the conversation agents).
+	public var maxTurns: Int?
 	/// pi's shouldStopAfterTurn (the question stopper): true ends the run
 	/// after this message's tools — WITHOUT draining steers, which wait for
 	/// the next run (a posed question must always end the turn).
@@ -79,6 +82,7 @@ public struct AgentConfig: Sendable {
 		self.toolTimeout = toolTimeout
 		self.updateInterval = updateInterval
 		self.shouldStop = shouldStop
+		maxTurns = nil
 	}
 
 	/// The request for a context (fixed tool order: client tools, then server tools).
@@ -209,6 +213,11 @@ public struct AgentLoop: Sendable {
 				}
 			}
 			emit(.turnEnd)
+
+			if let maxTurns = config.maxTurns, added.filter({ $0.assistant != nil }).count >= maxTurns {
+				emit(.turnEnd)
+				break turns
+			}
 
 			// 5. Steering at the boundary.
 			pending = await steering?.drain() ?? []

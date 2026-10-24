@@ -32,6 +32,8 @@ public struct JSONSchema: Sendable, Hashable {
 	public var isOptional: Bool
 	/// `Type.String({minLength})` — strings only.
 	public var minLength: Int?
+	/// `Type.Integer({minimum})` / `Type.Number({minimum})`.
+	public var minimum: Double?
 
 	public init(_ kind: Kind, description: String? = nil, isOptional: Bool = false) {
 		self.kind = kind
@@ -44,6 +46,11 @@ public struct JSONSchema: Sendable, Hashable {
 
 extension JSONSchema {
 	public static func string(description: String? = nil) -> JSONSchema { JSONSchema(.string, description: description) }
+	public static func integer(minimum: Double, description: String? = nil) -> JSONSchema {
+		var s = JSONSchema(.integer, description: description)
+		s.minimum = minimum
+		return s
+	}
 	public static func string(minLength: Int, description: String? = nil) -> JSONSchema {
 		var s = JSONSchema(.string, description: description)
 		s.minLength = minLength
@@ -112,6 +119,7 @@ extension JSONSchema {
 		switch kind {
 		case .string, .boolean, .number, .integer, .null:
 			if let minLength { o["minLength"] = .number(minLength) }
+			if let minimum { o["minimum"] = .number(JSONNumber(minimum)) }
 			o["type"] = .string(jsonType!)
 		case .literal(let v):
 			o["type"] = .string(v.jsTypeof)

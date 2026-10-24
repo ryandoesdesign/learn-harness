@@ -4,7 +4,8 @@ import SwiftUI
 
 /// Settings (⌘,) — the M5 minimum (docs/native-macos-m5.md): one Anthropic
 /// pane with the API key (Keychain) and the Strong / Cheap / Vision slots,
-/// each a model and its effort. The rest of Settings arrives with M8.
+/// each a model and its effort; M6 adds the learner folders the file tools
+/// may read. The rest of Settings arrives with M8.
 struct SettingsView: View {
 	var model: AppModel
 	@State private var keyDraft = ""
@@ -35,10 +36,40 @@ struct SettingsView: View {
 			} header: {
 				Text("Models")
 			}
+			Section {
+				if model.learnerFolders.isEmpty {
+					Text("No folders yet. The teacher can't read your files until you add one.").foregroundStyle(.secondary)
+				}
+				ForEach(model.learnerFolders) { folder in
+					HStack {
+						Image(systemName: folder.stale ? "exclamationmark.triangle" : "folder")
+							.foregroundStyle(folder.stale ? Color.orange : Color.secondary)
+						VStack(alignment: .leading, spacing: 1) {
+							Text(folder.path).lineLimit(1).truncationMode(.middle)
+							if folder.stale { Text("Access was lost — re-grant it to keep using this folder.").font(.caption).foregroundStyle(.secondary) }
+						}
+						Spacer()
+						if folder.stale { Button("Re-grant…") { model.pickLearnerFolder(replacing: folder.id) } }
+						Button("Remove", role: .destructive) { model.removeLearnerFolder(folder.id) }
+					}
+				}
+				HStack {
+					Spacer()
+					Button("Add…") { model.pickLearnerFolder() }
+				}
+			} header: {
+				Text("Learner folders")
+			} footer: {
+				Text("The teacher and its background agents can read files (and PDFs) only inside these folders. Relative paths resolve against the first one.")
+					.font(.caption).foregroundStyle(.secondary)
+			}
 		}
 		.formStyle(.grouped)
 		.frame(width: 520)
-		.onAppear(perform: reload)
+		.onAppear {
+			reload()
+			model.reloadFolders()
+		}
 	}
 
 	private func slotRow(_ title: String, _ name: ModelSlotName, help: String) -> some View {

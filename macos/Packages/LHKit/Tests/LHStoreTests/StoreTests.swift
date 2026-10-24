@@ -241,3 +241,16 @@ private func tempDir() throws -> URL {
 		#expect(graph.readPositions().keys.sorted() == ["n_1"])
 	}
 }
+
+@Suite struct JobDispatchStoreTests {
+	@Test func getOrCreateIsOneJobPerToolCall() throws {
+		let repo = JobRepository(try AppDatabase.inMemory(), dataDirectory: try tempDir())
+		let (a, createdA) = try repo.getOrCreate(kind: .research, chatId: "chat_x", toolCallId: "c1")
+		let (b, createdB) = try repo.getOrCreate(kind: .research, chatId: "chat_x", toolCallId: "c1")
+		#expect(createdA && !createdB)
+		#expect(a.id == b.id)
+		#expect(throws: (any Error).self, "the v3 unique index") { try repo.createJob(kind: .research, chatId: "chat_x", toolCallId: "c1") }
+		#expect(try repo.getOrCreate(kind: .pdf, chatId: "chat_y", toolCallId: "c1").created, "unique per chat")
+		#expect(try repo.runningJobs().count == 2)
+	}
+}

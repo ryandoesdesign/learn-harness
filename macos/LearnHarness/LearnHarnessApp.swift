@@ -22,6 +22,7 @@ struct LearnHarnessApp: App {
 			RootView(model: model)
 				.task { await model.observeSessions() }
 				.task { await model.observeService() }
+				.task { await model.observeJobs() }
 				#if DEBUG
 				// `-LHOpenGallery YES` (with -LHScratch): open the Render Gallery.
 				.task { if UserDefaults.standard.bool(forKey: "LHOpenGallery"), UserDefaults.standard.bool(forKey: "LHScratch") { model.addRenderGallery() } }

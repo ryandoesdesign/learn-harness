@@ -33,16 +33,30 @@ public func quizMechanics(_ enabled: [String: Bool]?) -> QuizMechanics {
 	enabled?["explain"] == true ? .free : .choice
 }
 
-/// The prober's registry: probe|recall, ask_user_question, probe_done.
-public func proberTools(_ ctx: TeachingContext, enabled: [String: Bool]?) -> [any AgentTool] {
+/// The prober's registry: probe|recall, ask_user_question, the file tools,
+/// research and pdf (every phase), probe_done.
+public func proberTools(_ ctx: TeachingContext, enabled: [String: Bool]?, background: BackgroundWiring? = nil) -> [any AgentTool] {
 	let quizzing: any AgentTool = quizMechanics(enabled) == .free ? QuestionTool.recall : QuestionTool.probe
-	return [quizzing, QuestionTool.ask, ProbeDoneTool(ctx: ctx)]
+	var tools: [any AgentTool] = [QuestionTool.ask]
+	if let background { tools += fileTools(background.files) + [DispatchTool.research(background), DispatchTool.pdf(background)] }
+	// probe_done stays on regardless (it is how the phase ends).
+	return [quizzing] + filteredOptional(tools, enabled) + [ProbeDoneTool(ctx: ctx)]
 }
 
-/// The teacher's registry: quiz|explain (nodeId-validated), ask_user_question, plan_init.
-public func teacherTools(_ ctx: TeachingContext, enabled: [String: Bool]?) -> [any AgentTool] {
+/// The teacher's registry: quiz|explain (nodeId-validated), ask_user_question,
+/// the file tools, plan_init, then the four job dispatch tools.
+public func teacherTools(_ ctx: TeachingContext, enabled: [String: Bool]?, background: BackgroundWiring? = nil) -> [any AgentTool] {
 	let quizzing: any AgentTool = quizMechanics(enabled) == .free ? QuestionTool.explain(ctx) : QuestionTool.quiz(ctx)
-	return [quizzing, QuestionTool.ask, PlanInitTool(ctx: ctx)]
+	var tools: [any AgentTool] = [QuestionTool.ask]
+	if let background { tools += fileTools(background.files) }
+	tools.append(PlanInitTool(ctx: ctx))
+	if let background { tools += [DispatchTool.research(background), DispatchTool.demo(background), DispatchTool.visual(background), DispatchTool.pdf(background)] }
+	return [quizzing] + filteredOptional(tools, enabled)
+}
+
+/// filterEnabledTools over everything but the quizzing mechanics.
+func filteredOptional(_ tools: [any AgentTool], _ enabled: [String: Bool]?) -> [any AgentTool] {
+	filterEnabledTools(tools.map { (name: $0.name, tool: $0) }, enabled: enabled?.filter { $0.key != "explain" && $0.key != "quiz" }).map(\.tool)
 }
 
 // MARK: - Question tools

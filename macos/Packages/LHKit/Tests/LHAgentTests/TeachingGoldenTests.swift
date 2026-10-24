@@ -22,13 +22,14 @@ private func canonical(_ v: JSONValue) -> JSONValue {
 }
 
 private let ctx = TeachingContext(chatId: "chat_golden", record: { nil }, saveTree: { _ in }, queueHandoff: {})
+private let wiring = BackgroundWiring(files: FileAccess(folders: { [] })) { _, _, _, _ in "stub" }
 
 @Suite struct TeachingToolGoldenTests {
 	@Test(arguments: [
-		("tools-prober", proberTools(ctx, enabled: nil)),
-		("tools-prober-free", proberTools(ctx, enabled: ["explain": true])),
-		("tools-teacher", teacherTools(ctx, enabled: nil)),
-		("tools-teacher-free", teacherTools(ctx, enabled: ["explain": true])),
+		("tools-prober", proberTools(ctx, enabled: nil, background: wiring)),
+		("tools-prober-free", proberTools(ctx, enabled: ["explain": true], background: wiring)),
+		("tools-teacher", teacherTools(ctx, enabled: nil, background: wiring)),
+		("tools-teacher-free", teacherTools(ctx, enabled: ["explain": true], background: wiring)),
 	] as [(String, [any AgentTool])])
 	func definitionsMatchTheTS(_ name: String, _ tools: [any AgentTool]) throws {
 		let expected = try #require(try golden(name).arrayValue)
@@ -63,18 +64,19 @@ private let ctx = TeachingContext(chatId: "chat_golden", record: { nil }, saveTr
 	}
 
 	@Test func gatesDropMissingToolSegmentsAndLines() {
-		let teacher = PromptComposer().compose(.teacher, tools: Set(teacherTools(ctx, enabled: nil).map(\.name)))
-		#expect(!teacher.contains("You have a `research` tool"))
-		#expect(!teacher.contains("### `demo` — interactive teaching instruments"))
-		#expect(!teacher.contains("His files live on his machine"))
-		#expect(teacher.contains("plan_init"))
-		let prober = PromptComposer().compose(.prober, tools: Set(proberTools(ctx, enabled: nil).map(\.name)))
+		// M6: the teacher's tools are all registered — its source composes whole.
+		let teacherSet = Set(teacherTools(ctx, enabled: nil, background: wiring).map(\.name))
+		#expect(PromptComposer().compose(.teacher, tools: teacherSet) == PromptComposer().compose(.teacher, tools: nil))
+		let prober = PromptComposer().compose(.prober, tools: Set(proberTools(ctx, enabled: nil, background: wiring).map(\.name)))
 		#expect(!prober.contains("`list_sessions`"))
 		#expect(!prober.contains("Read his persistent map"))
-		#expect(!prober.contains("the `read` tool"))
-		#expect(!prober.contains("## Grounding"))
+		#expect(prober.contains("the `read` tool"))
+		#expect(prober.contains("## Grounding"))
 		#expect(prober.contains("## 2. Make the goal concrete"))
 		#expect(!prober.contains("\n\n\n"), "removal leaves no blank-line runs")
+		// A learner who switches research off loses its prompt text too.
+		let noResearch = PromptComposer().compose(.teacher, tools: teacherSet.subtracting(["research"]))
+		#expect(noResearch == PromptComposer().compose(.teacher, tools: nil), "no research gate remains (TS parity: the prompt stays)")
 	}
 
 	@Test func registeredToolsKeepTheirText() {

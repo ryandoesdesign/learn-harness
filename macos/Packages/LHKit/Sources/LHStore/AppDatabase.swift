@@ -206,6 +206,10 @@ public final class AppDatabase: Sendable {
 			// Refusal cards keep the API's stop_details.
 			try db.execute(sql: "ALTER TABLE message ADD COLUMN stop_details_json TEXT")
 		}
+		// M6 (docs/native-macos-m6.md): one job per dispatching tool call.
+		m.registerMigration("v3") { db in
+			try db.execute(sql: "CREATE UNIQUE INDEX job_chat_tool_call ON job (chat_id, tool_call_id)")
+		}
 		return m
 	}
 }
@@ -216,5 +220,14 @@ public enum ISOClock {
 		let f = ISO8601DateFormatter()
 		f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 		return f.string(from: date)
+	}
+
+	/// Parse one back (`Date.parse`); fractional seconds optional.
+	public static func date(_ iso: String) -> Date? {
+		let f = ISO8601DateFormatter()
+		f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+		if let d = f.date(from: iso) { return d }
+		f.formatOptions = [.withInternetDateTime]
+		return f.date(from: iso)
 	}
 }

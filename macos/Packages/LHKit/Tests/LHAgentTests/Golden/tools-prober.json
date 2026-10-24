@@ -115,6 +115,159 @@
 		}
 	},
 	{
+		"name": "read",
+		"description": "Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50.0KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"path"
+			],
+			"properties": {
+				"path": {
+					"type": "string",
+					"minLength": 1,
+					"description": "Path to the file to read (relative or absolute)"
+				},
+				"offset": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "Line number to start reading from (1-indexed)"
+				},
+				"limit": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "Maximum number of lines to read"
+				}
+			}
+		}
+	},
+	{
+		"name": "ls",
+		"description": "List directory contents. Returns entries sorted alphabetically, with '/' suffix for directories. Includes dotfiles. Output is truncated to 500 entries or 50.0KB (whichever is hit first).",
+		"input_schema": {
+			"type": "object",
+			"properties": {
+				"path": {
+					"type": "string",
+					"description": "Directory to list (default: the learner's home directory)"
+				},
+				"limit": {
+					"type": "integer",
+					"description": "Maximum number of entries to return (default: 500)"
+				}
+			}
+		}
+	},
+	{
+		"name": "find",
+		"description": "Search for files by glob pattern. Returns matching file paths relative to the search directory. Ignores node_modules, .git, and Library directories. Output is truncated to 1000 results or 50.0KB (whichever is hit first).",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"pattern"
+			],
+			"properties": {
+				"pattern": {
+					"type": "string",
+					"minLength": 1,
+					"description": "Glob pattern to match files, e.g. '*.ts', '**/*.json', or 'src/**/*.spec.ts'"
+				},
+				"path": {
+					"type": "string",
+					"description": "Directory to search in (default: the learner's home directory)"
+				},
+				"limit": {
+					"type": "integer",
+					"description": "Maximum number of results (default: 1000)"
+				}
+			}
+		}
+	},
+	{
+		"name": "grep",
+		"description": "Search file contents for a pattern. Returns matching lines with file paths and line numbers. Ignores node_modules, .git, and Library directories. Output is truncated to 100 matches or 50.0KB (whichever is hit first). Long lines are truncated to 500 chars.",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"pattern"
+			],
+			"properties": {
+				"pattern": {
+					"type": "string",
+					"minLength": 1,
+					"description": "Search pattern (regex or literal string)"
+				},
+				"path": {
+					"type": "string",
+					"description": "Directory or file to search (default: the learner's home directory)"
+				},
+				"glob": {
+					"type": "string",
+					"description": "Filter files by glob pattern, e.g. '*.ts' or '**/*.spec.ts'"
+				},
+				"ignoreCase": {
+					"type": "boolean",
+					"description": "Case-insensitive search (default: false)"
+				},
+				"literal": {
+					"type": "boolean",
+					"description": "Treat pattern as literal string instead of regex (default: false)"
+				},
+				"context": {
+					"type": "integer",
+					"minimum": 0,
+					"description": "Number of lines to show before and after each match (default: 0)"
+				},
+				"limit": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "Maximum number of matches to return (default: 100)"
+				}
+			}
+		}
+	},
+	{
+		"name": "research",
+		"description": "Dispatch a background web-research agent: fact verification, current data, or niche specifics you are not certain about. The call is ASYNC and fire-and-forget — it resolves immediately and your turn continues; the research brief arrives later as a new message and the lesson resumes from it. Cite the brief's sources when you use them. NEVER use it for things you know cold, internal reasoning, or math.",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"question"
+			],
+			"properties": {
+				"question": {
+					"type": "string",
+					"description": "The single research question to answer. Make it specific — the researcher sees nothing else of the lesson."
+				},
+				"context": {
+					"type": "string",
+					"description": "Why you need this / what the lesson needs it for — focuses the brief. One or two sentences."
+				}
+			}
+		}
+	},
+	{
+		"name": "pdf",
+		"description": "Dispatch a background sub-agent that READS a learner-provided PDF on your behalf (triage, targeted extraction, visual page reading for equations and diagrams) and returns a brief with page citations. Use it when the learner gives you a PDF path and you need its CONTENT for the lesson. The call is ASYNC and fire-and-forget — it resolves immediately and your turn continues; the brief arrives later as a new message. For quick looks at plain text or image files, use the read tool directly instead of dispatching.",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"path",
+				"question"
+			],
+			"properties": {
+				"path": {
+					"type": "string",
+					"description": "Path to the learner's PDF (relative or absolute), exactly as they gave it."
+				},
+				"question": {
+					"type": "string",
+					"description": "What you need from the document — the specific content, explanation, or answer to extract and brief. The reader sees NOTHING else of the lesson."
+				}
+			}
+		}
+	},
+	{
 		"name": "probe_done",
 		"description": "Conclude the probing phase and hand off to the teaching phase. Call this ONCE, when the probe is complete: every strand the lesson depends on is bracketed (a floor he reliably gets right AND a ceiling where it runs out), and his learning goal is concrete. The input IS the learner assessment — one strand per dependency the lesson will rest on, with your read of where his edge sits on it (floor, ceiling, misconceptions, what to build from). It streams to the learner live and becomes the handoff artifact the teacher plans from. Refused while a question is still open, and after the probe is already concluded. After it succeeds, say your closing sentence and end your turn.",
 		"input_schema": {

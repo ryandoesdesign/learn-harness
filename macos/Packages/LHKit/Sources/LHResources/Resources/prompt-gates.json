@@ -1,12 +1,15 @@
 {
-	"_doc": "Tool-gated prompt composition (docs/native-macos-m5.md). A gate whose `tool` is not registered for the agent drops its target: the whole `segment`, or (with `prefix`) every line of that segment whose trimmed text starts with the prefix. Milestones delete entries as their tools land (M6: read/research/pdf/demo/visual; M7: list_sessions). The prompt files themselves stay verbatim copies of src/agent.",
+	"_doc": "Tool-gated prompt composition (docs/native-macos-m5.md). A gate whose `tool` is not registered for the agent drops its target: the whole `segment`, or (with `prefix`) every line of that segment whose trimmed text starts with the prefix. Milestones delete entries as their tools land (M7: list_sessions). The prompt files themselves stay verbatim copies of src/agent.",
 	"gates": [
-		{ "segment": "teacher/40-jobs.md", "tool": "research" },
-		{ "segment": "teacher/50-demos.md", "tool": "demo" },
-		{ "segment": "shared/30-learner-files.md", "tool": "read" },
-		{ "segment": "prober/10-probe-doctrine.md", "prefix": "## 1. Read his persistent map", "tool": "list_sessions" },
-		{ "segment": "prober/10-probe-doctrine.md", "prefix": "`list_sessions` and `list_propositions`", "tool": "list_sessions" },
-		{ "segment": "prober/10-probe-doctrine.md", "prefix": "## Grounding — his material, not his description of it", "tool": "read" },
-		{ "segment": "prober/10-probe-doctrine.md", "prefix": "If he references a local file", "tool": "read" }
+		{
+			"segment": "prober/10-probe-doctrine.md",
+			"prefix": "## 1. Read his persistent map",
+			"tool": "list_sessions"
+		},
+		{
+			"segment": "prober/10-probe-doctrine.md",
+			"prefix": "`list_sessions` and `list_propositions`",
+			"tool": "list_sessions"
+		}
 	]
 }

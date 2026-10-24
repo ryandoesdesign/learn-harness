@@ -19,6 +19,11 @@ public struct JobUsage: Sendable, Hashable, Codable {
 	public var reasoningTokens: Int?
 	public var steps: Int
 	public var lastStep: CallUsage?
+	/// Native (M6): the 1-hour cache-write subset and the server-tool
+	/// requests, so a job's cost includes its searches. Absent in TS rows.
+	public var cacheWrite1hTokens: Int?
+	public var webSearchRequests: Int?
+	public var webFetchRequests: Int?
 	public init(model: String, inputTokens: Int? = nil, outputTokens: Int? = nil, cacheReadTokens: Int? = nil, cacheWriteTokens: Int? = nil, reasoningTokens: Int? = nil, steps: Int, lastStep: CallUsage? = nil) {
 		self.model = model
 		self.inputTokens = inputTokens
@@ -31,7 +36,11 @@ public struct JobUsage: Sendable, Hashable, Codable {
 	}
 
 	public var callUsage: CallUsage {
-		CallUsage(inputTokens: inputTokens, outputTokens: outputTokens, cacheReadTokens: cacheReadTokens, cacheWriteTokens: cacheWriteTokens, reasoningTokens: reasoningTokens)
+		var c = CallUsage(inputTokens: inputTokens, outputTokens: outputTokens, cacheReadTokens: cacheReadTokens, cacheWriteTokens: cacheWriteTokens, reasoningTokens: reasoningTokens)
+		c.cacheWrite1hTokens = cacheWrite1hTokens
+		c.webSearchRequests = webSearchRequests
+		c.webFetchRequests = webFetchRequests
+		return c
 	}
 }
 
@@ -92,6 +101,18 @@ public func accumulateJobUsage(_ total: JobUsage?, model: String, step: UsageSte
 		reasoningTokens: add(total?.reasoningTokens, step.reasoningTokens),
 		steps: (total?.steps ?? 0) + 1,
 		lastStep: CallUsage(inputTokens: step.inputTokens, outputTokens: step.outputTokens, cacheReadTokens: step.cacheReadTokens, cacheWriteTokens: step.cacheWriteTokens, reasoningTokens: step.reasoningTokens))
+}
+
+/// The native fold over one Anthropic call (M6): accumulateJobUsage plus
+/// the 1-hour writes and server-tool requests.
+public func accumulateJobUsage(_ total: JobUsage?, model: String, call: CallUsage) -> JobUsage {
+	func add(_ a: Int?, _ b: Int?) -> Int? { a == nil && b == nil ? nil : (a ?? 0) + (b ?? 0) }
+	var next = accumulateJobUsage(total, model: model, step: UsageStep(inputTokens: call.inputTokens, outputTokens: call.outputTokens,
+		cacheReadTokens: call.cacheReadTokens, cacheWriteTokens: call.cacheWriteTokens, reasoningTokens: call.reasoningTokens))
+	next.cacheWrite1hTokens = add(total?.cacheWrite1hTokens, call.cacheWrite1hTokens)
+	next.webSearchRequests = add(total?.webSearchRequests, call.webSearchRequests)
+	next.webFetchRequests = add(total?.webFetchRequests, call.webFetchRequests)
+	return next
 }
 
 // MARK: - Tool inputs / results

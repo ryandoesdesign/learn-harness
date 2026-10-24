@@ -18,8 +18,11 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const OUT = path.join(ROOT, "macos/Packages/LHKit/Tests/LHAgentTests/Golden");
 mkdirSync(OUT, { recursive: true });
 
-/** The M5 teaching set — every other tool (fs, jobs, graph) is a later milestone. */
-const TEACHING = new Set(["probe", "recall", "quiz", "explain", "ask_user_question", "probe_done", "plan_init"]);
+/** The native set so far: M5 teaching + M6 jobs and learner files (graph tools are M7). */
+const TEACHING = new Set([
+	"probe", "recall", "quiz", "explain", "ask_user_question", "probe_done", "plan_init",
+	"research", "demo", "visual", "pdf", "read", "ls", "find", "grep",
+]);
 
 const ctx = {
 	chatId: "chat_golden",

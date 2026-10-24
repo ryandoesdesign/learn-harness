@@ -41,9 +41,9 @@ let package = Package(
 		// The shared hidden WKWebView: mermaid and figure snapshots, live diagram overlay.
 		.target(name: "LHWeb", dependencies: ["LHCore", "LHResources"]),
 		.testTarget(name: "LHMarkdownTests", dependencies: ["LHMarkdown", "LHCore"]),
-		.testTarget(name: "LHWebTests", dependencies: ["LHWeb"]),
+		.testTarget(name: "LHWebTests", dependencies: ["LHWeb", "LHCore"]),
 		.testTarget(name: "LHAnthropicTests", dependencies: ["LHAnthropic", "LHCore"], resources: [.copy("Fixtures")]),
-		.testTarget(name: "LHAgentTests", dependencies: ["LHAgent", "LHAnthropic", "LHCore", "LHStore", "LHResources"], resources: [.copy("Fixtures"), .copy("Golden")]),
+		.testTarget(name: "LHAgentTests", dependencies: ["LHAgent", "LHAnthropic", "LHCore", "LHStore", "LHResources", "LHWeb"], resources: [.copy("Fixtures"), .copy("Golden")]),
 		.testTarget(name: "LHStoreTests", dependencies: ["LHStore", "LHCore"]),
 		.testTarget(name: "LHImportTests", dependencies: ["LHImport", "LHStore", "LHCore"]),
 		.testTarget(

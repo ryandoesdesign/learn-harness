@@ -65,6 +65,10 @@ public actor TurnService {
 	private var handoffQueued: Set<String> = []
 	private var subscribers: [UUID: AsyncStream<Event>.Continuation] = [:]
 	private var running: Set<String> = []
+	/// Told when a `steer_` message lands in a record (the JobService settles its job).
+	/// The M6 registries' wiring (set by the JobService).
+	private var background: (@Sendable (_ chatId: String) -> BackgroundWiring)?
+	private var steerObserver: (@Sendable (_ chatId: String, _ steerId: String) -> Void)?
 
 	public init(database: AppDatabase, keychain: any KeychainStore, catalog: ModelCatalog,
 		makeTransport: @escaping @Sendable () -> any AnthropicTransport = { URLSessionTransport() },
@@ -184,6 +188,47 @@ public actor TurnService {
 		await coordinator.abort(chatId)
 	}
 
+	// MARK: - Background job steers (docs/native-macos-m6.md)
+
+	public func setSteerObserver(_ observer: @escaping @Sendable (_ chatId: String, _ steerId: String) -> Void) {
+		steerObserver = observer
+	}
+
+	public func setBackground(_ wiring: @escaping @Sendable (_ chatId: String) -> BackgroundWiring) {
+		background = wiring
+	}
+
+	/// Deliver a job's steer exactly once: already in the record → only
+	/// report it; mid-turn → handed to the loop; idle → written ahead and a
+	/// wake turn starts; held (an open question, the dismissal pause, no key)
+	/// → it stays pending and rides the next turn.
+	public func deliverSteer(_ chatId: String, _ steer: Message) async {
+		let repo = ChatRepository(database)
+		guard let record = (try? repo.get(chatId)) ?? nil else { return }
+		if steerDelivered(record.messages, steerId: steer.id) {
+			steerObserver?(chatId, steer.id)
+			return
+		}
+		let outbox = SteerOutboxRepository(database)
+		try? outbox.enqueue(steer, chatId: chatId)
+		if running.contains(chatId) {
+			await handOff(chatId, [steer])
+			return
+		}
+		let messages = record.messages
+		guard ((try? keychain.anthropicKey()) ?? nil) != nil, danglingQuestionOf(messages) == nil, !endsInDismissal(messages) else { return }
+		// Write-ahead: the marker is in the record before the wake turn runs.
+		guard (try? repo.append([steer], to: chatId)) != nil else { return }
+		try? outbox.mark([steer.id], .delivered)
+		steerObserver?(chatId, steer.id)
+		await startTurn(chatId)
+	}
+
+	/// Drop a steer that is still pending (a job abort). A handed one stays.
+	public func dropPendingSteer(_ id: String) {
+		try? SteerOutboxRepository(database).removePending(id)
+	}
+
 	// MARK: - Resume and launch recovery
 
 	/// Resume on open (your answer): an idle session whose record ends in
@@ -256,7 +301,10 @@ public actor TurnService {
 			switch event {
 			case .settled(let m):
 				try? repo.append([m], to: chatId)
-				if m.id.hasPrefix("steer_") { try? outbox.mark([m.id], .delivered) }
+				if m.id.hasPrefix("steer_") {
+					try? outbox.mark([m.id], .delivered)
+					steerObserver?(chatId, m.id)
+				}
 			case .agentEnd(let outcome):
 				await settle(chatId, outcome)
 			default:
@@ -323,7 +371,8 @@ public actor TurnService {
 			saveTree: { [database] tree in try ChatRepository(database).saveTree(tree, chatId: record.id) },
 			queueHandoff: { [weak self] in await self?.queueHandoff(record.id) })
 		let enabled = settings?.agent?.tools
-		let tools = teaching ? teacherTools(ctx, enabled: enabled) : proberTools(ctx, enabled: enabled)
+		let wiring = background?(record.id)
+		let tools = teaching ? teacherTools(ctx, enabled: enabled, background: wiring) : proberTools(ctx, enabled: enabled, background: wiring)
 		let system = composer(settings).compose(teaching ? .teacher : .prober, tools: Set(tools.map(\.name)))
 		let maxTokens = min(64_000, catalog.model(spec.model)?.maxTokens ?? 64_000)
 		return AgentConfig(

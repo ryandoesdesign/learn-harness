@@ -5,6 +5,7 @@ import LHCore
 import LHImport
 import LHResources
 import LHStore
+import LHWeb
 import Observation
 import UniformTypeIdentifiers
 
@@ -20,6 +21,12 @@ final class AppModel {
 	let catalog: ModelCatalog
 	/// The live teaching service (M5): one per app.
 	let service: TurnService
+	/// The background jobs (M6): dispatch, runs, delivery, abort, recovery.
+	let jobs: JobService
+	/// Running jobs across all chats (the sidebar's Background agents).
+	private(set) var runningJobs: [JobRecord] = []
+	/// The learner folders the file tools may read (Settings → Learner folders).
+	private(set) var learnerFolders: [LearnerFolder] = []
 	private(set) var sessions: [ChatSummary] = []
 	/// Chats with a running turn / a running compaction (sidebar spinners).
 	private(set) var runningChats: Set<String> = []
@@ -57,12 +64,20 @@ final class AppModel {
 			startupError = "Could not open the database: \(error)"
 		}
 		service = TurnService(database: database, keychain: keychain, catalog: catalog)
+		let store = BookmarkStore(database)
+		let access = FileAccess(folders: { (try? store.list())?.compactMap { try? store.resolve($0) } ?? [] })
+		jobs = JobService(database: database, dataDirectory: dataDirectory, keychain: keychain, catalog: catalog,
+			verifier: WebHeadlessVerifier.shared, fileAccess: access)
+		reloadFolders()
 	}
 
 	/// Relay the service's events for as long as the app runs (the TS
 	/// server-event bus): sidebar spinners, the open session's live state.
 	func observeService() async {
+		await jobs.attach(service)
 		await service.recoverOnLaunch()
+		// Eager job recovery (your answer): orphaned runs re-deliver or re-run.
+		await jobs.recoverOnLaunch()
 		for await event in await service.events() {
 			switch event {
 			case .turnStarted(let chatId):
@@ -117,6 +132,7 @@ final class AppModel {
 	/// Its graph traces stay (the traces option arrives with M7).
 	func delete(_ chatId: String) async -> String? {
 		if await service.isRunning(chatId) { return "A turn is still running in this session — wait for it to finish or stop it, then try again." }
+		await jobs.cancelAll(chatId: chatId)
 		do {
 			_ = try JobRepository(database, dataDirectory: dataDirectory).deleteJobs(chatId: chatId)
 			try SteerOutboxRepository(database).deleteAll(chatId: chatId)
@@ -126,6 +142,65 @@ final class AppModel {
 		} catch {
 			return "Delete failed — \(error). Try again."
 		}
+	}
+
+	// MARK: - Background agents (M6)
+
+	/// Mirror the running jobs for as long as the app runs.
+	func observeJobs() async {
+		do {
+			for try await running in JobRepository(database, dataDirectory: dataDirectory).observeRunning() { runningJobs = running }
+		} catch {}
+	}
+
+	/// End (the Background agents row): the learner's abort.
+	func endJob(_ id: String) async -> Bool {
+		await jobs.abort(id) != .notFound
+	}
+
+	func sessionTitle(_ chatId: String) -> String {
+		sessions.first { $0.id == chatId }?.title ?? "Session"
+	}
+
+	// MARK: - Learner folders (M6)
+
+	struct LearnerFolder: Identifiable, Equatable {
+		var id: String
+		var path: String
+		/// The bookmark no longer resolves (moved, deleted, or access lost).
+		var stale: Bool
+	}
+
+	func reloadFolders() {
+		let store = BookmarkStore(database)
+		learnerFolders = ((try? store.list()) ?? []).map { f in
+			LearnerFolder(id: f.id, path: (try? store.resolve(f).path) ?? f.path, stale: (try? store.resolve(f)) == nil)
+		}
+	}
+
+	/// Add… / Re-grant: pick a folder; a re-grant replaces the stale row.
+	func pickLearnerFolder(replacing id: String? = nil) {
+		let panel = NSOpenPanel()
+		panel.canChooseDirectories = true
+		panel.canChooseFiles = false
+		panel.allowsMultipleSelection = false
+		panel.prompt = id == nil ? "Add Folder" : "Re-grant"
+		panel.message = "LearnHarness can read files in this folder when the teacher looks something up."
+		if let id, let old = learnerFolders.first(where: { $0.id == id }) { panel.directoryURL = URL(fileURLWithPath: old.path) }
+		guard panel.runModal() == .OK, let url = panel.url else { return }
+		let store = BookmarkStore(database)
+		do {
+			if !learnerFolders.contains(where: { $0.path == url.path && !$0.stale && $0.id != id }) { try store.add(url) }
+			if let id { try store.remove(id) }
+		} catch {
+			NSAlert(error: error).runModal()
+		}
+		reloadFolders()
+	}
+
+	func removeLearnerFolder(_ id: String) {
+		try? BookmarkStore(database).remove(id)
+		reloadFolders()
 	}
 
 	/// Mirror the session summaries for as long as the app runs.

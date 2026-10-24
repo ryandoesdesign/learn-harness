@@ -45,6 +45,49 @@ public struct JobRepository: Sendable {
 		return record
 	}
 
+	/// The dispatch's get-or-insert: the job for this tool call, created when
+	/// new (`created` = the caller spawns the run).
+	public func getOrCreate(kind: JobKind, chatId: String, toolCallId: String, now: Date = Date()) throws -> (job: JobRecord, created: Bool) {
+		if let existing = try findJob(chatId: chatId, toolCallId: toolCallId) { return (existing, false) }
+		do {
+			return (try createJob(kind: kind, chatId: chatId, toolCallId: toolCallId, now: now), true)
+		} catch let e as DatabaseError where e.resultCode == .SQLITE_CONSTRAINT {
+			guard let existing = try findJob(chatId: chatId, toolCallId: toolCallId) else { throw e }
+			return (existing, false)
+		}
+	}
+
+	/// A job's model calls, appended to `usage_step` (owner `job`).
+	public func appendUsageSteps(_ steps: [(model: String, usage: CallUsage)], jobId: String) throws {
+		try database.writer.write { db in
+			let start = try Int.fetchOne(db, sql: "SELECT COALESCE(MAX(step_index) + 1, 0) FROM usage_step WHERE owner_kind = 'job' AND owner_id = ?", arguments: [jobId]) ?? 0
+			for (i, s) in steps.enumerated() {
+				try UsageRows.insertSteps([s.usage], ownerKind: "job", ownerId: jobId, model: s.model, startIndex: start + i, db: db)
+			}
+		}
+	}
+
+	public func usageSteps(jobId: String) throws -> [CallUsage] {
+		try database.writer.read { db in try UsageRows.steps(ownerKind: "job", ownerId: jobId, db: db) }
+	}
+
+	/// Every job still marked running (launch recovery: all are orphans).
+	public func runningJobs() throws -> [JobRecord] {
+		try database.writer.read { db in try Row.fetchAll(db, sql: "SELECT * FROM job WHERE status = 'running' ORDER BY created_at").map(Self.decode) }
+	}
+
+	/// Observe one chat's jobs (the dispatch cards' live form).
+	public func observe(chatId: String) -> AsyncValueObservation<[JobRecord]> {
+		ValueObservation.tracking { db in try Row.fetchAll(db, sql: "SELECT * FROM job WHERE chat_id = ?", arguments: [chatId]).map(Self.decode) }
+			.values(in: database.writer)
+	}
+
+	/// Observe the running jobs across all chats (the sidebar's Background agents).
+	public func observeRunning() -> AsyncValueObservation<[JobRecord]> {
+		ValueObservation.tracking { db in try Row.fetchAll(db, sql: "SELECT * FROM job WHERE status = 'running' ORDER BY created_at").map(Self.decode) }
+			.values(in: database.writer)
+	}
+
 	/// Insert a whole record (the importer's path; also createJob's).
 	public func insert(_ record: JobRecord) throws {
 		guard validId(record.id) else { throw StoreError.invalidId(record.id) }

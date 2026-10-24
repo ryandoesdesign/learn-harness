@@ -6,8 +6,9 @@ import LHCore
 /// an extraction stage, or a job; `extraction_run` for run metadata.
 /// Dollars are never stored — LHCore prices them at read time.
 enum UsageRows {
-	static func insertSteps(_ steps: [CallUsage], ownerKind: String, ownerId: String, model: String, db: Database) throws {
-		for (i, s) in steps.enumerated() {
+	static func insertSteps(_ steps: [CallUsage], ownerKind: String, ownerId: String, model: String, startIndex: Int = 0, db: Database) throws {
+		for (offset, s) in steps.enumerated() {
+			let i = startIndex + offset
 			try db.execute(sql: """
 				INSERT INTO usage_step (owner_kind, owner_id, step_index, model, input_tokens, output_tokens,
 					cache_read_tokens, cache_write_tokens, cache_write_1h_tokens, reasoning_tokens, web_search_requests, web_fetch_requests)

@@ -54,6 +54,16 @@ public struct SteerOutboxRepository: Sendable {
 		}
 	}
 
+	/// Remove a steer that is still pending (a job abort drops its result).
+	/// Returns whether one was removed; a handed steer stays and may land.
+	@discardableResult
+	public func removePending(_ id: String) throws -> Bool {
+		try database.writer.write { db in
+			try db.execute(sql: "DELETE FROM steer_outbox WHERE id = ? AND state = 'pending'", arguments: [id])
+			return db.changesCount > 0
+		}
+	}
+
 	/// Chats with pending steers.
 	public func chatsWithPending() throws -> [String] {
 		try database.writer.read { db in try String.fetchAll(db, sql: "SELECT DISTINCT chat_id FROM steer_outbox WHERE state = 'pending'") }

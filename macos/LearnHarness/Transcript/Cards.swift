@@ -1,5 +1,6 @@
 import LHCore
 import LHMarkdown
+import LHStore
 import SwiftUI
 
 // The transcript's cards, ported from the TS renderers named on each.
@@ -713,8 +714,9 @@ struct ToolCallCard: View {
 	}
 }
 
-/// dispatch-card.tsx, settled form (M4 is read-only): "✓ LABEL delivered",
-/// "✗ LABEL failed", or "Dispatched…" when no job row exists.
+/// dispatch-card.tsx: the running form (spinner, label, `· Ns`, the
+/// activity line, or "Dispatched…" before the job row exists), then the
+/// settled "✓ LABEL delivered" / "✗ LABEL failed".
 struct DispatchCard: View {
 	var part: ViewPart
 	var kind: String
@@ -748,9 +750,18 @@ struct DispatchCard: View {
 				.foregroundStyle(Theme.muted)
 			} else {
 				VStack(alignment: .leading, spacing: 4) {
-					Eyebrow(label)
-					Text(job?.activity ?? "Dispatched…").font(Theme.small).foregroundStyle(Theme.muted).lineLimit(1)
+					HStack(spacing: 8) {
+						BrailleSpinner()
+						Eyebrow(label)
+						if let started = job.flatMap({ ISOClock.date($0.createdAt) }) {
+							TimelineView(.periodic(from: .now, by: 1)) { context in
+								Text("· \(max(0, Int(context.date.timeIntervalSince(started))))s").font(Theme.ui).foregroundStyle(Theme.muted).monospacedDigit()
+							}
+						}
+					}
+					Text(job.map(\.activity) ?? "Dispatched…").font(Theme.small).foregroundStyle(Theme.muted).lineLimit(1).truncationMode(.tail)
 				}
+				.frame(maxWidth: .infinity, alignment: .leading)
 				.card()
 			}
 		}

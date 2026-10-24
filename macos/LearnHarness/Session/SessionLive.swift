@@ -96,8 +96,15 @@ extension SessionModel {
 	/// The composer's send: a steer while busy, otherwise a turn.
 	func sendDraft() {
 		let text = draft
-		guard !text.jsTrimmed.isEmpty, let service else { return }
+		guard !text.jsTrimmed.isEmpty, service != nil else { return }
 		draft = ""
+		sendText(text)
+	}
+
+	/// Send `text` as the learner (the composer, the demo chip's "Send to
+	/// teacher"): a steer while busy, otherwise a turn.
+	func sendText(_ text: String) {
+		guard !text.jsTrimmed.isEmpty, let service else { return }
 		errorText = nil
 		needsKey = false
 		if busy {
