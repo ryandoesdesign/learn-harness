@@ -103,8 +103,11 @@ struct SessionView: View {
 	}
 }
 
-private func isBottom(_ geo: ScrollGeometry) -> Bool {
-	geo.contentOffset.y + geo.containerSize.height >= geo.contentSize.height + geo.contentInsets.bottom - 24
+/// The view sits at the bottom of the transcript. `containerSize` already
+/// excludes the dock's inset (measured: a 400pt window with a 150pt dock
+/// reports 250), so the bottom is offset + container = content height.
+func isBottom(_ geo: ScrollGeometry) -> Bool {
+	geo.contentOffset.y + geo.containerSize.height >= geo.contentSize.height - 24
 }
 
 /// The transcript column (chat.tsx Conversation): rows in a lazy stack,
