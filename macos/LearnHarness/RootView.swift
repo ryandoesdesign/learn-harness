@@ -21,16 +21,8 @@ struct RootView: View {
 					.environment(model)
 					.id(session.chatId)
 					.task(id: session.chatId) { await session.observe() }
-			} else if model.sessions.isEmpty {
-				ContentUnavailableView {
-					Label("No Sessions", systemImage: "graduationcap")
-				} description: {
-					Text("Start one with File → New Session (⌘N), or import your sessions with File → Import from LearnHarness (Electron)…")
-				} actions: {
-					Button("New Session") { model.newSession() }
-				}
 			} else {
-				ContentUnavailableView("No Session Selected", systemImage: "graduationcap", description: Text("Choose a session in the sidebar."))
+				HomeSummaryView(model: model)
 			}
 		}
 		.environment(model.dictation)

@@ -29,6 +29,7 @@ struct SidebarView: View {
 	@FocusState private var renameFocused: Bool
 	@State private var deleting: ChatSummary?
 	@State private var deleteError: String?
+	@Environment(\.openWindow) private var openWindow
 
 	var body: some View {
 		let shown = filteredSessions(model.sessions, query: query, filter: filter)
@@ -97,6 +98,10 @@ struct SidebarView: View {
 			ToolbarItem {
 				Button { model.newSession() } label: { Label("New Session", systemImage: "plus") }
 					.help("New session (⌘N)")
+			}
+			ToolbarItem {
+				Button { openWindow(id: "graph") } label: { Label("Knowledge Graph", systemImage: "point.3.connected.trianglepath.dotted") }
+					.help("Knowledge Graph (⌥⌘G)")
 			}
 		}
 		.sheet(item: $deleting) { s in

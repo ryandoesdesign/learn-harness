@@ -74,7 +74,7 @@ import Testing
 		model.reload()
 		model.startSession(from: ["n_b", "n_a"])
 		#expect(app.drafting && app.draftPicks.map(\.id) == ["n_a", "n_b"])
-		app.startSession(prompt: "Teach me joins")
+		app.beginSession(prompt: "Teach me joins")
 		let chatId = try #require(app.selection)
 		let record = try #require(try ChatRepository(app.database).get(chatId))
 		guard case .marker(let m) = try #require(record.messages.first).body else { Issue.record("no marker first"); return }

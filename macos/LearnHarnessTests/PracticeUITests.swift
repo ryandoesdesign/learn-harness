@@ -67,7 +67,7 @@ private func concluded(_ id: String) -> [Message] {
 		app.newSession(kind: .practice)
 		#expect(app.drafting && app.draftKind == .practice)
 		app.draftPicks = [GraphContextPick(id: "n_a", name: "Inner join", statement: "Matching rows only.")]
-		app.startSession(prompt: "Drill me on joins")
+		app.beginSession(prompt: "Drill me on joins")
 		let id = try #require(app.selection)
 		let record = try #require(try ChatRepository(app.database).get(id))
 		#expect(record.kind == .practice)
@@ -97,5 +97,18 @@ private func concluded(_ id: String) -> [Message] {
 		s.problemDockExpanded = false
 		try await Task.sleep(for: .milliseconds(300))
 		#expect(box.height < 60, "folded to a bar: \(box.height)")
+	}
+}
+
+@MainActor
+@Suite struct FirstRunKeyTests {
+	@Test func startingWithoutAKeyAsksForOneAndCreatesNothing() throws {
+		let dir = FileManager.default.temporaryDirectory.appending(path: "lhkey-\(UUID().uuidString)", directoryHint: .isDirectory)
+		let app = AppModel(dataDirectory: dir, keychain: InMemoryKeychain())
+		app.newSession()
+		#expect(!app.startSession(prompt: "Teach me joins"))
+		#expect(app.keyPromptOpen)
+		#expect(try ChatRepository(app.database).listChats().isEmpty, "no orphan chat (TS created it first)")
+		#expect(app.drafting && app.selection == nil)
 	}
 }

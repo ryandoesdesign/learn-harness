@@ -217,15 +217,18 @@ struct FigureCard: View {
 				}
 				.toggleStyle(.button)
 				.help("Invert colors")
+				.accessibilityLabel("Invert colors")
 				Button {
 					saveFile(name: "figure.svg", contents: svg, type: .svg)
 				} label: { Image(systemName: "arrow.down.to.line") }
 					.help("Download as SVG")
+					.accessibilityLabel("Download as SVG")
 				if let overlays, let rendered {
 					Button {
 						overlays.openDiagram(svg: rendered.svg, size: rendered.size, figure: true, inverted: isInverted)
 					} label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
 						.help("Open fullscreen")
+						.accessibilityLabel("Open fullscreen")
 				}
 			}
 			.buttonStyle(.borderless)
@@ -289,10 +292,12 @@ struct DemoCard: View {
 				}
 				.toggleStyle(.button)
 				.help("Invert colors")
+				.accessibilityLabel("Invert colors")
 				Button {
 					saveFile(name: "\(slugFilename(title)).html", contents: html, type: .html)
 				} label: { Image(systemName: "arrow.down.to.line") }
 					.help("Download as HTML")
+					.accessibilityLabel("Download as HTML")
 			}
 			.buttonStyle(.borderless)
 			.controlSize(.small)

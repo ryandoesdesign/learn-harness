@@ -172,7 +172,7 @@ enum RenderGallery {
 		messages.append(newUserMessage("Let's practice.", id: "u3", now: tick()))
 		messages.append(assistant("a10", [.toolUse(id: "c_problem", name: "problem", input: ["statement": "Write a query joining $A$ and $B$ on `id`.", "modelSolution": "SELECT * FROM A JOIN B USING (id);", "mode": "practice", "target": ["n_1"]])], stop: "tool_use"))
 		messages.append(newThinkingMessage(problemCallId: "c_problem", text: "Maybe USING (id) works here.", id: "pt", now: tick()))
-		messages.append(assistant("a11", [.toolUse(id: "c_conclude", name: "conclude", input: ["outcome": "solvedWithHints", "verdict": "Right idea — the hint about USING landed.", "rung": "nudge", "missClass": "syntax", "retest": true])], stop: "tool_use"))
+		messages.append(assistant("a11", [.toolUse(id: "c_conclude", name: "conclude", input: ["outcome": "solvedWithHints", "verdict": "Right idea — the hint about USING landed.", "rung": "R1", "missClass": "execution", "retest": true])], stop: "tool_use"))
 		messages.append(result("c_conclude", "conclude", ["ok": true]))
 		messages.append(newNextMessage(id: "pn", now: tick()))
 		let (call, res) = concludedByDismissalPair(problemCallId: "c_problem", now: tick())

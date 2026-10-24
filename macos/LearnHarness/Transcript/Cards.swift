@@ -162,9 +162,11 @@ struct LiveToolCard: View {
 /// braille-spinner.tsx: the one working-state indicator.
 struct BrailleSpinner: View {
 	private static let frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+	/// Reduce Motion: one still frame (globals.css prefers-reduced-motion).
+	@Environment(\.accessibilityReduceMotion) private var reduceMotion
 	var body: some View {
 		TimelineView(.periodic(from: .now, by: 0.08)) { context in
-			let i = Int(context.date.timeIntervalSinceReferenceDate / 0.08) % Self.frames.count
+			let i = reduceMotion ? 0 : Int(context.date.timeIntervalSinceReferenceDate / 0.08) % Self.frames.count
 			Text(Self.frames[i]).font(Theme.ui).foregroundStyle(Theme.muted)
 		}
 		.accessibilityLabel("Working")
@@ -174,7 +176,17 @@ struct BrailleSpinner: View {
 /// shimmer.tsx: muted caps text with a moving highlight.
 struct ShimmerText: View {
 	var text: String
+	/// Reduce Motion: plain muted caps, no moving highlight.
+	@Environment(\.accessibilityReduceMotion) private var reduceMotion
 	var body: some View {
+		if reduceMotion {
+			Text(text.uppercased()).font(Theme.uiMedium).tracking(0.6).foregroundStyle(Theme.muted)
+		} else {
+			shimmer
+		}
+	}
+
+	private var shimmer: some View {
 		TimelineView(.animation) { context in
 			let t = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.2) / 1.2
 			Text(text.uppercased())

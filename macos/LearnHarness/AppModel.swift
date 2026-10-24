@@ -42,6 +42,22 @@ final class AppModel {
 	var drafting = false
 	/// The draft's mode (M8): nil = a teaching session, .practice = practice.
 	var draftKind: ChatKind?
+	/// The app's own model remembers the open session across launches
+	/// (tests' models never touch it).
+	private var remembersSelection = false
+	private static let lastSessionKey = "lh.lastSession"
+
+	/// At launch: reopen the session that was open last, if it still exists.
+	func restoreLastSession() {
+		remembersSelection = true
+		guard selection == nil, !drafting, let id = UserDefaults.standard.string(forKey: Self.lastSessionKey),
+		      ((try? ChatRepository(database).get(id)) ?? nil) != nil
+		else { return }
+		selection = id
+	}
+
+	/// The first-run key prompt (no Anthropic key when a draft starts).
+	var keyPromptOpen = false
 	/// Edit → Search Sessions (⇧⌘F): each bump focuses the sidebar search.
 	var searchRequest = 0
 	/// Session → Rename… (or Return on a sidebar row): the chat to rename.
@@ -51,6 +67,7 @@ final class AppModel {
 		didSet {
 			guard selection != oldValue else { return }
 			if selection != nil { drafting = false }
+			if remembersSelection { UserDefaults.standard.set(selection, forKey: Self.lastSessionKey) }
 			session = selection.map { SessionModel(chatId: $0, database: database, dataDirectory: dataDirectory, catalog: catalog, service: service) }
 		}
 	}
@@ -134,11 +151,27 @@ final class AppModel {
 		NSApp.windows.first { $0.canBecomeMain && $0.isVisible && !($0.identifier?.rawValue.contains("graph") ?? false) }?.makeKeyAndOrderFront(nil)
 	}
 
-	/// The draft's first send: create the chat (titled from the prompt, its
-	/// settings stamped from the Strong slot), open it, send the prompt.
-	func startSession(prompt: String) {
+	/// The draft's first send. With no Anthropic key the key prompt opens
+	/// first and nothing is created (setup-dialog.tsx; the draft keeps its
+	/// text): false. Otherwise the session begins and the prompt is sent.
+	@discardableResult
+	func startSession(prompt: String) -> Bool {
+		guard ((try? keychain.anthropicKey()) ?? nil) != nil else {
+			keyPromptOpen = true
+			return false
+		}
+		guard let chatId = beginSession(prompt: prompt), session?.chatId == chatId else { return false }
+		session?.draft = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+		session?.sendDraft()
+		return true
+	}
+
+	/// Create the chat (titled from the prompt, picks as message[0], its
+	/// settings stamped from the Strong slot) and open it — no send.
+	@discardableResult
+	func beginSession(prompt: String) -> String? {
 		let text = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
-		guard !text.isEmpty else { return }
+		guard !text.isEmpty else { return nil }
 		do {
 			let repo = ChatRepository(database)
 			let chat = try repo.createChat(title: titleFromPrompt(text), kind: draftKind)
@@ -156,12 +189,18 @@ final class AppModel {
 			let spec = resolveConversationSpec(nil, strong: settings?.models?.strong, catalog: catalog)
 			try repo.saveSettings(ChatSettings(model: spec.model, effort: spec.effort), chatId: chat.id)
 			selection = chat.id
-			session?.draft = text
-			session?.sendDraft()
+			return chat.id
 		} catch {
 			let alert = NSAlert(error: error)
 			alert.runModal()
+			return nil
 		}
+	}
+
+	/// The key prompt's Save (first run): store it, then the draft can start.
+	func saveKey(_ key: String) throws {
+		try keychain.setAnthropicKey(key.trimmingCharacters(in: .whitespacesAndNewlines))
+		session?.needsKey = false
 	}
 
 	func rename(_ chatId: String, to title: String) {
@@ -170,8 +209,8 @@ final class AppModel {
 		try? ChatRepository(database).rename(chatId, title: t)
 	}
 
-	/// Delete a session (refused while its turn runs — TS 409 turn_in_flight).
-	/// Its graph traces stay (the traces option arrives with M7).
+	/// Delete a session (refused while its turn runs — TS 409 turn_in_flight),
+	/// and with `removeGraphTraces` the graph nodes only it contributed.
 	func delete(_ chatId: String, removeGraphTraces: Bool = false) async -> String? {
 		if await service.isRunning(chatId) { return "A turn is still running in this session — wait for it to finish or stop it, then try again." }
 		await jobs.cancelAll(chatId: chatId)

@@ -9,6 +9,7 @@ struct CoverageRing: View {
 	var chatId: String
 	@Environment(AppModel.self) private var app
 	@State private var open = false
+	@Environment(\.accessibilityReduceMotion) private var reduceMotion
 	@State private var pulse = false
 
 	var body: some View {
@@ -25,8 +26,8 @@ struct CoverageRing: View {
 					Circle().trim(from: 0, to: fill).stroke(Color.accentColor, style: StrokeStyle(lineWidth: 2.5, lineCap: .round)).rotationEffect(.degrees(-90))
 				}
 				.frame(width: 14, height: 14)
-				.opacity(c.running && pulse ? 0.35 : 1)
-				.animation(c.running ? .easeInOut(duration: 0.8).repeatForever() : .default, value: pulse)
+				.opacity(c.running && pulse && !reduceMotion ? 0.35 : 1)
+				.animation(c.running && !reduceMotion ? .easeInOut(duration: 0.8).repeatForever() : .default, value: pulse)
 				.onAppear { pulse = c.running }
 				.onChange(of: c.running) { _, r in pulse = r }
 			}

@@ -132,6 +132,7 @@ struct ChainTableView: View {
 		Button(action: action) { Image(systemName: open ? "chevron.down" : "chevron.right").font(.system(size: 9)).frame(width: 14) }
 			.buttonStyle(.plain)
 			.foregroundStyle(.secondary)
+			.accessibilityLabel(open ? "Collapse" : "Expand")
 	}
 
 	/// A flat node-id checkbox: on, off, or partial (some members selected).
@@ -143,6 +144,7 @@ struct ChainTableView: View {
 		} label: { Image(systemName: state) }
 			.buttonStyle(.plain)
 			.foregroundStyle(count == 0 ? Color.secondary : Color.accentColor)
+			.accessibilityLabel(count == ids.count ? "Deselect" : "Select")
 	}
 
 	private func selectionBar(_ snap: GraphSnapshot?) -> some View {

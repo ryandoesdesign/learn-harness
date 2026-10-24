@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		10E1D61BD94DDB41925A85D0 /* Highlightr in Frameworks */ = {isa = PBXBuildFile; productRef = 8B27410E88D31C05DD928092 /* Highlightr */; };
 		1632EB3C8BD3369394476A89 /* ScrollBottomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BFF23D8C953FE56B9EE851 /* ScrollBottomTests.swift */; };
+		1C2CD7072AEEABCC02ED13C9 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39155C296F11F2563A10CDB3 /* AppIcon.icon */; };
 		27B878A503276E3F1C38A71F /* GraphRegions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C005D31ED5A2EFEECF18F0C9 /* GraphRegions.swift */; };
 		29F6B95BB12F72F8278D3539 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C84F44649F29806FC6820DB /* RootView.swift */; };
 		2DD5FDBE6AD6BBED906E8C28 /* PlaygroundModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C753281CFD184086DB7D25 /* PlaygroundModel.swift */; };
@@ -71,6 +72,7 @@
 		F6468A6BAE719FB08F992FFF /* MermaidBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6474BA93B85E71DCE9A97E35 /* MermaidBlockView.swift */; };
 		F9D2A5921B3FD9481043D7BF /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA3E30B7D6811217919957F /* AppModel.swift */; };
 		FBE464AA6E5DEB941F496EA6 /* MathImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A8987D59E09E10926C27DC1 /* MathImage.swift */; };
+		FCEFEDAD232B332BD8FA8557 /* HomeSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90DBC48017EFD5C39871F3D /* HomeSummary.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,6 +101,7 @@
 		289B9F29DFF7F198AB7A8E2E /* TranscriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptTests.swift; sourceTree = "<group>"; };
 		34807431DA9BEFDC4D5BB0E9 /* DockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockView.swift; sourceTree = "<group>"; };
 		389F8439DE555C7DABE72FD6 /* SessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionModel.swift; sourceTree = "<group>"; };
+		39155C296F11F2563A10CDB3 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		3BA431BB50DD08A54F6F116E /* DemoSandboxHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSandboxHostTests.swift; sourceTree = "<group>"; };
 		40C71F67E4DC2D5856E1ADD3 /* DictationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationTests.swift; sourceTree = "<group>"; };
 		46DE353BFF880FCA14F35171 /* LHKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LHKit; path = Packages/LHKit; sourceTree = SOURCE_ROOT; };
@@ -126,6 +129,7 @@
 		ABB2DF13F0D80C39FEECFACA /* PlaygroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaygroundView.swift; sourceTree = "<group>"; };
 		B364A0BC0064623E6E5A84B1 /* PracticeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeUITests.swift; sourceTree = "<group>"; };
 		B6AD793186A69DF940CEB0A7 /* chats */ = {isa = PBXFileReference; lastKnownFileType = folder; name = chats; path = "../tests/fixtures/golden-data/chats"; sourceTree = SOURCE_ROOT; };
+		B90DBC48017EFD5C39871F3D /* HomeSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSummary.swift; sourceTree = "<group>"; };
 		BE87A15DE6632DBA8D5EF9E1 /* LearnHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LearnHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C005D31ED5A2EFEECF18F0C9 /* GraphRegions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphRegions.swift; sourceTree = "<group>"; };
 		C22021EA11C44929384FB781 /* FindModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindModel.swift; sourceTree = "<group>"; };
@@ -196,8 +200,10 @@
 			isa = PBXGroup;
 			children = (
 				47E669C182901B19CCACAADF /* AppCommands.swift */,
+				39155C296F11F2563A10CDB3 /* AppIcon.icon */,
 				5EA3E30B7D6811217919957F /* AppModel.swift */,
 				9D35D006AE2576BA7CBAB041 /* Commands.swift */,
+				B90DBC48017EFD5C39871F3D /* HomeSummary.swift */,
 				65642BEE29DC429C524A3A4E /* ImportView.swift */,
 				A1C87B8F3F1CA96293D3BD67 /* LearnHarness.entitlements */,
 				DF66A05E71DF8368D500E8F4 /* LearnHarnessApp.swift */,
@@ -418,6 +424,7 @@
 			buildConfigurationList = D6222274042540A7D095D205 /* Build configuration list for PBXNativeTarget "LearnHarness" */;
 			buildPhases = (
 				D5E9034FE436CCAAC8663EF6 /* Sources */,
+				B48050937AEB12DB67068C98 /* Resources */,
 				C0501B721E2451678D53D0A8 /* Frameworks */,
 			);
 			buildRules = (
@@ -484,6 +491,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		B48050937AEB12DB67068C98 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C2CD7072AEEABCC02ED13C9 /* AppIcon.icon in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E8910E1BE87F115D2F107C6F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -540,6 +555,7 @@
 				27B878A503276E3F1C38A71F /* GraphRegions.swift in Sources */,
 				5491E8E43020B57B0379AE3B /* GraphWindow.swift in Sources */,
 				6C725DC58FE4108644BF2EEB /* GraphWindowModel.swift in Sources */,
+				FCEFEDAD232B332BD8FA8557 /* HomeSummary.swift in Sources */,
 				572ED57A386A07E026EDCA74 /* ImportView.swift in Sources */,
 				DD3BFEE3A36B7A68841C70F2 /* LearnHarnessApp.swift in Sources */,
 				81D5074029CE728CB298445E /* MarkdownView.swift in Sources */,
@@ -586,7 +602,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = LearnHarness;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Ryan Tessier";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "LearnHarness uses the microphone for dictation. Speech is transcribed on this Mac and never leaves it.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "LearnHarness transcribes your dictation on this Mac.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -682,7 +698,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = LearnHarness;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Ryan Tessier";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "LearnHarness uses the microphone for dictation. Speech is transcribed on this Mac and never leaves it.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "LearnHarness transcribes your dictation on this Mac.";
 				LD_RUNPATH_SEARCH_PATHS = (

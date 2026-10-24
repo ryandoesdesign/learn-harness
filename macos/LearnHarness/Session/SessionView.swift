@@ -235,6 +235,7 @@ struct TranscriptView: View {
 					}
 					.buttonStyle(.plain)
 					.help("Scroll to the bottom")
+					.accessibilityLabel("Scroll to the bottom")
 					.padding(.bottom, 8)
 				}
 			}
@@ -330,9 +331,9 @@ struct FindBar: View {
 					.monospacedDigit()
 					.foregroundStyle(Theme.muted)
 			}
-			Button { find.step(-1) } label: { Image(systemName: "chevron.up") }.help("Previous match").disabled(find.matches.isEmpty)
-			Button { find.step(1) } label: { Image(systemName: "chevron.down") }.help("Next match").disabled(find.matches.isEmpty)
-			Button { find.close() } label: { Image(systemName: "xmark") }.help("Close")
+			Button { find.step(-1) } label: { Image(systemName: "chevron.up") }.help("Previous match").accessibilityLabel("Previous match").disabled(find.matches.isEmpty)
+			Button { find.step(1) } label: { Image(systemName: "chevron.down") }.help("Next match").accessibilityLabel("Next match").disabled(find.matches.isEmpty)
+			Button { find.close() } label: { Image(systemName: "xmark") }.help("Close").accessibilityLabel("Close Find")
 		}
 		.buttonStyle(.borderless)
 		.padding(.horizontal, 12)

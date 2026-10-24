@@ -20,7 +20,9 @@ struct LearnHarnessApp: App {
 	var body: some Scene {
 		WindowGroup {
 			RootView(model: model)
+				.frame(minWidth: 640, minHeight: 600)
 				.task { await model.observeSessions() }
+				.task { model.restoreLastSession() }
 				.task { await model.observeService() }
 				.task { await model.observeJobs() }
 				.task { await model.observeExtraction() }
@@ -29,6 +31,7 @@ struct LearnHarnessApp: App {
 				.task { if UserDefaults.standard.bool(forKey: "LHOpenGallery"), UserDefaults.standard.bool(forKey: "LHScratch") { model.addRenderGallery() } }
 				#endif
 		}
+		.defaultSize(width: 1440, height: 900)
 		.commands {
 			AppCommands(model: model)
 			#if DEBUG

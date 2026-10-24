@@ -26,6 +26,7 @@ struct PracticeDockView: View {
 					Button { session.problemDockExpanded = false } label: { Image(systemName: "chevron.down") }
 						.buttonStyle(.borderless)
 						.help("Fold the problem")
+						.accessibilityLabel("Fold the problem")
 				}
 				HuggingScroll(maxHeight: Self.maxBody) {
 					MarkdownView(problem.statement, unit: "dock.p", font: .system(size: 15, design: .serif), fontSize: 15)

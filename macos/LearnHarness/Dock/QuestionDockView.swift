@@ -55,6 +55,7 @@ struct QuestionDockView: View {
 				Button { session.dockExpanded = false } label: { Image(systemName: "chevron.down") }
 					.buttonStyle(.borderless)
 					.help("Fold the question")
+					.accessibilityLabel("Fold the question")
 			}
 			HuggingScroll(maxHeight: Self.maxBody) {
 				VStack(alignment: .leading, spacing: 10) {
