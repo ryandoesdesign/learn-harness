@@ -1,18 +1,11 @@
-node_modules/
 data/
-.next/
 *.log
 .DS_Store
-*.tsbuildinfo
-.env.local
 .memory/
 SCOPE.md
 # raw real-data import sources (user directive 2026-09-13: never commit)
 real-data-extraction/
-dist/
 
-# dev auth/keys store (auth-keys wave): repo-root auth.json — secrets never committed
+# the old web app's local key store: repo-root auth.json — secrets never committed
 auth.json
 
-# dev-fresh launcher scratch (fresh-user sim): disposable per launch
-.fresh-data/
