@@ -74,12 +74,13 @@ struct BlockView: View {
 			}
 			.fixedSize(horizontal: false, vertical: true)
 		case .callout(_, let children):
-			MarkdownView(blocks: children, unit: unit, font: font, fontSize: fontSize)
-				.padding(.horizontal, 16)
-				.padding(.vertical, 12)
-				.overlay(Rectangle().strokeBorder(Color.primary, lineWidth: 1))
-				.fixedSize(horizontal: true, vertical: false)
-				.frame(maxWidth: .infinity, alignment: .leading)
+			ShrinkToFit {
+				MarkdownView(blocks: children, unit: unit, font: font, fontSize: fontSize)
+					.padding(.horizontal, 16)
+					.padding(.vertical, 12)
+					.overlay(Rectangle().strokeBorder(Color.primary, lineWidth: 1))
+			}
+			.frame(maxWidth: .infinity, alignment: .leading)
 		case .code(let language, let source, let startLine, let lineNumbers):
 			CodeBlockView(language: language, source: source, startLine: startLine, lineNumbers: lineNumbers, unit: unit)
 		case .mermaid(let source, let closed):
@@ -102,6 +103,22 @@ struct BlockView: View {
 		case 3: fontSize * 1.15
 		default: fontSize
 		}
+	}
+}
+
+/// CSS `width: fit-content` with `max-width: 100%`: the child at its ideal
+/// width, but never wider than the proposal (a long line wraps instead of
+/// running past the column — .fixedSize(horizontal: true) can't wrap).
+struct ShrinkToFit: Layout {
+	func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+		guard let child = subviews.first else { return .zero }
+		let ideal = child.sizeThatFits(.unspecified).width
+		let width = min(ideal, proposal.width ?? ideal)
+		return child.sizeThatFits(ProposedViewSize(width: width, height: nil))
+	}
+
+	func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+		subviews.first?.place(at: bounds.origin, proposal: ProposedViewSize(width: bounds.width, height: bounds.height))
 	}
 }
 
