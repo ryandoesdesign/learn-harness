@@ -103,6 +103,10 @@ struct SessionView: View {
 	}
 }
 
+private func isBottom(_ geo: ScrollGeometry) -> Bool {
+	geo.contentOffset.y + geo.containerSize.height >= geo.contentSize.height + geo.contentInsets.bottom - 24
+}
+
 /// The transcript column (chat.tsx Conversation): rows in a lazy stack,
 /// opening at the bottom and sticking there while it streams; a
 /// scroll-to-bottom button otherwise. Find and graph anchors scroll rows
@@ -149,10 +153,18 @@ struct TranscriptView: View {
 			}
 			.scrollPosition($position)
 			.defaultScrollAnchor(.bottom)
+			// "At the bottom" follows YOUR scrolling: reaching the bottom sets it,
+			// but only a scroll you make can clear it — content growing while a
+			// turn streams, or the dock changing height, never does.
 			.onScrollGeometryChange(for: Bool.self) { geo in
-				geo.contentOffset.y + geo.containerSize.height >= geo.contentSize.height - 24
+				isBottom(geo)
 			} action: { _, atBottom in
-				session.isAtBottom = atBottom
+				if atBottom { session.isAtBottom = true }
+			}
+			.onScrollPhaseChange { old, new, context in
+				if new == .idle, old == .interacting || old == .decelerating {
+					session.isAtBottom = isBottom(context.geometry)
+				}
 			}
 			.onChange(of: session.rows.count) {
 				if session.isAtBottom, session.busy { proxy.scrollTo("bottom", anchor: .bottom) }

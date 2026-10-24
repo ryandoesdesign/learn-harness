@@ -200,7 +200,7 @@ extension SessionModel {
 		errorText = "\(error)"
 	}
 
-	// MARK: Dock arrival (chat.tsx revealArrival / probeArrivalExpanded)
+	// MARK: Dock arrival
 
 	func updatePendingArrival() {
 		let id = pending?.toolCallId
@@ -209,17 +209,11 @@ extension SessionModel {
 		// sibling may follow it directly — keep the previous id until the
 		// turn actually runs (or the sibling arrives).
 		if id == nil, status == .submitted { return }
-		let previous = lastPendingId
 		lastPendingId = id
 		guard id != nil else { return }
-		if requiresReveal {
-			let arrival = revealArrival(wasQuestion: previous != nil)
-			dockExpanded = arrival.expanded
-			revealed = arrival.revealed
-		} else {
-			dockExpanded = isAtBottom
-			revealed = true
-		}
+		let arrival = questionArrival(atBottom: isAtBottom)
+		dockExpanded = arrival.expanded
+		revealed = arrival.revealed
 		readingThinking = ""
 	}
 
@@ -230,10 +224,12 @@ extension SessionModel {
 	}
 }
 
-/// chat.tsx revealArrival: a teach check after another question arrives
-/// open; after the composer it waits behind the reveal bar.
-func revealArrival(wasQuestion: Bool) -> (expanded: Bool, revealed: Bool) {
-	wasQuestion ? (true, true) : (false, false)
+/// How a new question arrives (your rule, 2026-10-24 — replaces the TS
+/// revealArrival/probeArrivalExpanded pair): expanded when you are at the
+/// bottom of the conversation, folded when you have scrolled up — every
+/// kind alike (a folded teach check shows "Check your understanding").
+func questionArrival(atBottom: Bool) -> (expanded: Bool, revealed: Bool) {
+	(atBottom, atBottom)
 }
 
 /// composer.tsx enterAction.

@@ -27,9 +27,10 @@ import Testing
 		#expect(escAbortTarget(abortAsk: false, diagram: false, plan: false, setup: false, pending: false, problem: false, busy: false) == nil)
 	}
 
-	@Test func revealArrivalRules() {
-		#expect(revealArrival(wasQuestion: true) == (true, true))
-		#expect(revealArrival(wasQuestion: false) == (false, false))
+	/// New questions: expanded at the bottom, folded when scrolled up — every kind.
+	@Test func questionArrivalFollowsTheScroll() {
+		#expect(questionArrival(atBottom: true) == (true, true))
+		#expect(questionArrival(atBottom: false) == (false, false))
 	}
 
 	@Test func abortDialogCopy() {

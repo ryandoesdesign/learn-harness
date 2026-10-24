@@ -199,6 +199,11 @@ Both dialogs use the TS copy, including "The working turn stops too." when a tur
 
 **Live acceptance** (`LH_LIVE=1`, Sonnet 5.5, low effort): `probe` → `probe_done` → handoff → `plan_init` → tagged `quiz` → answer → `quiz`. That took 5 turns and about 35 seconds, and later requests read about 60k tokens from the cache.
 
+**How a new question arrives** (your rule, 2026-10-24; it replaces TS's revealArrival / probeArrivalExpanded):
+- At the bottom of the conversation, a new question arrives expanded. When you've scrolled up, it arrives folded. This applies to every kind of question.
+- A folded teach check still shows "Check your understanding · Open ›".
+- "At the bottom" follows your own scrolling: reaching the bottom sets it, and only a scroll you make clears it. Content growing while a turn streams, or the dock changing height, never clears it.
+
 **Small differences from TS:**
 - The delete dialog drops "unless you check below", because the graph-traces checkbox arrives with M7.
 - The session title is renamed with the native editable title (click it).
