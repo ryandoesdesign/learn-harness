@@ -1,47 +1,55 @@
 # LearnHarness data: a field reference
 
-The files are the user's record, not an import format to rewrite. Work read-only.
+The database is the user's record, not an import format to rewrite. Work read-only.
 The bundled readers make common views convenient; they are not required for custom
-analysis. This reference describes native session/graph format **1**. An absent
-version stamp means v1. Older fields within that format are described below;
-pre-native `parts`/UIMessage transcripts are a different, unsupported dialect.
+analysis. This reference describes the native app's SQLite database at the schema
+migrations `v1`, `v2` and `v3`. A database stamped with any other migration is
+refused rather than guessed.
 
-## File map
+## The database
 
-Paths below are relative to the selected **data** directory:
+One SQLite file, `learnharness.sqlite`, in WAL mode while the app runs (it then has
+`-wal` and `-shm` siblings holding recent commits). The readers open it through a
+`file:…?mode=ro` URI: with a `-wal` present the shared-memory file is opened
+read-only too (`readonly_shm=1`), and without one the file is opened `immutable=1`
+so SQLite creates no siblings. For your own queries, open it the same way, e.g.
+`sqlite3.connect("file:/path/learnharness.sqlite?mode=ro&readonly_shm=1", uri=True)`,
+and never run `PRAGMA`s that write, `VACUUM`, checkpoints or schema statements.
+
+`grdb_migrations` lists the applied schema migrations (`identifier`). The tables
+the skill reads:
 
 ```text
-chats/<session-id>.json    Full session: messages, optional plan, usage metadata
-graph/nodes.jsonl          Proposition assertions; IDs can repeat
-graph/chains.jsonl         Reasoning-chain assertions; logical chains can repeat
-graph/sources.json        Imported-note source metadata, keyed by source ID
-graph/format.json         Graph-family format stamp: {"version": 1}
-graph/sessions.jsonl       Extraction checkpoints, NOT the session index
-graph/coverage.jsonl       Extraction fingerprints, NOT learner assessment
-graph/positions.json      Canvas layout, not semantic relationships
-graph/render-settings.json  Presentation preferences, not learning evidence
-jobs/<job-id>.json        Background work records; delivered artifacts also appear in sessions
+chat               One row per session
+message            Every session message, one row each, ordered by (chat_id, seq)
+graph_node_line    Proposition ledger: one JSON line per row, append order = seq
+graph_chain_line   Reasoning-chain ledger: one JSON line per row, append order = seq
+source             Imported-note source metadata
 ```
 
-`settings.json`, downloaded models, caches, and provider debug logs are not needed
-to interpret learning history. `auth.json` is normally one directory above data;
-do not read it. Imported-note paths, research URLs, and artifact references are not
-automatically followed by the readers.
+Other tables are not learning evidence and the readers do not show them:
+`message_ui` (a display toggle for artifact cards), `turn`, `usage_step`,
+`extraction_run` (usage/cost observation), `job`, `steer_outbox` (background
+work and delivery bookkeeping), `graph_session` (extraction checkpoints, **not**
+the session index), `coverage` (extraction fingerprints, **not** learner
+assessment), `node_position` (canvas layout), `kv_settings`, `prompt_override`,
+`folder_bookmark`, `import_log`, and the `message_fts` search index. API keys are
+in the macOS Keychain, not in the database. Imported-note paths, research URLs, and
+artifact references are not automatically followed by the readers.
 
 ## A session record
 
-Each `chats/*.json` file is an object with:
+`chat` columns:
 
-| Field | Meaning |
+| Column | Meaning |
 | --- | --- |
 | `id`, `title` | Stable session identity and user-visible name |
-| `createdAt`, `updatedAt` | ISO date strings for the session, not a date for every idea |
-| `kind` | `teach` or `practice`; absent means `teach` |
-| `version` | Format stamp; absent means v1 |
-| `messages` | Complete stored chronological history, including custom app markers |
-| `tree` | Optional session plan: nodes, prerequisite edges, revision number |
-| `turns`, `extractions` | Parallel usage/cost-observation logs, not learner answers |
-| `settings` | Per-session model/thinking overrides, not an understanding assessment |
+| `created_at`, `updated_at` | ISO date strings for the session, not a date for every idea |
+| `kind` | `teach` or `practice`; NULL means `teach` |
+| `version` | Record format stamp (1); NULL means 1. Newer is refused |
+| `tree_json` | Optional session plan: nodes, prerequisite edges, revision number |
+| `settings_json` | Per-session model/effort overrides, not an understanding assessment |
+| `origin` | `native` or `import` (from the older app); not learning evidence |
 
 The plan is session scaffolding, not the persistent knowledge graph. Its visited
 or current positions are not proof of mastery. Context compaction changes what the
@@ -50,18 +58,33 @@ stored history.
 
 ### Messages and content blocks
 
-Messages carry an application `id` and usually a millisecond Unix `timestamp`.
-Native roles are:
+`message` columns: `chat_id`, `seq` (order), `id` (application message ID),
+`role`, `timestamp` (Unix milliseconds), `payload_json` (the content), and per role
+`custom_type`, `tool_call_id`, `tool_name`, `is_error`, `details_json`, `display`,
+`model`, `stop_reason`, `usage_json`, `error_message`. Stored roles are:
 
-- `user`: learner prose; `content` can be a string or text/image blocks.
-- `assistant`: `content` is an array of `text`, `thinking`, and `toolCall` blocks.
-  `thinking` here is **agent reasoning**, not learner thinking.
-- `toolResult`: result of a call, identified by `toolCallId` and `toolName`.
-  `content` is often only a compact model-facing summary; `details` can be richer.
-- `custom`: an application event identified by `customType`. Some contain
-  irreplaceable learner work or teaching artifacts, so do not discard this role.
+- `user`: learner prose; `payload_json` is an array of `text`/`image` blocks.
+- `assistant`: an array of `text`, `thinking`, `redacted_thinking` and `tool_use`
+  blocks (Anthropic's shapes). `thinking` here is **agent reasoning**, not learner
+  thinking.
+- `toolResult`: result of a call, identified by `tool_call_id` and `tool_name`.
+  `payload_json` is often only a compact model-facing summary; `details_json` can be richer.
+- `marker`: an application event identified by `custom_type`; `payload_json` is a
+  JSON **string** (its model-facing text). Some contain irreplaceable learner work
+  or teaching artifacts, so do not discard this role.
 
-An assistant tool call has roughly this shape:
+The readers print messages in the older app's vocabulary, which the rest of this
+reference uses: `marker` → role `custom` with `customType`; `tool_use{id,name,input}`
+→ `toolCall{id,name,arguments}`; `thinking{thinking,signature}` →
+`thinking{thinking,thinkingSignature}`; `redacted_thinking{data}` → `thinking` with
+`redacted: true`; `image{source:{type:"base64",media_type,data}}` →
+`image{mimeType,data}` (the base64 data is never printed); `tool_call_id` →
+`toolCallId`, `is_error` → `isError`, `details_json` → `details`. On assistant
+messages, `model` (`provider:id`, or a bare Anthropic id) becomes `provider` and
+`model`, and `stop_reason` becomes `stopReason` (`stop`, `length`, `toolUse`, or the
+stored value). Other block types are shown as stored, as unsupported content.
+
+An assistant tool call, as the readers print it, has roughly this shape:
 
 ```json
 {
@@ -173,7 +196,10 @@ reader needs to open the original PDF or notes file merely to read these records
 
 ## The graph: assertions must be merged, not counted as unique lines
 
-### Propositions (`nodes.jsonl`)
+The ledgers keep each assertion as its original JSON line (`line_json`), byte for
+byte, with `seq` giving append order. Read them in `seq` order and merge.
+
+### Propositions (`graph_node_line`)
 
 Each line contains `id`, `name`, `statement`, `aliases`, `createdAt`, and
 `provenance`—an array of `{chatId, messageId}` points.
@@ -185,7 +211,7 @@ Each line contains `id`, `name`, `statement`, `aliases`, `createdAt`, and
 - Provenance unions by exact `(chatId, messageId)` pair, retaining encounter order.
 - Do not deduplicate different node IDs just because their labels look alike.
 
-### Reasoning chains (`chains.jsonl`)
+### Reasoning chains (`graph_chain_line`)
 
 Each line contains `id`, `premises` (node IDs), `conclusion` (node ID), `createdAt`,
 and `provenance`. **All premises within a chain are used together.** Different
@@ -205,18 +231,18 @@ point, not the earliest timestamp and not every session that mentioned it.
 Graph session listings and `propositions --session` use this rule. A node with no
 provenance remains readable/searchable but belongs to no birth session.
 
-- `chat_…` IDs usually refer to session files. Use the matching `messageId` when
-  present to find the exact source message. Empty message IDs in older data are
-  chat-level attribution; they do not identify an exact message.
-- Imported notes use `src_…` source IDs. `sources.json` supplies `id`, `filePath`,
-  and `importedAt`; these source paths are references only.
+- `chat_…` IDs usually refer to `chat` rows. Use the matching `messageId` when
+  present to find the exact source message (`message.id`). Empty message IDs in
+  older data are chat-level attribution; they do not identify an exact message.
+- Imported notes use `src_…` source IDs. The `source` table supplies `id`,
+  `file_path`, and `imported_at`; these source paths are references only.
 - Missing/deleted source metadata can leave a valid graph. The session index then
   uses the source ID as its label and `file` as its fallback kind; this fallback
   alone does not prove the source was an imported file.
 - Chat deletion and chain simplification can rewrite ledgers. They are normally
-  appended during extraction, but do not assume the files are immutable logs.
+  appended during extraction, but do not assume the ledgers are immutable logs.
 
-Graph `sessions.jsonl` records extraction checkpoints, and `coverage.jsonl` records
+`graph_session` records extraction checkpoints, and `coverage` records
 fingerprints of extracted teacher text. Neither is a session catalog, quiz-event
 ledger, mastery scale, or record of every idea the learner personally endorsed.
 Practice does not itself write new propositions to the graph.
@@ -225,9 +251,9 @@ Practice does not itself write new propositions to the graph.
 
 The readers intentionally stop short of analysis: no inferred mastery, scoring,
 semantic search, transitive traversal, or automatic report generation. Their JSON
-output can be processed further, or you can read the native files directly.
+output can be processed further, or you can query the database read-only yourself.
 
 Malformed/unsupported records must be identified, not silently counted as valid.
-The app may be writing while a reader runs, so a directory-wide read is not an
-atomic snapshot. Re-read or close the app for a stable comparison. Never introduce
-locks, migrations, cleanup, or source-file edits to make a read succeed.
+The app may commit while a reader runs, so a run's separate queries are not one
+atomic snapshot. Re-read or quit the app for a stable comparison. Never introduce locks,
+migrations, cleanup, or writes to make a read succeed.

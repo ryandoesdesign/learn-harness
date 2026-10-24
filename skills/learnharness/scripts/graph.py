@@ -3,6 +3,7 @@
 
 These records describe what sources articulated, not mastery or guaranteed truth.
 Source file paths are labels only: this script never opens the imported originals.
+The database is opened read-only; nothing is written.
 """
 
 import sys
@@ -10,10 +11,12 @@ import sys
 sys.dont_write_bytecode = True
 
 import argparse
+from contextlib import closing
 import json
 import re
+import sqlite3
 
-from _data import DataError, add_common_arguments, data_root, print_json, read_chat, read_json, safe_path
+from _data import DataError, add_common_arguments, check_chat_version, database_path, open_database, print_json
 
 
 def warn(message):
@@ -46,26 +49,22 @@ def reject_constant(value):
     raise ValueError(f"Non-JSON numeric constant: {value}")
 
 
-def read_ledger(root, relative, chain=False):
-    path = safe_path(root, relative)
+def read_ledger(connection, table, chain=False):
+    """Yield valid ledger lines in append (seq) order; warn on bad lines."""
     try:
-        with path.open(encoding="utf-8") as handle:
-            for number, line in enumerate(handle, 1):
-                if not line.strip():
-                    continue
-                try:
-                    value = json.loads(line, parse_constant=reject_constant)
-                except ValueError:
-                    warn(f"{relative}:{number}: malformed JSON; skipped (results may be incomplete)")
-                    continue
-                if not valid_record(value, chain):
-                    warn(f"{relative}:{number}: invalid record shape; skipped (results may be incomplete)")
-                    continue
-                yield value
-    except FileNotFoundError:
-        return
-    except (OSError, UnicodeError) as exc:
-        raise DataError(f"Cannot read {relative}: {exc}") from exc
+        rows = connection.execute(f"SELECT seq, line_json FROM {table} ORDER BY seq").fetchall()
+    except sqlite3.Error as exc:
+        raise DataError(f"Cannot read {table}: {exc}") from exc
+    for seq, line in rows:
+        try:
+            value = json.loads(line, parse_constant=reject_constant)
+        except (TypeError, ValueError):
+            warn(f"{table} seq {seq}: malformed JSON; skipped (results may be incomplete)")
+            continue
+        if not valid_record(value, chain):
+            warn(f"{table} seq {seq}: invalid record shape; skipped (results may be incomplete)")
+            continue
+        yield value
 
 
 def union_points(target, points):
@@ -77,17 +76,10 @@ def union_points(target, points):
             seen.add(key)
 
 
-def load_graph(root):
+def load_graph(connection):
     """Merge ledger lines using getGraph's first-identity/union semantics."""
-    stamp = read_json(root, "graph/format.json", missing=None)
-    if stamp is not None:
-        version = stamp.get("version") if isinstance(stamp, dict) else None
-        if isinstance(version, bool) or not isinstance(version, (int, float)) or version % 1:
-            raise DataError("graph/format.json: invalid graph format version")
-        if version > 1:
-            raise DataError(f"Graph format version {version} is newer than supported version 1; upgrade this skill")
     nodes = {}
-    for line in read_ledger(root, "graph/nodes.jsonl"):
+    for line in read_ledger(connection, "graph_node_line"):
         existing = nodes.get(line["id"])
         if existing is None:
             nodes[line["id"]] = {**line, "aliases": list(line["aliases"]), "provenance": list(line["provenance"])}
@@ -97,7 +89,7 @@ def load_graph(root):
                 existing["aliases"].append(phrasing)
         union_points(existing["provenance"], line["provenance"])
     chains = {}
-    for line in read_ledger(root, "graph/chains.jsonl", chain=True):
+    for line in read_ledger(connection, "graph_chain_line", chain=True):
         key = "+".join(sorted(line["premises"])) + ">" + line["conclusion"]
         existing = chains.get(key)
         if existing is None:
@@ -111,32 +103,29 @@ def birth_session(node):
     return node["provenance"][0]["chatId"] if node["provenance"] else None
 
 
-def load_metadata(root):
-    """Read only stored metadata, never the filePath references in sources."""
-    sources = read_json(root, "graph/sources.json", missing={})
-    if not isinstance(sources, dict):
-        raise DataError("graph/sources.json: expected an object keyed by source id")
+def load_metadata(connection):
+    """Read only stored metadata, never the file paths that sources name."""
     metadata = {}
-    for source in sources.values():
-        if not isinstance(source, dict) or not all(isinstance(source.get(key), str) for key in ("id", "filePath", "importedAt")):
-            warn("graph/sources.json: invalid source metadata; skipped (labels may be incomplete)")
-            continue
-        metadata[source["id"]] = {
-            "id": source["id"], "name": source["filePath"], "kind": "file",
-            "createdAt": source["importedAt"], "updatedAt": source["importedAt"],
+    try:
+        sources = connection.execute("SELECT id, file_path, imported_at FROM source ORDER BY seq").fetchall()
+        chats = connection.execute("SELECT id, title, created_at, updated_at, version FROM chat ORDER BY id").fetchall()
+    except sqlite3.Error as exc:
+        raise DataError(f"Cannot read session metadata: {exc}") from exc
+    for source_id, file_path, imported_at in sources:
+        metadata[source_id] = {
+            "id": source_id, "name": file_path, "kind": "file",
+            "createdAt": imported_at, "updatedAt": imported_at,
         }
-    chats = safe_path(root, "chats")
-    if chats.exists():
-        for path in sorted(chats.glob("*.json")):
-            try:
-                chat = read_chat(root, path.stem)
-            except DataError as exc:
-                warn(f"chats/{path.name}: {exc}; skipped (labels may be incomplete)")
-                continue
-            metadata[chat["id"]] = {
-                "id": chat["id"], "name": chat["title"], "kind": "chat",
-                "createdAt": chat["createdAt"], "updatedAt": chat["updatedAt"],
-            }
+    for chat_id, title, created_at, updated_at, version in chats:
+        try:
+            check_chat_version(chat_id, version)
+        except DataError as exc:
+            warn(f"chat {chat_id}: {exc}; skipped (labels may be incomplete)")
+            continue
+        metadata[chat_id] = {
+            "id": chat_id, "name": title, "kind": "chat",
+            "createdAt": created_at, "updatedAt": updated_at,
+        }
     return metadata
 
 
@@ -210,9 +199,9 @@ def node_markdown(node, metadata, heading="###"):
     print()
 
 
-def print_markdown(command, result, graph, metadata, root):
+def print_markdown(command, result, graph, metadata, db):
     print(f"# {command.capitalize()}\n")
-    print(f"Data directory: {root}\n")
+    print(f"Database: {db}\n")
     print("Recorded propositions and reasoning, not mastery or guaranteed truth.\n")
     if not result:
         print("No matching records.")
@@ -259,9 +248,10 @@ def main(argv=None):
     chains.add_argument("--node", metavar="ID", type=nonempty)
     args = parser.parse_args(argv)
     try:
-        root = data_root(args.data_dir)
-        graph = load_graph(root)
-        metadata = load_metadata(root) if args.command == "sessions" or args.format == "markdown" else {}
+        db = database_path(args.db)
+        with closing(open_database(db)) as connection:
+            graph = load_graph(connection)
+            metadata = load_metadata(connection) if args.command == "sessions" or args.format == "markdown" else {}
         if args.command == "sessions":
             result = session_index(graph, metadata)
         elif args.command in ("propositions", "find"):
@@ -269,11 +259,11 @@ def main(argv=None):
         else:
             result = [chain for chain in graph["chains"] if args.node is None or args.node == chain["conclusion"] or args.node in chain["premises"]]
         if args.format == "json":
-            print_json({"data_dir": str(root), "records": result})
+            print_json({"db": str(db), "records": result})
         else:
-            print_markdown(args.command, result, graph, metadata, root)
+            print_markdown(args.command, result, graph, metadata, db)
         return 0
-    except (DataError, OSError, UnicodeError) as exc:
+    except (DataError, OSError, UnicodeError, sqlite3.Error) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

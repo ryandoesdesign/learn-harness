@@ -7,22 +7,44 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import subprocess
 import sys
 import tempfile
 import unittest
 
 sys.dont_write_bytecode = True
-REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import _db
+
+REPO = _db.REPO
 SKILL = REPO / "skills" / "learnharness"
-GOLDEN = REPO / "tests" / "fixtures" / "golden-data"
+GOLDEN = _db.GOLDEN_DB
+snapshot = _db.snapshot
+COMMANDS = [
+    ("sessions.py", ["list"]),
+    ("sessions.py", ["read", "chat_mv27rrra_feff23b6"]),
+    ("sessions.py", ["read", "chat_mv293wv5_10656952"]),
+    ("sessions.py", ["read", "chat_mv293wv5_10656952", "--include-agent-thinking", "--include-operations"]),
+    ("graph.py", ["sessions"]),
+    ("graph.py", ["propositions"]),
+    ("graph.py", ["find", "*"]),
+    ("graph.py", ["chains"]),
+    ("graph.py", ["chains", "--node", "n_nonexistent"]),
+]
 
-
-def snapshot(root):
-    return {
-        path.relative_to(root).as_posix(): (path.read_bytes(), path.stat().st_mtime_ns) if path.is_file() else None
-        for path in root.rglob("*")
-    }
+# Holds a write connection open in its own process, as the running app does,
+# with automatic checkpoints off so committed rows stay in the -wal file.
+APP = """
+import sqlite3, sys
+connection = sqlite3.connect(sys.argv[1])
+connection.execute("PRAGMA journal_mode=WAL")
+connection.execute("PRAGMA wal_autocheckpoint=0")
+connection.execute("INSERT INTO chat (id, title, created_at, updated_at, version) VALUES ('chat_live', 'Only in the WAL', '2026-10-24T00:00:00Z', '2026-10-24T00:00:00Z', 1)")
+connection.commit()
+print("ready", flush=True)
+sys.stdin.read()
+"""
 
 
 class SkillFolderTest(unittest.TestCase):
@@ -57,43 +79,89 @@ class SkillFolderTest(unittest.TestCase):
             data = base / "learning-data"
             elsewhere = base / "unrelated-working-directory"
             elsewhere.mkdir()
+            data.mkdir()
             shutil.copytree(SKILL, skill)
-            shutil.copytree(GOLDEN, data)
+            db = data / "learnharness.sqlite"
+            shutil.copy2(GOLDEN, db)
             before_skill = snapshot(skill)
             before_data = snapshot(data)
             env = dict(os.environ)
             env.pop("PYTHONDONTWRITEBYTECODE", None)
             env.pop("PYTHONPATH", None)
-            commands = [
-                ("sessions.py", ["list"]),
-                ("sessions.py", ["read", "chat_mv27rrra_feff23b6"]),
-                ("sessions.py", ["read", "chat_mv293wv5_10656952"]),
-                ("sessions.py", ["read", "chat_mv293wv5_10656952", "--include-agent-thinking", "--include-operations"]),
-                ("graph.py", ["sessions"]),
-                ("graph.py", ["propositions"]),
-                ("graph.py", ["find", "*"]),
-                ("graph.py", ["chains"]),
-                ("graph.py", ["chains", "--node", "n_nonexistent"]),
-            ]
-            for filename, arguments in commands:
+            for filename, arguments in COMMANDS:
                 for output_format in ("markdown", "json"):
                     with self.subTest(script=filename, arguments=arguments, format=output_format):
                         # Deliberately omit -B here: the entrypoints must disable
                         # bytecode before importing their helper on their own.
                         completed = subprocess.run(
-                            [sys.executable, str(skill / "scripts" / filename), "--data-dir", str(data), "--format", output_format, *arguments],
+                            [sys.executable, str(skill / "scripts" / filename), "--db", str(db), "--format", output_format, *arguments],
                             cwd=elsewhere, env=env, capture_output=True, text=True, encoding="utf-8", timeout=30,
                         )
                         self.assertEqual(completed.returncode, 0, completed.stderr)
                         self.assertTrue(completed.stdout.strip())
                         if output_format == "json":
                             result = json.loads(completed.stdout)
-                            self.assertEqual(result["data_dir"], str(data.resolve()))
+                            self.assertEqual(result["db"], str(db.resolve()))
                         else:
-                            self.assertIn(str(data.resolve()), completed.stdout)
+                            self.assertIn(str(db.resolve()), completed.stdout)
             self.assertEqual(snapshot(skill), before_skill)
             self.assertEqual(snapshot(data), before_data)
             self.assertEqual(list(elsewhere.iterdir()), [])
+
+    def run_all(self, db):
+        for filename, arguments in COMMANDS:
+            completed = subprocess.run(
+                [sys.executable, "-B", str(SKILL / "scripts" / filename), "--db", str(db), "--format", "json", *arguments],
+                capture_output=True, text=True, encoding="utf-8", timeout=30,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+        listing = subprocess.run(
+            [sys.executable, "-B", str(SKILL / "scripts" / "sessions.py"), "--db", str(db), "--format", "json", "list"],
+            capture_output=True, text=True, encoding="utf-8", timeout=30,
+        )
+        return {item["id"] for item in json.loads(listing.stdout)["sessions"]}
+
+    def test_reads_leave_the_database_and_its_wal_and_shm_unchanged(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+            live, copied = base / "live", base / "copied"
+            live.mkdir()
+            copied.mkdir()
+            db = live / "learnharness.sqlite"
+            shutil.copy2(GOLDEN, db)
+            app = subprocess.Popen([sys.executable, "-B", "-c", APP, str(db)], stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE, text=True)
+            try:
+                self.assertEqual(app.stdout.readline().strip(), "ready")
+                for sibling in ("learnharness.sqlite-wal", "learnharness.sqlite-shm"):
+                    self.assertTrue((live / sibling).is_file(), sibling)
+                    shutil.copy2(live / sibling, copied / sibling)
+                shutil.copy2(db, copied / db.name)
+                # While the app runs: the WAL's rows are visible, nothing changes.
+                before = snapshot(live)
+                self.assertIn("chat_live", self.run_all(db))
+                self.assertEqual(snapshot(live), before)
+            finally:
+                app.stdin.close()
+                app.wait(timeout=30)
+                app.stdout.close()
+            # A copy taken with its -wal and -shm, no app attached.
+            before = snapshot(copied)
+            self.assertIn("chat_live", self.run_all(copied / db.name))
+            self.assertEqual(snapshot(copied), before)
+            # A WAL-mode database without siblings gets none created.
+            bare = base / "bare"
+            bare.mkdir()
+            shutil.copy2(copied / db.name, bare / db.name)
+            with sqlite3.connect(bare / db.name) as connection:
+                connection.execute("PRAGMA journal_mode=WAL")
+            connection.close()
+            for sibling in ("learnharness.sqlite-wal", "learnharness.sqlite-shm"):
+                (bare / sibling).unlink(missing_ok=True)
+            before = snapshot(bare)
+            self.run_all(bare / db.name)
+            self.assertEqual(snapshot(bare), before)
+            self.assertEqual(sorted(before), ["learnharness.sqlite"])
 
 
 if __name__ == "__main__":

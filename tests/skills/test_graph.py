@@ -1,4 +1,4 @@
-"""Portable, read-only graph CLI tests; no application-store imports."""
+"""Portable, read-only graph CLI tests over SQLite; no application-store imports."""
 
 import contextlib
 import io
@@ -11,19 +11,16 @@ import tempfile
 import unittest
 
 sys.dont_write_bytecode = True
-SCRIPTS = Path(__file__).resolve().parents[2] / "skills" / "learnharness" / "scripts"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import _db
+
+SCRIPTS = _db.SCRIPTS
 sys.path.insert(0, str(SCRIPTS))
 import graph
 
-GOLDEN = Path(__file__).resolve().parents[1] / "fixtures" / "golden-data"
-
-
-def snapshot(root):
-    """Notice both changed bytes/mtimes and newly created files/directories."""
-    return {
-        str(path.relative_to(root)): (path.read_bytes(), path.stat().st_mtime_ns) if path.is_file() else None
-        for path in root.rglob("*")
-    }
+GOLDEN = _db.GOLDEN_DB
+# Notices both changed bytes/mtimes and newly created files (e.g. -wal/-shm).
+snapshot = _db.snapshot
 
 
 def point(chat, message=""):
@@ -55,29 +52,32 @@ class GraphTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        self.db = _db.create(self.root / "learnharness.sqlite")
 
-    def write_json(self, relative, value):
-        path = self.root / relative
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
+    def write_chat(self, identifier, title, updated, **extra):
+        _db.insert_chat(self.db, {"id": identifier, "title": title, "createdAt": "2026-01-01T00:00:00Z",
+                                  "updatedAt": updated, "messages": [], **extra})
+
+    def write_source(self, identifier, file_path, imported_at, seq=0):
+        _db.execute(self.db, "INSERT INTO source (id, seq, file_path, imported_at) VALUES (?, ?, ?, ?)",
+                    (identifier, seq, file_path, imported_at))
 
     def write_ledger(self, name, records):
-        path = self.root / "graph" / f"{name}.jsonl"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("".join(json.dumps(record, ensure_ascii=False) + "\n" for record in records), encoding="utf-8")
+        table, key = {"nodes": ("graph_node_line", "node_id"), "chains": ("graph_chain_line", "chain_id")}[name]
+        _db.insert_lines(self.db, table, key, records)
 
-    def invoke(self, *arguments, format="json", root=None):
+    def invoke(self, *arguments, format="json", db=None):
         out, err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            status = graph.main(["--data-dir", str(root or self.root), "--format", format, *arguments])
+            status = graph.main(["--db", str(db or self.db), "--format", format, *arguments])
         return status, out.getvalue(), err.getvalue()
 
-    def result(self, *arguments, root=None):
-        status, output, diagnostics = self.invoke(*arguments, root=root)
+    def result(self, *arguments, db=None):
+        status, output, diagnostics = self.invoke(*arguments, db=db)
         self.assertEqual(status, 0, diagnostics)
         self.assertEqual(diagnostics, "")
         payload = json.loads(output)
-        self.assertEqual(payload["data_dir"], str((root or self.root).resolve()))
+        self.assertEqual(payload["db"], str((db or self.db).resolve()))
         return payload["records"]
 
     def fixture(self):
@@ -100,13 +100,8 @@ class GraphTests(unittest.TestCase):
             ("chat_new", "Recent conversation", "2026-03-01T00:00:00Z"),
             ("chat_without_nodes", "Not a birth session", "2099-01-01"),
         ]:
-            self.write_json(f"chats/{identifier}.json", {
-                "id": identifier, "title": title, "createdAt": "2026-01-01T00:00:00Z",
-                "updatedAt": updated, "messages": [],
-            })
-        self.write_json("graph/sources.json", {
-            "src_notes": {"id": "src_notes", "filePath": "/never/open/these notes.md", "importedAt": "2026-02-15T00:00:00Z"},
-        })
+            self.write_chat(identifier, title, updated)
+        self.write_source("src_notes", "/never/open/these notes.md", "2026-02-15T00:00:00Z")
 
     def test_merge_nodes_first_identity_and_union(self):
         self.fixture()
@@ -147,30 +142,18 @@ class GraphTests(unittest.TestCase):
         self.assertEqual([item["id"] for item in self.result("propositions", "--session", "chat_old")], ["n_b"])
         self.assertEqual(self.result("propositions", "--session", "nonexistent"), [])
 
-    def test_bad_chat_metadata_is_isolated_and_diagnosed(self):
+    def test_future_chat_metadata_is_isolated_and_diagnosed(self):
         self.fixture()
-        corrupted = self.root / "chats" / "chat_old.json"
-        corrupted.write_text("{torn", encoding="utf-8")
-        self.write_json("chats/chat_future.json", {
-            "id": "chat_future", "title": "Future metadata", "createdAt": "2026-01-01",
-            "updatedAt": "2026-01-01", "version": 2, "messages": [],
-        })
-        self.write_json("chats/src_notes.json", {
-            "id": "src_notes", "title": "Older parts metadata", "createdAt": "2026-01-01",
-            "updatedAt": "2026-01-01", "messages": [{"role": "assistant", "parts": []}],
-        })
-        self.write_json("chats/chat_mismatch.json", {
-            "id": "another_id", "title": "Wrong filename", "createdAt": "2026-01-01",
-            "updatedAt": "2026-01-01", "messages": [],
-        })
+        _db.execute(self.db, "UPDATE chat SET version = 2 WHERE id = 'chat_old'")
+        self.write_chat("chat_future", "Future metadata", "2026-01-01", version=3)
         before = snapshot(self.root)
         for arguments, format in [(("sessions",), "json"), (("propositions",), "markdown")]:
             with self.subTest(arguments=arguments):
                 status, output, diagnostics = self.invoke(*arguments, format=format)
                 self.assertEqual(status, 0, diagnostics)
-                for name in ("chat_old.json", "chat_future.json", "src_notes.json", "chat_mismatch.json"):
+                for name in ("chat chat_old", "chat chat_future"):
                     self.assertIn(name, diagnostics)
-                for reason in ("format 2", "older UIMessage/parts", "filename/ID mismatch", "skipped"):
+                for reason in ("format 2", "format 3", "skipped"):
                     self.assertIn(reason, diagnostics)
                 if format == "json":
                     sessions = {item["id"]: item for item in json.loads(output)["records"]}
@@ -190,13 +173,13 @@ class GraphTests(unittest.TestCase):
                 out, err = io.StringIO(), io.StringIO()
                 with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                     with self.assertRaises(SystemExit) as raised:
-                        graph.main(["--data-dir", str(self.root), *arguments])
+                        graph.main(["--db", str(self.db), *arguments])
                 self.assertEqual(raised.exception.code, 2)
                 self.assertEqual(out.getvalue(), "")
                 self.assertIn("must not be empty", err.getvalue())
         for arguments in (("find", " "), ("propositions", "--session", " "), ("chains", "--node", " ")):
             self.assertEqual(self.result(*arguments), [])
-        self.assertEqual(list(self.root.iterdir()), [])
+        self.assertEqual(list(self.root.iterdir()), [self.db])
 
     def test_empty_first_provenance_acquires_birth_from_surviving_link(self):
         self.write_ledger("nodes", [node("n_x"), node("n_x", "survivor")])
@@ -232,52 +215,51 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(self.result("find", "precise*"), [])
         self.assertEqual(len(self.result("find", "*")), 5)
 
-    def test_missing_ledgers_empty_graph_and_no_directory_creation(self):
+    def test_empty_ledgers_empty_graph_and_no_file_creation(self):
         for command in ("sessions", "propositions", "chains"):
             self.assertEqual(self.result(command), [])
         self.assertEqual(self.result("find", "anything"), [])
-        self.assertEqual(list(self.root.iterdir()), [])
+        self.assertEqual(list(self.root.iterdir()), [self.db])
         status, output, diagnostics = self.invoke("propositions", format="markdown")
         self.assertEqual(status, 0, diagnostics)
         self.assertIn("No matching records", output)
-        self.assertEqual(list(self.root.iterdir()), [])
+        self.assertEqual(list(self.root.iterdir()), [self.db])
 
-    def test_malformed_and_wrong_shape_lines_warn_instead_of_silent_loss(self):
-        self.write_ledger("nodes", [node("n_ok", "source")])
-        path = self.root / "graph" / "nodes.jsonl"
-        with path.open("a", encoding="utf-8") as handle:
-            handle.write('\n{"torn":\n{"id":"bad"}\nnull\n')
+    def test_malformed_and_wrong_shape_rows_warn_instead_of_silent_loss(self):
+        self.write_ledger("nodes", [node("n_ok", "source"), '{"torn":', '{"id":"bad"}', "null"])
         self.write_ledger("chains", [chain("arg_bad", [], "n_ok", "source")])
         before = snapshot(self.root)
         status, output, diagnostics = self.invoke("propositions")
         self.assertEqual(status, 0)
         self.assertEqual([item["id"] for item in json.loads(output)["records"]], ["n_ok"])
-        self.assertIn("nodes.jsonl:3: malformed JSON", diagnostics)
-        self.assertIn("nodes.jsonl:4: invalid record shape", diagnostics)
-        self.assertIn("nodes.jsonl:5: invalid record shape", diagnostics)
-        self.assertIn("chains.jsonl:1: invalid record shape", diagnostics)
+        self.assertIn("graph_node_line seq 2: malformed JSON", diagnostics)
+        self.assertIn("graph_node_line seq 3: invalid record shape", diagnostics)
+        self.assertIn("graph_node_line seq 4: invalid record shape", diagnostics)
+        self.assertIn("graph_chain_line seq 1: invalid record shape", diagnostics)
         self.assertIn("incomplete", diagnostics)
         self.assertEqual(snapshot(self.root), before)
 
-    def test_future_format_refuses_without_partial_output_or_writes(self):
+    def test_unknown_migration_refuses_without_partial_output_or_writes(self):
         self.fixture()
-        self.write_json("graph/format.json", {"version": 2})
+        _db.execute(self.db, "INSERT INTO grdb_migrations (identifier) VALUES ('v4')")
         before = snapshot(self.root)
         for command in ("sessions", "propositions", "chains"):
             status, output, diagnostics = self.invoke(command)
             self.assertNotEqual(status, 0)
             self.assertEqual(output, "")
-            self.assertIn("newer", diagnostics)
+            self.assertIn("v4", diagnostics)
+            self.assertIn("Update the skill", diagnostics)
         self.assertEqual(snapshot(self.root), before)
 
-    def test_current_format_works_and_malformed_json_refuses(self):
-        self.write_json("graph/format.json", {"version": 1})
-        self.assertEqual(self.result("propositions"), [])
-        (self.root / "graph" / "format.json").write_text("{torn", encoding="utf-8")
-        status, output, diagnostics = self.invoke("propositions")
+    def test_known_older_migrations_work_and_non_databases_refuse(self):
+        older = _db.create(self.root / "older.sqlite", migrations=["v1", "v2"])
+        self.assertEqual(self.result("propositions", db=older), [])
+        torn = self.root / "torn.sqlite"
+        torn.write_text("{torn", encoding="utf-8")
+        status, output, diagnostics = self.invoke("propositions", db=torn)
         self.assertNotEqual(status, 0)
         self.assertEqual(output, "")
-        self.assertIn("format.json", diagnostics)
+        self.assertIn("torn.sqlite", diagnostics)
 
     def test_source_paths_are_only_references_and_markdown_is_full_text(self):
         self.fixture()
@@ -286,7 +268,7 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(status, 0, diagnostics)
         for text in ("First precise statement", "Original wording", "Later restatement", "Another phrasing", "chat_old", "m1", "Recent conversation", "Café", "/never/open/these notes.md"):
             self.assertIn(text, output)
-        self.assertIn(f"Data directory: {self.root.resolve()}", output)
+        self.assertIn(f"Database: {self.db.resolve()}", output)
         self.assertIn("not mastery or guaranteed truth", output)
         status, output, diagnostics = self.invoke("chains", "--node", "n_a", format="markdown")
         self.assertEqual(status, 0, diagnostics)
@@ -294,57 +276,41 @@ class GraphTests(unittest.TestCase):
         self.assertIn("missing proposition", output)
         self.assertEqual(snapshot(self.root), before)
 
-    @unittest.skipUnless(hasattr(os, "symlink"), "symlinks unavailable")
-    def test_ledger_symlink_escape_is_rejected(self):
-        with tempfile.TemporaryDirectory() as external:
-            path = Path(external) / "nodes.jsonl"
-            path.write_text(json.dumps(node("n_external")), encoding="utf-8")
-            (self.root / "graph").mkdir()
-            try:
-                (self.root / "graph" / "nodes.jsonl").symlink_to(path)
-            except OSError as exc:
-                self.skipTest(f"symlink permission unavailable: {exc}")
-            status, output, diagnostics = self.invoke("propositions")
-            self.assertNotEqual(status, 0)
-            self.assertEqual(output, "")
-            self.assertTrue(diagnostics)
-            self.assertEqual(path.read_text(encoding="utf-8"), json.dumps(node("n_external")))
-
-    def test_cli_root_options_order_missing_root_and_no_bytecode(self):
-        env = {**os.environ, "LH_DATA_DIR": str(GOLDEN)}
+    def test_cli_db_option_order_missing_db_and_no_bytecode(self):
+        env = dict(os.environ)
         env.pop("PYTHONDONTWRITEBYTECODE", None)
         before = snapshot(self.root)
         caches_before = set(SCRIPTS.rglob("*.pyc"))
         command = [sys.executable, str(SCRIPTS / "graph.py")]
-        completed = subprocess.run([*command, "--data-dir", str(self.root), "--format", "json", "sessions"], env=env, capture_output=True, text=True, check=False)
+        completed = subprocess.run([*command, "--db", str(self.db), "--format", "json", "sessions"], env=env, capture_output=True, text=True, check=False)
         self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertEqual(json.loads(completed.stdout), {"data_dir": str(self.root.resolve()), "records": []})  # Never falls back to repo/LH_DATA_DIR.
-        bad = subprocess.run([*command, "sessions", "--data-dir", str(self.root)], env=env, capture_output=True, text=True, check=False)
+        self.assertEqual(json.loads(completed.stdout), {"db": str(self.db.resolve()), "records": []})  # Never falls back to an installed database.
+        bad = subprocess.run([*command, "sessions", "--db", str(self.db)], env=env, capture_output=True, text=True, check=False)
         self.assertNotEqual(bad.returncode, 0)
-        absent = subprocess.run([*command, "--data-dir", str(self.root / "missing"), "sessions"], env=env, capture_output=True, text=True, check=False)
+        absent = subprocess.run([*command, "--db", str(self.root / "missing.sqlite"), "sessions"], env=env, capture_output=True, text=True, check=False)
         self.assertNotEqual(absent.returncode, 0)
         self.assertEqual(absent.stdout, "")
         self.assertEqual(snapshot(self.root), before)
         self.assertEqual(set(SCRIPTS.rglob("*.pyc")), caches_before)
 
     def test_golden_data_read_only_broad_graph(self):
-        before = snapshot(GOLDEN)
-        nodes = self.result("propositions", root=GOLDEN)
-        chains = self.result("chains", root=GOLDEN)
-        sessions = self.result("sessions", root=GOLDEN)
+        before = snapshot(GOLDEN.parent)
+        nodes = self.result("propositions", db=GOLDEN)
+        chains = self.result("chains", db=GOLDEN)
+        sessions = self.result("sessions", db=GOLDEN)
         self.assertGreaterEqual(len(nodes), 250)
         self.assertGreaterEqual(len(chains), 150)
         self.assertEqual(len({item["id"] for item in nodes}), len(nodes))
         self.assertEqual(sum(item["propositions"] for item in sessions), sum(bool(item["provenance"]) for item in nodes))
         for session in sessions:
-            born = self.result("propositions", "--session", session["id"], root=GOLDEN)
+            born = self.result("propositions", "--session", session["id"], db=GOLDEN)
             self.assertEqual(len(born), session["propositions"])
             self.assertTrue(all(item["provenance"][0]["chatId"] == session["id"] for item in born))
         self.assertTrue(any(item["kind"] == "file" for item in sessions))
-        # Golden chat files are not the original graph birth sessions; their
+        # Golden chats are not the original graph birth sessions; their
         # missing historical metadata must remain honestly undated.
         self.assertTrue(any(item["createdAt"] is None for item in sessions))
-        self.assertEqual(snapshot(GOLDEN), before)
+        self.assertEqual(snapshot(GOLDEN.parent), before)
 
 
 if __name__ == "__main__":
