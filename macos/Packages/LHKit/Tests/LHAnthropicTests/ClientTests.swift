@@ -19,7 +19,7 @@ private func client(_ transport: ScriptedTransport, key: String? = "sk-ant-test"
 @Suite struct RequestShapeTests {
 	@Test func bodyCarriesTheApprovedRequestShapeInAFixedOrder() {
 		let body = request().body.serialized()
-		#expect(body == #"{"model":"claude-opus-5-5","max_tokens":64000,"system":[{"type":"text","text":"SYS","cache_control":{"type":"ephemeral","ttl":"1h"}}],"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}],"tools":[{"name":"get_current_time","description":"Time","input_schema":{"type":"object","properties":{"timezone":{"type":"string"}},"required":["timezone"],"additionalProperties":false},"strict":true,"eager_input_streaming":true},{"type":"web_search_20260209","name":"web_search","max_uses":3}],"thinking":{"type":"adaptive","display":"summarized","block_binding":{"prefix_mismatch_behavior":"drop_block"}},"output_config":{"effort":"high"},"cache_control":{"type":"ephemeral","ttl":"1h"},"fallbacks":"default","stream":true}"#)
+		#expect(body == #"{"model":"claude-opus-5-5","max_tokens":64000,"system":[{"type":"text","text":"SYS","cache_control":{"type":"ephemeral","ttl":"1h"}}],"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}],"tools":[{"name":"get_current_time","description":"Time","input_schema":{"type":"object","properties":{"timezone":{"type":"string"}},"required":["timezone"],"additionalProperties":false},"eager_input_streaming":true},{"type":"web_search_20260209","name":"web_search","max_uses":3}],"thinking":{"type":"adaptive","display":"summarized","block_binding":{"prefix_mismatch_behavior":"drop_block"}},"output_config":{"effort":"high"},"cache_control":{"type":"ephemeral","ttl":"1h"},"fallbacks":"default","stream":true}"#)
 	}
 
 	@Test func haikuNeverSendsFallbacks() {

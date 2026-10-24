@@ -22,7 +22,7 @@ public struct QuizToolInput: Sendable, Hashable {
 	/// Raw role string — read through normalizeQuizType.
 	public var type: String?
 
-	init?(cleaned v: JSONValue) {
+	public init?(cleaned v: JSONValue) {
 		guard let question = v["question"]?.stringValue, let explanation = v["explanation"]?.stringValue,
 			let options = optionInputs(v["options"]), let correct = v["correctAnswer"].flatMap(CorrectAnswer.init(json:))
 		else { return nil }
@@ -45,7 +45,7 @@ public struct AskToolInput: Sendable, Hashable {
 	public var options: [QuizOptionInput]?
 	public var multiSelect: Bool?
 
-	init?(cleaned v: JSONValue) {
+	public init?(cleaned v: JSONValue) {
 		guard let question = v["question"]?.stringValue else { return nil }
 		json = v
 		self.question = question
@@ -66,7 +66,7 @@ public struct ExplainToolInput: Sendable, Hashable {
 	public var details: String?
 	public var type: String?
 
-	init?(cleaned v: JSONValue) {
+	public init?(cleaned v: JSONValue) {
 		guard let question = v["question"]?.stringValue, let correct = v["correctAnswer"]?.stringValue else { return nil }
 		json = v
 		self.question = question

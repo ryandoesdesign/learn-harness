@@ -45,7 +45,7 @@ This adds detail to `native-macos-plan.md`. It covers M3 only. Wire details were
 - **Effort:** `output_config: {effort}` is always sent explicitly. No sampling parameters are ever sent.
 - **max_tokens:** 64000 for streaming requests, capped at the model's own limit.
 - **Tools:**
-  - Client tools carry `strict: true` and `eager_input_streaming: true`, and their schemas come from the M1 `JSONSchema`.
+  - Client tools carry `eager_input_streaming: true`, and their schemas come from the M1 `JSONSchema`. (They were `strict: true` until M5. Strict mode rejects the TS schemas, so they are now sent non-strict and validated locally; see docs/native-macos-m5.md.)
   - The server tools are `web_search_20260209` and `web_fetch_20260209`, used only by the researcher.
   - The tool list is in a fixed order.
 - **Caching:** `system` is one text block with a `cache_control` breakpoint (`ttl` per role), plus a top-level automatic `cache_control` that caches the conversation's growing prefix.

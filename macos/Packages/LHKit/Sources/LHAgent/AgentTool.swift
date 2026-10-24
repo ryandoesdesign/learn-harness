@@ -9,10 +9,17 @@ public protocol AgentTool: Sendable {
 	var description: String { get }
 	var schema: JSONSchema { get }
 	func execute(_ input: JSONValue, context: ToolContext) async throws -> ToolOutput
+	/// pi's executionMode "sequential": a batch holding one runs in call order.
+	var sequential: Bool { get }
+	/// pi's prepareArguments, BEFORE schema validation. Default: the
+	/// standard argument heal (tools/heal.ts — every registry is wrapped).
+	func prepare(_ input: JSONValue) -> JSONValue
 }
 
 extension AgentTool {
 	public var definition: ToolDefinition { .client(name: name, description: description, inputSchema: schema.json) }
+	public var sequential: Bool { false }
+	public func prepare(_ input: JSONValue) -> JSONValue { healEncodedArguments(input, schema: schema) }
 }
 
 public struct ToolContext: Sendable {

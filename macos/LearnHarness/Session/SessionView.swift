@@ -3,12 +3,13 @@ import LHMarkdown
 import LHWeb
 import SwiftUI
 
-/// One session: toolbar (title, PLAN, phase), the Find bar, the read-only
-/// transcript, the bottom status bar (cost meter), and the session-scoped
-/// overlays above the detail column.
+/// One session: toolbar (title — click to rename —, PLAN, phase), the Find
+/// bar, the transcript with the pinned dock, the bottom status bar, the
+/// session-scoped overlays, and the layered Esc (overlays first, then
+/// "Dismiss this question?", then "Abort this turn?").
 struct SessionView: View {
 	@Bindable var session: SessionModel
-	@Environment(\.openURL) private var openURL
+	@State private var abortAsk: AbortMode?
 
 	var body: some View {
 		VStack(spacing: 0) {
@@ -18,6 +19,9 @@ struct SessionView: View {
 			}
 			ZStack {
 				TranscriptView(session: session)
+					.safeAreaInset(edge: .bottom, spacing: 0) {
+						if session.record != nil { DockView(session: session) }
+					}
 				if let diagram = session.overlays.diagram {
 					DiagramOverlay(diagram: diagram, onClose: { session.overlays.diagram = nil })
 				} else if session.overlays.planOpen {
@@ -29,7 +33,7 @@ struct SessionView: View {
 		.environment(session)
 		.environment(session.find)
 		.environment(session.overlays)
-		.navigationTitle(session.title)
+		.navigationTitle(titleBinding)
 		.toolbar {
 			ToolbarItemGroup(placement: .primaryAction) {
 				if session.plan != nil {
@@ -56,21 +60,63 @@ struct SessionView: View {
 				}
 			}
 		}
+		.onExitCommand(perform: escape)
+		.alert(abortAsk?.title ?? "", isPresented: Binding(get: { abortAsk != nil }, set: { if !$0 { abortAsk = nil } }), presenting: abortAsk) { mode in
+			Button(mode.action, role: .destructive) { confirm(mode) }
+			Button("Cancel", role: .cancel) {}
+		} message: { mode in
+			Text(mode.line(busy: session.busy))
+		}
 		.focusedSceneValue(\.session, session)
+		.task(id: session.chatId) { await session.start() }
+	}
+
+	/// Click-to-rename (the native editable title).
+	private var titleBinding: Binding<String> {
+		Binding(get: { session.title }, set: { session.rename($0) })
+	}
+
+	/// chat.tsx escAbortTarget: overlays and Find claim Esc first.
+	private func escape() {
+		if session.find.isOpen { session.find.close(); return }
+		switch escAbortTarget(abortAsk: abortAsk != nil, diagram: session.overlays.diagram != nil, plan: session.overlays.planOpen,
+			setup: false, pending: session.pending != nil, problem: false, busy: session.busy)
+		{
+		case .diagram?: session.overlays.diagram = nil
+		case .plan?: session.overlays.planOpen = false
+		case .question?: abortAsk = .question
+		case .turn?: abortAsk = .turn
+		case .setup?, .problem?, nil: break
+		}
+	}
+
+	private func confirm(_ mode: AbortMode) {
+		switch mode {
+		case .question:
+			if session.busy { session.abortTurn() }
+			session.dismissPending()
+		case .turn:
+			session.abortTurn()
+		case .problem:
+			break
+		}
 	}
 }
 
 /// The transcript column (chat.tsx Conversation): rows in a lazy stack,
-/// opening at the bottom; Find and graph anchors scroll rows into view.
+/// opening at the bottom and sticking there while it streams; a
+/// scroll-to-bottom button otherwise. Find and graph anchors scroll rows
+/// into view. The trailing placeholders and the error banner end it.
 struct TranscriptView: View {
 	var session: SessionModel
 	@State private var flash: String?
+	@State private var position = ScrollPosition(edge: .bottom)
 
 	var body: some View {
 		ScrollViewReader { proxy in
 			ScrollView {
 				LazyVStack(alignment: .leading, spacing: 16) {
-					if session.rows.isEmpty {
+					if session.rows.isEmpty, !session.busy {
 						ContentUnavailableView("New session", systemImage: "graduationcap",
 							description: Text("The teacher will open by probing what you already know."))
 							.padding(.top, 60)
@@ -80,11 +126,56 @@ struct TranscriptView: View {
 							.id(row.id)
 							.background(flash == row.id ? Color.accentColor.opacity(0.15) : .clear)
 					}
+					if session.compacting {
+						HStack(spacing: 8) { BrailleSpinner(); ShimmerText(text: "Compacting context…") }
+					}
+					if session.status == .submitted || (session.running && session.status == .idle) {
+						HStack(spacing: 8) { BrailleSpinner(); ShimmerText(text: "Thinking…") }
+					}
+					if let error = session.errorText {
+						Text("Something went wrong: \(error)")
+							.font(Theme.small)
+							.textSelection(.enabled)
+							.padding(.horizontal, 12)
+							.padding(.vertical, 8)
+							.frame(maxWidth: .infinity, alignment: .leading)
+							.background(RoundedRectangle(cornerRadius: 8).fill(Theme.red.opacity(0.1)))
+							.overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.red.opacity(0.5)))
+					}
+					Color.clear.frame(height: 1).id("bottom")
 				}
 				.padding(.horizontal, Theme.column)
 				.padding(.vertical, 16)
 			}
+			.scrollPosition($position)
 			.defaultScrollAnchor(.bottom)
+			.onScrollGeometryChange(for: Bool.self) { geo in
+				geo.contentOffset.y + geo.containerSize.height >= geo.contentSize.height - 24
+			} action: { _, atBottom in
+				session.isAtBottom = atBottom
+			}
+			.onChange(of: session.rows.count) {
+				if session.isAtBottom, session.busy { proxy.scrollTo("bottom", anchor: .bottom) }
+			}
+			.onChange(of: session.streaming?.assistant?.content.count) {
+				if session.isAtBottom { proxy.scrollTo("bottom", anchor: .bottom) }
+			}
+			.overlay(alignment: .bottom) {
+				if !session.isAtBottom {
+					Button {
+						withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("bottom", anchor: .bottom) }
+					} label: {
+						Image(systemName: "arrow.down")
+							.font(.system(size: 12, weight: .semibold))
+							.frame(width: 30, height: 30)
+							.background(Circle().fill(Theme.card))
+							.overlay(Circle().strokeBorder(Theme.border))
+					}
+					.buttonStyle(.plain)
+					.help("Scroll to the bottom")
+					.padding(.bottom, 8)
+				}
+			}
 			.onChange(of: session.find.scrollTick) {
 				if let match = session.find.activeMatch {
 					withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(match.rowId, anchor: UnitPoint(x: 0, y: 0.04)) }
@@ -126,7 +217,8 @@ struct RowView: View {
 			.frame(maxWidth: .infinity)
 			.padding(.vertical, 16)
 		case .textBlock(let block, _): BlockView(block: block, unit: blockUnitId(row.id, 0), font: Theme.prose, fontSize: Theme.proseSize)
-		case .reasoning(let text): ReasoningRow(text: text, id: row.id)
+		case .reasoning(let text, let streaming): ReasoningRow(text: text, id: row.id, streaming: streaming)
+		case .liveTool(let part): LiveToolCard(part: part, id: row.id)
 		case .separator: Divider().padding(.vertical, 4)
 		case .planBlock(let data): PlanBlockView(data: data)
 		case .answered(let answer, let input): AnsweredCard(answer: answer, input: input, id: row.id)
@@ -190,19 +282,21 @@ struct FindBar: View {
 
 // MARK: - Status bar (stats-bar.tsx)
 
-/// The cost meter: `ctx · cost`; click → SESSION STATS. Hidden without turns.
+/// stats-bar.tsx: the cost meter (`ctx · cost` → SESSION STATS, shown once
+/// turns exist) on the left; ModelControl (this session's model + effort) on
+/// the right.
 struct StatusBar: View {
 	var session: SessionModel
 	@State private var open = false
 
 	var body: some View {
 		let turns = session.record?.turns ?? []
-		if !turns.isEmpty {
-			let cost = sessionCost(turns, catalog: session.catalog)
-			let ctx = contextWindow(turns, catalog: session.catalog)
-			VStack(spacing: 0) {
-				Divider()
-				HStack {
+		VStack(spacing: 0) {
+			Divider()
+			HStack {
+				if !turns.isEmpty {
+					let cost = sessionCost(turns, catalog: session.catalog)
+					let ctx = contextWindow(turns, catalog: session.catalog)
 					Button { open.toggle() } label: {
 						Text("\(ctxLabel(ctx)) · \(costLabel(cost, turns: turns.count))")
 							.font(Theme.ui)
@@ -211,12 +305,57 @@ struct StatusBar: View {
 					}
 					.buttonStyle(.plain)
 					.popover(isPresented: $open, arrowEdge: .top) { SessionStats(turns: turns, catalog: session.catalog) }
-					Spacer()
 				}
-				.padding(.horizontal, 12)
-				.frame(height: 26)
+				Spacer()
+				if session.record != nil, session.service != nil { ModelControl(session: session) }
 			}
+			.padding(.horizontal, 12)
+			.frame(height: 28)
 		}
+	}
+}
+
+/// model-picker.tsx ModelControl: the model pill and the effort pill —
+/// this session's own (stored on the chat, effort clamped to the model).
+struct ModelControl: View {
+	var session: SessionModel
+
+	var body: some View {
+		let spec = session.conversationSpec
+		let efforts = session.catalog.model(spec.model)?.efforts ?? []
+		HStack(spacing: 6) {
+			Menu {
+				Section("This session's model") {
+					ForEach(session.catalog.models, id: \.id) { m in
+						Button {
+							session.setModel(m.id, effort: spec.effort)
+						} label: {
+							if m.id == spec.model { Label(m.name, systemImage: "checkmark") } else { Text(m.name) }
+						}
+					}
+				}
+			} label: {
+				Text(session.catalog.model(spec.model)?.name ?? prettyModel(spec.model))
+			}
+			Menu {
+				Section("Levels this model actually supports") {
+					ForEach(efforts, id: \.self) { e in
+						Button {
+							session.setModel(spec.model, effort: e)
+						} label: {
+							if e == spec.effort { Label(e.rawValue, systemImage: "checkmark") } else { Text(e.rawValue) }
+						}
+					}
+				}
+			} label: {
+				Text(spec.effort.rawValue)
+			}
+			.disabled(efforts.isEmpty)
+		}
+		.menuStyle(.button)
+		.buttonStyle(.borderless)
+		.font(Theme.ui)
+		.fixedSize()
 	}
 }
 

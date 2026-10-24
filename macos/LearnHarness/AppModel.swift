@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import LHAgent
 import LHCore
 import LHImport
 import LHResources
@@ -17,12 +18,20 @@ final class AppModel {
 	let keychain: any KeychainStore
 
 	let catalog: ModelCatalog
+	/// The live teaching service (M5): one per app.
+	let service: TurnService
 	private(set) var sessions: [ChatSummary] = []
+	/// Chats with a running turn / a running compaction (sidebar spinners).
+	private(set) var runningChats: Set<String> = []
+	private(set) var compactingChats: Set<String> = []
+	/// The ⌘N draft is open in the detail column.
+	var drafting = false
 	/// The sidebar selection; opening a session builds its model.
 	var selection: String? {
 		didSet {
 			guard selection != oldValue else { return }
-			session = selection.map { SessionModel(chatId: $0, database: database, dataDirectory: dataDirectory, catalog: catalog) }
+			if selection != nil { drafting = false }
+			session = selection.map { SessionModel(chatId: $0, database: database, dataDirectory: dataDirectory, catalog: catalog, service: service) }
 		}
 	}
 	private(set) var session: SessionModel?
@@ -46,6 +55,76 @@ final class AppModel {
 			// Fall back to an in-memory database so the window still opens and says why.
 			database = try! AppDatabase.inMemory()
 			startupError = "Could not open the database: \(error)"
+		}
+		service = TurnService(database: database, keychain: keychain, catalog: catalog)
+	}
+
+	/// Relay the service's events for as long as the app runs (the TS
+	/// server-event bus): sidebar spinners, the open session's live state.
+	func observeService() async {
+		await service.recoverOnLaunch()
+		for await event in await service.events() {
+			switch event {
+			case .turnStarted(let chatId):
+				runningChats.insert(chatId)
+				if session?.chatId == chatId { session?.follow() }
+			case .turnSettled(let chatId):
+				runningChats.remove(chatId)
+			case .compaction(let chatId, let running):
+				if running { compactingChats.insert(chatId) } else { compactingChats.remove(chatId) }
+				if session?.chatId == chatId { session?.compacting = running }
+			case .error:
+				break
+			}
+		}
+	}
+
+	// MARK: - Sessions (M5)
+
+	/// File → New Session (⌘N): the draft in the detail column.
+	func newSession() {
+		selection = nil
+		drafting = true
+	}
+
+	/// The draft's first send: create the chat (titled from the prompt, its
+	/// settings stamped from the Strong slot), open it, send the prompt.
+	func startSession(prompt: String) {
+		let text = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+		guard !text.isEmpty else { return }
+		do {
+			let repo = ChatRepository(database)
+			let chat = try repo.createChat(title: titleFromPrompt(text))
+			let settings = (try? SettingsRepository(database).read()) ?? nil
+			let spec = resolveConversationSpec(nil, strong: settings?.models?.strong, catalog: catalog)
+			try repo.saveSettings(ChatSettings(model: spec.model, effort: spec.effort), chatId: chat.id)
+			selection = chat.id
+			session?.draft = text
+			session?.sendDraft()
+		} catch {
+			let alert = NSAlert(error: error)
+			alert.runModal()
+		}
+	}
+
+	func rename(_ chatId: String, to title: String) {
+		let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
+		guard !t.isEmpty else { return }
+		try? ChatRepository(database).rename(chatId, title: t)
+	}
+
+	/// Delete a session (refused while its turn runs — TS 409 turn_in_flight).
+	/// Its graph traces stay (the traces option arrives with M7).
+	func delete(_ chatId: String) async -> String? {
+		if await service.isRunning(chatId) { return "A turn is still running in this session — wait for it to finish or stop it, then try again." }
+		do {
+			_ = try JobRepository(database, dataDirectory: dataDirectory).deleteJobs(chatId: chatId)
+			try SteerOutboxRepository(database).deleteAll(chatId: chatId)
+			try ChatRepository(database).delete(chatId)
+			if selection == chatId { selection = nil }
+			return nil
+		} catch {
+			return "Delete failed — \(error). Try again."
 		}
 	}
 

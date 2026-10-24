@@ -98,7 +98,9 @@ public struct WireMessage: Sendable, Hashable {
 }
 
 public enum ToolDefinition: Sendable, Hashable {
-	/// A client tool: strict schema, eager input streaming (validated client-side).
+	/// A client tool: the TS schema as-is (non-strict — strict mode rejects
+	/// it; see docs/native-macos-m5.md), eager input streaming, validated
+	/// client-side with the TS problem list on failure.
 	case client(name: String, description: String, inputSchema: JSONValue)
 	/// A server tool (`web_search_20260209`, `web_fetch_20260209`, …) with its options.
 	case server(type: String, name: String, options: JSONObject = JSONObject())
@@ -112,7 +114,7 @@ public enum ToolDefinition: Sendable, Hashable {
 	public var json: JSONValue {
 		switch self {
 		case .client(let name, let description, let schema):
-			return ["name": .string(name), "description": .string(description), "input_schema": schema, "strict": true, "eager_input_streaming": true]
+			return ["name": .string(name), "description": .string(description), "input_schema": schema, "eager_input_streaming": true]
 		case .server(let type, let name, let options):
 			var o = JSONObject(["type": .string(type), "name": .string(name)])
 			for (k, v) in options { o[k] = v }

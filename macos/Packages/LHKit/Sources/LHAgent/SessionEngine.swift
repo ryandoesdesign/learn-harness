@@ -75,6 +75,9 @@ public actor SessionEngine {
 	private func unsubscribe(_ id: UUID) { subscribers[id] = nil }
 
 	private func publish(_ event: AgentEvent) {
+		// The turn is over before anyone hears agentEnd, so a subscriber can
+		// start the next turn (a handoff wake, pending steers) right away.
+		if case .agentEnd = event { running = nil }
 		// The log keeps settled events plus only the latest snapshot.
 		if case .messageUpdate = event, case .messageUpdate? = log.last { log[log.count - 1] = event } else { log.append(event) }
 		for c in subscribers.values { c.yield(event) }

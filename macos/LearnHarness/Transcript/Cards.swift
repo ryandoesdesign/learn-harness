@@ -71,8 +71,55 @@ struct ThinkingBlock: View {
 
 /// The agent's reasoning (ai-elements/reasoning.tsx): collapsed by default,
 /// "AGENT'S THINKING" + chevron; open shows the markdown, small and muted.
+/// While streaming: spinner + shimmered "Thinking…"; if you opened it while
+/// it streamed, it closes 1s after streaming ends.
 struct ReasoningRow: View {
 	var text: String
+	var id: String
+	var streaming = false
+	@Environment(SessionModel.self) private var session
+	@State private var openedWhileStreaming = false
+
+	var body: some View {
+		let open = session.isOpen(id)
+		VStack(alignment: .leading, spacing: 6) {
+			Button {
+				session.setOpen(id, !open)
+				if streaming, !open { openedWhileStreaming = true }
+			} label: {
+				HStack(spacing: 6) {
+					if streaming {
+						BrailleSpinner()
+						ShimmerText(text: "Thinking…")
+					} else {
+						Eyebrow("Agent's thinking")
+					}
+					Chevron(open: open)
+				}
+				.contentShape(Rectangle())
+			}
+			.buttonStyle(.plain)
+			if open, !text.isEmpty {
+				MarkdownView(text, unit: "\(id).body", font: Theme.small, fontSize: 13)
+					.foregroundStyle(Theme.muted)
+			}
+		}
+		.padding(.bottom, 8)
+		.onChange(of: streaming) { was, now in
+			guard was, !now, openedWhileStreaming else { return }
+			openedWhileStreaming = false
+			Task {
+				try? await Task.sleep(for: .seconds(1))
+				session.setOpen(id, false)
+			}
+		}
+	}
+}
+
+/// live-tool-card.tsx: a tool call being written — spinner, the shimmered
+/// activity label, the headline argument; expanding shows the streaming input.
+struct LiveToolCard: View {
+	var part: ViewPart
 	var id: String
 	@Environment(SessionModel.self) private var session
 
@@ -82,19 +129,61 @@ struct ReasoningRow: View {
 			Button {
 				session.setOpen(id, !open)
 			} label: {
-				HStack(spacing: 6) {
-					Eyebrow("Agent's thinking")
-					Chevron(open: open)
+				HStack(spacing: 8) {
+					BrailleSpinner()
+					ShimmerText(text: toolActivityLabel(part.toolName ?? ""))
+					if let arg = headline { Text(arg).font(Theme.ui).foregroundStyle(Theme.muted).lineLimit(1) }
+					Chevron(open: open).opacity(0.5)
 				}
 				.contentShape(Rectangle())
 			}
 			.buttonStyle(.plain)
 			if open {
-				MarkdownView(text, unit: "\(id).body", font: Theme.small, fontSize: 13)
-					.foregroundStyle(Theme.muted)
+				VStack(alignment: .leading, spacing: 4) {
+					Eyebrow("Input (streaming)")
+					Text(part.input.map { $0.serialized(indent: 2) } ?? "…")
+						.font(Theme.monoSmall)
+						.textSelection(.enabled)
+						.frame(maxWidth: .infinity, alignment: .leading)
+				}
+				.card(padding: 12)
 			}
 		}
-		.padding(.bottom, 8)
+		.padding(.vertical, 4)
+	}
+
+	private var headline: String? {
+		let i = part.input
+		return i?["path"]?.stringValue ?? i?["pattern"]?.stringValue ?? i?["session"]?.stringValue
+	}
+}
+
+/// braille-spinner.tsx: the one working-state indicator.
+struct BrailleSpinner: View {
+	private static let frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+	var body: some View {
+		TimelineView(.periodic(from: .now, by: 0.08)) { context in
+			let i = Int(context.date.timeIntervalSinceReferenceDate / 0.08) % Self.frames.count
+			Text(Self.frames[i]).font(Theme.ui).foregroundStyle(Theme.muted)
+		}
+		.accessibilityLabel("Working")
+	}
+}
+
+/// shimmer.tsx: muted caps text with a moving highlight.
+struct ShimmerText: View {
+	var text: String
+	var body: some View {
+		TimelineView(.animation) { context in
+			let t = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.2) / 1.2
+			Text(text.uppercased())
+				.font(Theme.uiMedium)
+				.tracking(0.6)
+				.foregroundStyle(LinearGradient(
+					stops: [.init(color: Theme.muted, location: 0), .init(color: Theme.muted, location: max(0, t - 0.15)),
+						.init(color: .primary, location: t), .init(color: Theme.muted, location: min(1, t + 0.15)), .init(color: Theme.muted, location: 1)],
+					startPoint: .leading, endPoint: .trailing))
+		}
 	}
 }
 

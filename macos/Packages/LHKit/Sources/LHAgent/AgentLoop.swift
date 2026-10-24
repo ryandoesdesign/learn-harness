@@ -9,6 +9,9 @@ public enum AgentEvent: Sendable {
 	/// The streaming assistant message's latest full snapshot (coalesced ≈30 Hz).
 	case messageUpdate(Message)
 	case messageEnd(Message)
+	/// A message the record keeps (everything but the in-memory question
+	/// placeholders), in order — the per-message persistence seam.
+	case settled(Message)
 	case toolStart(toolCallId: String, name: String, input: JSONValue)
 	case toolEnd(toolCallId: String, output: ToolOutput)
 	case retrying(attempt: Int, delay: Duration, reason: String)
@@ -52,11 +55,16 @@ public struct AgentConfig: Sendable {
 	public var toolTimeout: Duration
 	/// Coalescing window for streaming snapshots.
 	public var updateInterval: Duration
+	/// pi's shouldStopAfterTurn (the question stopper): true ends the run
+	/// after this message's tools — WITHOUT draining steers, which wait for
+	/// the next run (a posed question must always end the turn).
+	public var shouldStop: (@Sendable (_ assistant: Message, _ results: [(ToolUse, ToolOutput)]) -> Bool)?
 
 	public init(model: String, effort: Effort, system: String? = nil, tools: [any AgentTool] = [], serverTools: [ToolDefinition] = [],
 		thinkingDisplay: MessagesRequest.ThinkingDisplay = .summarized, cacheTTL: MessagesRequest.CacheTTL = .fiveMinutes,
 		maxTokens: Int = 64_000, projection: WireProjection.Options = WireProjection.Options(), chatId: String? = nil,
-		toolTimeout: Duration = ToolGuard.defaultTimeout, updateInterval: Duration = .milliseconds(33))
+		toolTimeout: Duration = ToolGuard.defaultTimeout, updateInterval: Duration = .milliseconds(33),
+		shouldStop: (@Sendable (_ assistant: Message, _ results: [(ToolUse, ToolOutput)]) -> Bool)? = nil)
 	{
 		self.model = model
 		self.effort = effort
@@ -70,6 +78,7 @@ public struct AgentConfig: Sendable {
 		self.chatId = chatId
 		self.toolTimeout = toolTimeout
 		self.updateInterval = updateInterval
+		self.shouldStop = shouldStop
 	}
 
 	/// The request for a context (fixed tool order: client tools, then server tools).
@@ -120,11 +129,12 @@ public struct AgentLoop: Sendable {
 		var servedBy = config.model
 		var aborted = false
 
-		func append(_ m: Message) {
+		func append(_ m: Message, ephemeral isEphemeral: Bool = false) {
 			context.append(m)
 			added.append(m)
 			emit(.messageStart(m))
 			emit(.messageEnd(m))
+			if !isEphemeral { emit(.settled(m)) }
 		}
 
 		for m in inputs { append(m) }
@@ -184,12 +194,17 @@ public struct AgentLoop: Sendable {
 					let result = Message(id: mintId(), timestamp: now(), body: .toolResult(ToolResultBody(
 						toolUseId: call.id, toolName: call.name, content: out.content, isError: out.isError, details: out.details)))
 					if out.ephemeral { ephemeral.insert(result.id) }
-					append(result)
+					append(result, ephemeral: out.ephemeral)
 				}
 				// 4. Terminate only when every call in the batch terminates.
 				terminate = response.stopReason != "max_tokens" && outputs.allSatisfy { $0.1.terminate }
 				if Task.isCancelled {
 					aborted = true
+					break turns
+				}
+				// The stopper ends the run before steering drains (steers wait).
+				if let shouldStop = config.shouldStop, shouldStop(assistant, outputs) {
+					emit(.turnEnd)
 					break turns
 				}
 			}
@@ -283,6 +298,17 @@ public struct AgentLoop: Sendable {
 		for call in calls { emit(.toolStart(toolCallId: call.id, name: call.name, input: call.input)) }
 		let timeout = config.toolTimeout
 		let chatId = config.chatId
+		// pi executionMode "sequential": any sequential tool in the batch runs
+		// the whole batch in call order (parallel questions resolve in order).
+		if calls.contains(where: { toolsByName[$0.name]?.sequential == true }) {
+			var out: [(ToolUse, ToolOutput)] = []
+			for call in calls {
+				let o = await Self.execute(call, tool: toolsByName[call.name], invalidJSON: invalid[call.id], timeout: timeout, chatId: chatId)
+				emit(.toolEnd(toolCallId: call.id, output: o))
+				out.append((call, o))
+			}
+			return out
+		}
 		let results = await withTaskGroup(of: (Int, ToolOutput).self) { group in
 			for (i, call) in calls.enumerated() {
 				group.addTask {
@@ -305,7 +331,7 @@ public struct AgentLoop: Sendable {
 		if let raw = invalidJSON {
 			return ToolOutput(content: [.text(JSONValue.object(JSONObject(["INVALID_JSON": .string(raw)])).serialized())], details: [:], isError: true)
 		}
-		let converted = tool.schema.convert(call.input)
+		let converted = tool.schema.convert(tool.prepare(call.input))
 		guard tool.schema.check(converted) else {
 			return .error("Validation failed for tool \"\(call.name)\":\n  - root: the arguments do not match the tool's input schema\n\nReceived arguments:\n\(call.input.serialized(indent: 2))")
 		}

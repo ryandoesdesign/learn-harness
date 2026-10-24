@@ -21,12 +21,16 @@ struct LearnHarnessApp: App {
 		WindowGroup {
 			RootView(model: model)
 				.task { await model.observeSessions() }
+				.task { await model.observeService() }
 				#if DEBUG
 				// `-LHOpenGallery YES` (with -LHScratch): open the Render Gallery.
 				.task { if UserDefaults.standard.bool(forKey: "LHOpenGallery"), UserDefaults.standard.bool(forKey: "LHScratch") { model.addRenderGallery() } }
 				#endif
 		}
 		.commands {
+			CommandGroup(replacing: .newItem) {
+				Button("New Session") { model.newSession() }.keyboardShortcut("n")
+			}
 			CommandGroup(after: .newItem) {
 				Divider()
 				ImportCommand(model: model)
@@ -42,6 +46,9 @@ struct LearnHarnessApp: App {
 				Button("Add Render Gallery Session") { model.addRenderGallery() }
 			}
 			#endif
+		}
+		Settings {
+			SettingsView(model: model)
 		}
 		#if DEBUG
 		Window("Anthropic Playground", id: "playground") {

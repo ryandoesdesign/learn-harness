@@ -30,6 +30,8 @@ public struct JSONSchema: Sendable, Hashable {
 	public var description: String?
 	/// `Type.Optional` — the key is left out of the parent's `required`.
 	public var isOptional: Bool
+	/// `Type.String({minLength})` — strings only.
+	public var minLength: Int?
 
 	public init(_ kind: Kind, description: String? = nil, isOptional: Bool = false) {
 		self.kind = kind
@@ -42,6 +44,11 @@ public struct JSONSchema: Sendable, Hashable {
 
 extension JSONSchema {
 	public static func string(description: String? = nil) -> JSONSchema { JSONSchema(.string, description: description) }
+	public static func string(minLength: Int, description: String? = nil) -> JSONSchema {
+		var s = JSONSchema(.string, description: description)
+		s.minLength = minLength
+		return s
+	}
 	public static func boolean(description: String? = nil) -> JSONSchema { JSONSchema(.boolean, description: description) }
 	public static func number(description: String? = nil) -> JSONSchema { JSONSchema(.number, description: description) }
 	public static func integer(description: String? = nil) -> JSONSchema { JSONSchema(.integer, description: description) }
@@ -104,6 +111,7 @@ extension JSONSchema {
 		var o = JSONObject()
 		switch kind {
 		case .string, .boolean, .number, .integer, .null:
+			if let minLength { o["minLength"] = .number(minLength) }
 			o["type"] = .string(jsonType!)
 		case .literal(let v):
 			o["type"] = .string(v.jsTypeof)

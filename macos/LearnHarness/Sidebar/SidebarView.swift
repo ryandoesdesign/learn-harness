@@ -13,14 +13,21 @@ enum SessionKindFilter: String, CaseIterable {
 	}
 }
 
-/// The sessions sidebar (sidebar.tsx), read-only in M4: fuzzy search,
-/// kind filter, rows with their state-aware meta, Export as Markdown….
+/// The sessions sidebar (sidebar.tsx): "+" (new session), fuzzy search,
+/// kind filter, rows with their live state (spinner, Working…, Compacting,
+/// Waiting for input), and the context menu: Rename, Export as Markdown…,
+/// Delete….
 struct SidebarView: View {
 	var model: AppModel
 	@Binding var selection: String?
 	@AppStorage("lh.sessionKindFilter") private var filter: SessionKindFilter = .all
 	@State private var query = ""
 	@FocusState private var searchFocused: Bool
+	@State private var renaming: String?
+	@State private var renameText = ""
+	@FocusState private var renameFocused: Bool
+	@State private var deleting: ChatSummary?
+	@State private var deleteError: String?
 
 	var body: some View {
 		let shown = filteredSessions(model.sessions, query: query, filter: filter)
@@ -48,11 +55,32 @@ struct SidebarView: View {
 						Text("No sessions match.").foregroundStyle(Theme.muted)
 					}
 					ForEach(shown, id: \.id) { s in
-						SessionRow(summary: s)
-							.tag(s.id)
-							.contextMenu {
-								Button("Export as Markdown…") { model.exportMarkdown(chatId: s.id) }
+						Group {
+							if renaming == s.id {
+								TextField("Title", text: $renameText)
+									.textFieldStyle(.plain)
+									.focused($renameFocused)
+									.onSubmit { commitRename(s.id) }
+									.onKeyPress(.escape) { renaming = nil; return .handled }
+									.onChange(of: renameFocused) { _, f in if !f, renaming == s.id { commitRename(s.id) } }
+							} else {
+								SessionRow(summary: s, busy: model.runningChats.contains(s.id), compacting: model.compactingChats.contains(s.id))
 							}
+						}
+						.tag(s.id)
+						.contextMenu {
+							Button("Rename") {
+								renameText = s.title
+								renaming = s.id
+								renameFocused = true
+							}
+							Button("Export as Markdown…") { model.exportMarkdown(chatId: s.id) }
+							Divider()
+							Button("Delete…", role: .destructive) {
+								deleteError = nil
+								deleting = s
+							}
+						}
 					}
 				}
 			}
@@ -60,11 +88,30 @@ struct SidebarView: View {
 		}
 		.padding(.top, 8)
 		.padding(.horizontal, 8)
+		.toolbar {
+			ToolbarItem {
+				Button { model.newSession() } label: { Label("New Session", systemImage: "plus") }
+					.help("New session (⌘N)")
+			}
+		}
+		.sheet(item: $deleting) { s in
+			DeleteSessionSheet(summary: s, error: deleteError, onCancel: { deleting = nil }) {
+				Task {
+					if let error = await model.delete(s.id) { deleteError = error } else { deleting = nil }
+				}
+			}
+		}
 		.background {
 			Button("") { searchFocused = true }
 				.keyboardShortcut("f", modifiers: [.command, .shift])
 				.hidden()
 		}
+	}
+
+	private func commitRename(_ id: String) {
+		let title = renameText
+		renaming = nil
+		model.rename(id, to: title)
 	}
 
 	/// ↑/↓ walk the shown rows with wrap.
@@ -89,21 +136,26 @@ func filteredSessions(_ sessions: [ChatSummary], query: String, filter: SessionK
 }
 
 /// The row's second line (sessionMeta): the state when one exists,
-/// otherwise how long ago. (Busy/compacting states arrive with M5.)
-func sessionMeta(_ s: ChatSummary, now: Date = Date()) -> String {
+/// otherwise how long ago.
+func sessionMeta(_ s: ChatSummary, busy: Bool = false, compacting: Bool = false, now: Date = Date()) -> String {
+	if compacting { return "Compacting context · \(timeAgo(s.updatedAt, now: now))" }
 	if s.pendingQuestion { return "Waiting for input · \(timeAgo(s.updatedAt, now: now))" }
 	if s.kind == .practice, s.pendingProblem { return "Problem waiting · \(timeAgo(s.updatedAt, now: now))" }
+	if busy { return "Working…" }
 	return timeAgo(s.updatedAt, now: now)
 }
 
 struct SessionRow: View {
 	var summary: ChatSummary
+	var busy = false
+	var compacting = false
 	var body: some View {
 		HStack(spacing: 8) {
+			if busy || compacting { BrailleSpinner() }
 			VStack(alignment: .leading, spacing: 2) {
 				Text(summary.title).font(.system(size: 13, design: .serif)).lineLimit(2)
 				TimelineView(.periodic(from: .now, by: 60)) { context in
-					Text(sessionMeta(summary, now: context.date)).font(Theme.ui).foregroundStyle(Theme.muted)
+					Text(sessionMeta(summary, busy: busy, compacting: compacting, now: context.date)).font(Theme.ui).foregroundStyle(Theme.muted)
 				}
 			}
 			Spacer(minLength: 0)
@@ -112,5 +164,36 @@ struct SessionRow: View {
 			}
 		}
 		.padding(.vertical, 2)
+	}
+}
+
+extension ChatSummary: @retroactive Identifiable {}
+
+/// delete-session-dialog.tsx (the graph-traces option arrives with M7).
+struct DeleteSessionSheet: View {
+	var summary: ChatSummary
+	var error: String?
+	var onCancel: () -> Void
+	var onDelete: () -> Void
+
+	var body: some View {
+		VStack(alignment: .leading, spacing: 12) {
+			Text("Delete session?").font(.headline).foregroundStyle(Theme.red)
+			Text(summary.title).font(Theme.mono)
+			Text("This permanently removes the session — its messages, background jobs, and extraction records. Everything it added to the graph stays. This cannot be undone.")
+				.font(Theme.small)
+				.foregroundStyle(Theme.muted)
+				.fixedSize(horizontal: false, vertical: true)
+			if let error {
+				Text(error).font(Theme.small).foregroundStyle(Theme.red)
+			}
+			HStack {
+				Spacer()
+				Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
+				Button(error == nil ? "Delete" : "Try again", role: .destructive, action: onDelete)
+			}
+		}
+		.padding(20)
+		.frame(width: 420)
 	}
 }

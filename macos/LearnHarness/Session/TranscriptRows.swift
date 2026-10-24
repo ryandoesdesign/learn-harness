@@ -21,7 +21,9 @@ struct TranscriptRow: Identifiable {
 		/// One block of assistant prose; `anchor` marks the native message's
 		/// first prose block (graph links scroll to it).
 		case textBlock(MDBlock, anchor: String?)
-		case reasoning(String)
+		case reasoning(String, streaming: Bool)
+		/// A tool call being written (input-streaming): spinner + activity label.
+		case liveTool(ViewPart)
 		case separator
 		case planBlock(PlanBlockData)
 		case answered(QuestionAnswerData, input: JSONValue?)
@@ -42,7 +44,8 @@ let TOOL_CALL_TOOLS: Set<String> = ["read", "ls", "find", "grep", "list_sessions
 let CARD_TOOLS: Set<String> = DISPATCH_TOOLS.union(TOOL_CALL_TOOLS).union(["probe_done", "problem", "conclude"])
 
 /// The rows for a record. Pure over (native record, view projection).
-func transcriptRows(native: [Message], view: [ViewMessage]) -> [TranscriptRow] {
+@MainActor
+func transcriptRows(native: [Message], view: [ViewMessage], streaming: Bool = false) -> [TranscriptRow] {
 	let phases = viewPhaseTimeline(view)
 	let sourceTextParts = firstSourceTextParts(view)
 	let refusals = refusalsByGroup(native: native, view: view)
@@ -92,14 +95,15 @@ func transcriptRows(native: [Message], view: [ViewMessage]) -> [TranscriptRow] {
 			}
 			switch part.kind {
 			case .text:
-				let blocks = parseMessageMarkdown(part.text ?? "")
+				let blocks = MarkdownCache.blocks(part.text ?? "")
 				let sourceId = textPartMessageId(part.id)
 				let anchor = sourceId.flatMap { sourceTextParts[$0] == part.id ? messageAnchorId($0) : nil }
 				for (bi, block) in blocks.enumerated() {
 					rows.append(TranscriptRow(id: "\(id)/b\(bi)", kind: .textBlock(block, anchor: bi == 0 ? anchor : nil)))
 				}
 			case .reasoning:
-				rows.append(TranscriptRow(id: id, kind: .reasoning(part.text ?? "")))
+				let isLast = mi == view.count - 1 && pi == m.parts.count - 1
+				rows.append(TranscriptRow(id: id, kind: .reasoning(part.text ?? "", streaming: streaming && isLast)))
 			case .stepStart:
 				if pi == teachStep {
 					rows.append(TranscriptRow(id: id, kind: .phaseDivider(.teach)))
@@ -115,9 +119,10 @@ func transcriptRows(native: [Message], view: [ViewMessage]) -> [TranscriptRow] {
 				if part.state == .outputAvailable, let output = part.output, let answer = QuestionAnswerData(json: output) {
 					rows.append(TranscriptRow(id: id, kind: .answered(answer, input: part.input)))
 				}
+			case .tool where part.state == .inputStreaming:
+				rows.append(TranscriptRow(id: id, kind: .liveTool(part)))
 			case .tool(let name) where CARD_TOOLS.contains(name):
-				// Live input-streaming cards arrive with M5; dispatch boxes need the ack.
-				if part.state == .inputStreaming { continue }
+				// Dispatch boxes need the ack.
 				if DISPATCH_TOOLS.contains(name), part.state != .outputAvailable { continue }
 				rows.append(TranscriptRow(id: id, kind: .tool(part)))
 			default:

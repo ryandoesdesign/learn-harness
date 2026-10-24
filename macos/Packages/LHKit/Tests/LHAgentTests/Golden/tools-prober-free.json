@@ -1,0 +1,123 @@
+[
+	{
+		"name": "recall",
+		"description": "Ask the learner to EXPLAIN something in his own words — a graded check with NO options: he types a free-text answer. Unlike ask_user_question (no right answer), recall always has one. THE COMMITMENT RULE: correctAnswer is the FULL correct answer in your own words, reasoning included, COMMITTED before he ever sees the question. When his answer returns, grade it strictly against the commitment — never revise it after seeing his words. He sees the committed answer on submit. ONE question per turn: call a single recall, then end your turn — his answer determines the next.",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"question",
+				"correctAnswer"
+			],
+			"properties": {
+				"question": {
+					"type": "string",
+					"description": "The single question to ask. ONE question per turn: ask, then end your turn — the answer determines the next."
+				},
+				"correctAnswer": {
+					"type": "string",
+					"description": "REQUIRED. The full correct answer in your own words, reasoning included — COMMITTED before the learner ever sees the question. The commitment is immutable: when his answer returns, grade it strictly against this text — never revise the commitment after seeing his words, and never mark a wrong answer right to be kind. It is shown to him on submit; your next reply grades the nuance of what he wrote."
+				},
+				"details": {
+					"type": "string",
+					"description": "Optional extra context or instructions shown under the question."
+				}
+			}
+		}
+	},
+	{
+		"name": "ask_user_question",
+		"description": "Ask the learner a single question and pause until they answer. NOT graded — there is no correct answer. Use when requirements are ambiguous, preferences are needed, a decision would materially affect the lesson, or you need an open-ended response. ONE question per turn: call a single ask_user_question, then end your turn — his answer determines the next.",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"question"
+			],
+			"properties": {
+				"question": {
+					"type": "string",
+					"description": "The single question to ask the learner. ONE question per turn: ask, then end your turn — the answer determines the next question."
+				},
+				"details": {
+					"type": "string",
+					"description": "Optional extra context or instructions shown under the question."
+				},
+				"options": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": [
+							"label"
+						],
+						"properties": {
+							"label": {
+								"type": "string",
+								"description": "Display label for the answer option — a bare claim, no reasoning"
+							},
+							"value": {
+								"type": "string",
+								"description": "Optional machine-readable value returned for the option. Defaults to the label."
+							},
+							"description": {
+								"type": "string",
+								"description": "Optional extra detail shown below the option"
+							}
+						}
+					},
+					"minItems": 2,
+					"description": "Optional multiple-choice options. Omit for free-form text input. The learner can always choose 'Other' and type a custom answer when options are provided."
+				},
+				"multiSelect": {
+					"type": "boolean",
+					"description": "Set to true to allow multiple answers to the same question."
+				}
+			}
+		}
+	},
+	{
+		"name": "probe_done",
+		"description": "Conclude the probing phase and hand off to the teaching phase. Call this ONCE, when the probe is complete: every strand the lesson depends on is bracketed (a floor he reliably gets right AND a ceiling where it runs out), and his learning goal is concrete. The input IS the learner assessment — one strand per dependency the lesson will rest on, with your read of where his edge sits on it (floor, ceiling, misconceptions, what to build from). It streams to the learner live and becomes the handoff artifact the teacher plans from. Refused while a question is still open, and after the probe is already concluded. After it succeeds, say your closing sentence and end your turn.",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"assessment"
+			],
+			"properties": {
+				"assessment": {
+					"type": "object",
+					"required": [
+						"strands"
+					],
+					"properties": {
+						"strands": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"required": [
+									"strand",
+									"assessment"
+								],
+								"properties": {
+									"strand": {
+										"type": "string",
+										"description": "The dependency strand (e.g. 'the derivative as a limit') — a name the plan can hang a node on."
+									},
+									"assessment": {
+										"type": "string",
+										"description": "Where his edge sits on this strand: the floor (what he reliably gets right), the ceiling (where it runs out), misconceptions found, and what the lesson should build from."
+									}
+								}
+							},
+							"minItems": 1,
+							"description": "Every strand the planned lesson will depend on, each with your read of his edge on it."
+						},
+						"summary": {
+							"type": "string",
+							"description": "Optional overall synthesis: his apparent goal and where the teaching should enter."
+						}
+					},
+					"description": "The learner assessment — the probe's distilled output."
+				}
+			}
+		}
+	}
+]

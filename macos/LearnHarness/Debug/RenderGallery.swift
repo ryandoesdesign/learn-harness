@@ -167,6 +167,9 @@ enum RenderGallery {
 		messages.append(newProblemDismissedMarker(problemCallId: "c_problem", id: "pd", now: tick()))
 		messages.append(call)
 		messages.append(res)
+		// End settled: a gallery that owed a turn would resume on open (M5) and
+		// spend a real request.
+		messages.append(assistant("a12", [.text("That's every card in the gallery.")]))
 
 		let created = iso.string(from: Date(timeIntervalSince1970: Double(t) / 1000))
 		let turns = [TurnUsage(id: "turn_1", messageId: "a6", at: created, model: "claude-opus-5-5", steps: [

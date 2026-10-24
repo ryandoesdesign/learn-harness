@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import LHAgent
 import LHCore
 import LHMarkdown
 import LHResources
@@ -26,6 +27,10 @@ import Testing
 
 	private func kindName(_ k: TranscriptRow.Kind) -> String {
 		String(describing: k).components(separatedBy: "(").first ?? ""
+	}
+
+	@Test func theGalleryNeverOwesATurn() {
+		#expect(!TurnService.owesTurn(RenderGallery.record().messages), "opening it must not resume a live turn")
 	}
 
 	@Test func theGalleryCarriesEveryMarkerKind() {

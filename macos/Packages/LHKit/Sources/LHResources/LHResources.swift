@@ -32,4 +32,26 @@ public enum LHResources {
 			return try String(contentsOf: url, encoding: .utf8)
 		}
 	}
+
+	/// A bundled prompt segment by its segment path ("system-prompt.md",
+	/// "teacher/05-method.md", …) — verbatim copies of src/agent/prompts.
+	public static func promptSegment(_ path: String) -> String? {
+		guard let dir = Bundle.module.url(forResource: "prompts", withExtension: nil) else { return nil }
+		return try? String(contentsOf: dir.appending(path: path), encoding: .utf8)
+	}
+
+	/// The fragment file names (sorted) under one prompts directory.
+	public static func promptFragments(_ directory: String) -> [String] {
+		guard let dir = Bundle.module.url(forResource: "prompts", withExtension: nil) else { return [] }
+		let names = (try? FileManager.default.contentsOfDirectory(atPath: dir.appending(path: directory).path)) ?? []
+		return names.sorted()
+	}
+
+	/// prompt-gates.json.
+	public static var promptGatesJSON: Data {
+		get throws {
+			guard let url = Bundle.module.url(forResource: "prompt-gates", withExtension: "json") else { throw CocoaError(.fileNoSuchFile) }
+			return try Data(contentsOf: url)
+		}
+	}
 }

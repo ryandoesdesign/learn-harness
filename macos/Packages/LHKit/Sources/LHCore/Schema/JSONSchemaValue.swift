@@ -11,7 +11,9 @@ extension JSONSchema {
 	/// additionalProperties, anyOf).
 	public func check(_ value: JSONValue) -> Bool {
 		switch kind {
-		case .string: return value.stringValue != nil
+		case .string:
+			guard let s = value.stringValue else { return false }
+			return minLength.map { s.jsLength >= $0 } ?? true
 		case .boolean: return value.boolValue != nil
 		case .number: return value.doubleValue?.isFinite == true
 		case .integer: return value.doubleValue.map { $0.isFinite && $0 == $0.rounded(.towardZero) } == true

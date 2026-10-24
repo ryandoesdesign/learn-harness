@@ -12,13 +12,20 @@ struct RootView: View {
 		} detail: {
 			if let error = model.startupError {
 				ContentUnavailableView("Something Went Wrong", systemImage: "exclamationmark.triangle", description: Text(error))
+			} else if model.drafting {
+				DraftView(model: model)
 			} else if let session = model.session {
 				SessionView(session: session)
 					.id(session.chatId)
 					.task(id: session.chatId) { await session.observe() }
 			} else if model.sessions.isEmpty {
-				ContentUnavailableView("No Sessions", systemImage: "graduationcap",
-					description: Text("Import your sessions with File → Import from LearnHarness (Electron)…"))
+				ContentUnavailableView {
+					Label("No Sessions", systemImage: "graduationcap")
+				} description: {
+					Text("Start one with File → New Session (⌘N), or import your sessions with File → Import from LearnHarness (Electron)…")
+				} actions: {
+					Button("New Session") { model.newSession() }
+				}
 			} else {
 				ContentUnavailableView("No Session Selected", systemImage: "graduationcap", description: Text("Choose a session in the sidebar."))
 			}

@@ -1,18 +1,22 @@
 import Foundation
+import LHAgent
 import LHCore
 import LHMarkdown
 import LHStore
 import Observation
 
-/// One open session, read-only in M4: the record (observed from the
-/// store), its view projection and transcript rows, the expansion state
-/// Find needs (collapsed sections are never searched), and the lookups the
-/// cards read (jobs, artifacts, graph node names).
+/// One open session: the record (observed from the store), the live turn
+/// layered over it (M5 — the streaming message and tool executions), its
+/// view projection and transcript rows, the expansion state Find needs
+/// (collapsed sections are never searched), the dock state, and the
+/// lookups the cards read (jobs, artifacts, graph node names).
 @MainActor
 @Observable
 final class SessionModel {
 	let chatId: String
-	private let database: AppDatabase
+	let database: AppDatabase
+	/// The live service (nil = read-only: tests, previews).
+	let service: TurnService?
 	private let jobs: JobRepository
 	let catalog: ModelCatalog
 
@@ -30,9 +34,33 @@ final class SessionModel {
 	private var jobCache: [String: JobRecord?] = [:]
 	private var nodeNames: [String: String]?
 
-	init(chatId: String, database: AppDatabase, dataDirectory: URL, catalog: ModelCatalog) {
+	// MARK: Live (M5)
+	enum Status: Equatable { case idle, submitted, streaming }
+	var status: Status = .idle
+	/// A turn is running for this chat (ours, a wake, or a resumed one).
+	var running = false
+	var compacting = false
+	/// "Something went wrong: …" (a turn error or a refused request).
+	var errorText: String?
+	/// The last send was refused for a missing key (the "Add a key" pill).
+	var needsKey = false
+	var draft = ""
+	var queuedSteers: [Message] = []
+	/// The streaming assistant snapshot (not yet persisted).
+	var streaming: Message?
+	var executions: [String: LiveExecution] = [:]
+	var following = false
+	var isAtBottom = true
+	// The dock (pinned; folds on demand).
+	var dockExpanded = true
+	var revealed = true
+	var readingThinking = ""
+	var lastPendingId: String?
+
+	init(chatId: String, database: AppDatabase, dataDirectory: URL, catalog: ModelCatalog, service: TurnService? = nil) {
 		self.chatId = chatId
 		self.database = database
+		self.service = service
 		jobs = JobRepository(database, dataDirectory: dataDirectory)
 		self.catalog = catalog
 	}
@@ -62,12 +90,25 @@ final class SessionModel {
 		}
 		missing = false
 		record = next
-		view = projectView(next.messages)
-		rows = transcriptRows(native: next.messages, view: view)
+		if let s = streaming, next.messages.contains(where: { $0.id == s.id }) { streaming = nil }
+		jobCache.removeAll()
+		rebuild()
+	}
+
+	/// The projection over the record plus the live layer.
+	func rebuild() {
+		guard let record else { return }
+		var messages = record.messages
+		if let s = streaming, !messages.contains(where: { $0.id == s.id }) { messages.append(s) }
+		let live = running || status != .idle
+			? LiveTurnState(executions: executions, inFlight: true, streamingIds: streaming.map { [$0.id] } ?? [])
+			: nil
+		view = projectView(messages, live: live)
+		rows = transcriptRows(native: messages, view: view, streaming: status == .streaming)
 		plan = latestTree(view)
 		phase = viewPhaseTimeline(view).last ?? .probe
-		jobCache.removeAll()
 		refreshFindUnits()
+		updatePendingArrival()
 	}
 
 	var title: String { record?.title ?? "" }
@@ -144,7 +185,7 @@ final class SessionModel {
 				plain("\(id).text", text, id)
 			case .textBlock(let block, _):
 				add(findUnits([block], prefix: id), id)
-			case .reasoning(let text):
+			case .reasoning(let text, _):
 				if isOpen(id) { add(findUnits(MarkdownCache.blocks(text), prefix: "\(id).body"), id) }
 			case .practiceThinking(let text):
 				if isOpen(id, default: true) { plain("\(id).text", text, id) }

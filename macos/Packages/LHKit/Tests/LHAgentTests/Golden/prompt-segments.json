@@ -1,0 +1,38 @@
+{
+	"prober": [
+		"system-prompt.md",
+		"prober/10-probe-doctrine.md",
+		"shared/10-voice.md",
+		"shared/15-accuracy.md",
+		"shared/16-mental-model.md",
+		"shared/20-question-tools.md",
+		"shared/25-confidence.md",
+		"shared/30-learner-files.md",
+		"shared/40-formatting.md"
+	],
+	"teacher": [
+		"system-prompt.md",
+		"teacher/05-method.md",
+		"teacher/10-planning.md",
+		"teacher/20-teaching.md",
+		"teacher/28-predictions.md",
+		"teacher/30-question-principles.md",
+		"teacher/40-jobs.md",
+		"teacher/50-demos.md",
+		"shared/10-voice.md",
+		"shared/15-accuracy.md",
+		"shared/16-mental-model.md",
+		"shared/20-question-tools.md",
+		"shared/25-confidence.md",
+		"shared/30-learner-files.md",
+		"shared/40-formatting.md"
+	],
+	"practice": [
+		"practice/00-base.md",
+		"practice/10-doctrine.md",
+		"shared/10-voice.md",
+		"shared/15-accuracy.md",
+		"shared/16-mental-model.md",
+		"shared/40-formatting.md"
+	]
+}
