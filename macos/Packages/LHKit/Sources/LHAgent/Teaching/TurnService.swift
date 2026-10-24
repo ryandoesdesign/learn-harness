@@ -68,6 +68,8 @@ public actor TurnService {
 	/// Told when a `steer_` message lands in a record (the JobService settles its job).
 	/// The M6 registries' wiring (set by the JobService).
 	private var background: (@Sendable (_ chatId: String) -> BackgroundWiring)?
+	/// Told after every settled turn (M7: the extraction trigger).
+	private var settleObserver: (@Sendable (_ chatId: String) -> Void)?
 	private var steerObserver: (@Sendable (_ chatId: String, _ steerId: String) -> Void)?
 
 	public init(database: AppDatabase, keychain: any KeychainStore, catalog: ModelCatalog,
@@ -192,6 +194,10 @@ public actor TurnService {
 
 	public func setSteerObserver(_ observer: @escaping @Sendable (_ chatId: String, _ steerId: String) -> Void) {
 		steerObserver = observer
+	}
+
+	public func setSettleObserver(_ observer: @escaping @Sendable (_ chatId: String) -> Void) {
+		settleObserver = observer
 	}
 
 	public func setBackground(_ wiring: @escaping @Sendable (_ chatId: String) -> BackgroundWiring) {
@@ -338,6 +344,7 @@ public actor TurnService {
 
 		running.remove(chatId)
 		broadcast(.turnSettled(chatId: chatId))
+		settleObserver?(chatId)
 		if let record = (try? repo.get(chatId)) ?? nil { await compaction.kick(chatId, deps: compactionDeps(record)) }
 
 		// The handoff wake: the teacher's first turn (its marker written ahead).
@@ -372,7 +379,11 @@ public actor TurnService {
 			queueHandoff: { [weak self] in await self?.queueHandoff(record.id) })
 		let enabled = settings?.agent?.tools
 		let wiring = background?(record.id)
-		let tools = teaching ? teacherTools(ctx, enabled: enabled, background: wiring) : proberTools(ctx, enabled: enabled, background: wiring)
+		let graph: GraphToolDeps? = graphToolsEnabled(resolveSettings(settings, catalog: catalog))
+			? GraphToolDeps { [database] in GraphDeps(chatStore: ChatRepository(database), graphStore: GraphRepository(database)) }
+			: nil
+		let tools = teaching ? teacherTools(ctx, enabled: enabled, background: wiring)
+			: proberTools(ctx, enabled: enabled, background: wiring, graph: graph)
 		let system = composer(settings).compose(teaching ? .teacher : .prober, tools: Set(tools.map(\.name)))
 		let maxTokens = min(64_000, catalog.model(spec.model)?.maxTokens ?? 64_000)
 		return AgentConfig(

@@ -25,6 +25,11 @@ final class AppModel {
 	let jobs: JobService
 	/// Running jobs across all chats (the sidebar's Background agents).
 	private(set) var runningJobs: [JobRecord] = []
+	/// The extraction pipeline (M7) and its running batch jobs.
+	let extraction: ExtractionService
+	private(set) var extractionRows: [ExtractionService.Row] = []
+	/// Propositions the next ⌘N draft starts with (New Session from Selection…).
+	var draftPicks: [GraphContextPick] = []
 	/// The learner folders the file tools may read (Settings → Learner folders).
 	private(set) var learnerFolders: [LearnerFolder] = []
 	private(set) var sessions: [ChatSummary] = []
@@ -68,6 +73,7 @@ final class AppModel {
 		let access = FileAccess(folders: { (try? store.list())?.compactMap { try? store.resolve($0) } ?? [] })
 		jobs = JobService(database: database, dataDirectory: dataDirectory, keychain: keychain, catalog: catalog,
 			verifier: WebHeadlessVerifier.shared, fileAccess: access)
+		extraction = ExtractionService(database: database, keychain: keychain, catalog: catalog)
 		reloadFolders()
 	}
 
@@ -75,9 +81,13 @@ final class AppModel {
 	/// server-event bus): sidebar spinners, the open session's live state.
 	func observeService() async {
 		await jobs.attach(service)
+		let extraction = extraction
+		await service.setSettleObserver { chatId in Task { await extraction.turnSettled(chatId) } }
 		await service.recoverOnLaunch()
 		// Eager job recovery (your answer): orphaned runs re-deliver or re-run.
 		await jobs.recoverOnLaunch()
+		// The one-time backfill (M7, your answer): runs in the background.
+		Task { await extraction.backfillIfNeeded() }
 		for await event in await service.events() {
 			switch event {
 			case .turnStarted(let chatId):
@@ -99,7 +109,17 @@ final class AppModel {
 	/// File → New Session (⌘N): the draft in the detail column.
 	func newSession() {
 		selection = nil
+		draftPicks = []
 		drafting = true
+	}
+
+	/// New Session from Selection… (M7): the draft, with the picks attached.
+	func newSession(picks: [GraphContextPick]) {
+		selection = nil
+		draftPicks = Array(picks.prefix(64))
+		drafting = true
+		// Bring the sessions window forward (the graph window stays open).
+		NSApp.windows.first { $0.canBecomeMain && $0.isVisible && !($0.identifier?.rawValue.contains("graph") ?? false) }?.makeKeyAndOrderFront(nil)
 	}
 
 	/// The draft's first send: create the chat (titled from the prompt, its
@@ -110,6 +130,16 @@ final class AppModel {
 		do {
 			let repo = ChatRepository(database)
 			let chat = try repo.createChat(title: titleFromPrompt(text))
+			// Picks seed message[0]: the Graph context card (app/api/chats).
+			if !draftPicks.isEmpty {
+				let graph = GraphRepository(database)
+				let known = Set(getGraph(graph).nodes.map(\.id))
+				let ids = draftPicks.map(\.id).filter(known.contains)
+				let names = Dictionary(draftPicks.map { ($0.id, $0.name) }, uniquingKeysWith: { a, _ in a })
+				let chains = chainsForSelection(ids, graph.readChains()).filter { !$0.premises.isEmpty }.map { formatChainLine($0, names: names) }
+				try repo.append([newGraphContextMessage(picks: draftPicks, chains: chains)], to: chat.id)
+				draftPicks = []
+			}
 			let settings = (try? SettingsRepository(database).read()) ?? nil
 			let spec = resolveConversationSpec(nil, strong: settings?.models?.strong, catalog: catalog)
 			try repo.saveSettings(ChatSettings(model: spec.model, effort: spec.effort), chatId: chat.id)
@@ -130,13 +160,19 @@ final class AppModel {
 
 	/// Delete a session (refused while its turn runs — TS 409 turn_in_flight).
 	/// Its graph traces stay (the traces option arrives with M7).
-	func delete(_ chatId: String) async -> String? {
+	func delete(_ chatId: String, removeGraphTraces: Bool = false) async -> String? {
 		if await service.isRunning(chatId) { return "A turn is still running in this session — wait for it to finish or stop it, then try again." }
 		await jobs.cancelAll(chatId: chatId)
+		// Its extraction winds down first, so nothing merges for a deleted chat.
+		await extraction.windDown(chatId)
 		do {
 			_ = try JobRepository(database, dataDirectory: dataDirectory).deleteJobs(chatId: chatId)
 			try SteerOutboxRepository(database).deleteAll(chatId: chatId)
-			try ChatRepository(database).delete(chatId)
+			// The traces and the chat go in one transaction (all or nothing).
+			try GraphRepository(database).transaction { tx in
+				try deleteChatTraces(tx, chatId: chatId, mode: removeGraphTraces ? .deleteNodes : .preserveGraph)
+				_ = try tx.deleteChat(chatId)
+			}
 			if selection == chatId { selection = nil }
 			return nil
 		} catch {
@@ -160,6 +196,61 @@ final class AppModel {
 
 	func sessionTitle(_ chatId: String) -> String {
 		sessions.first { $0.id == chatId }?.title ?? "Session"
+	}
+
+	// MARK: - Extraction and the graph (M7)
+
+	func observeExtraction() async {
+		for await rows in await extraction.observe() { extractionRows = rows }
+	}
+
+	/// A session's extraction coverage (the ring and the sidebar menu).
+	func coverage(_ chatId: String) -> ExtractionService.SessionCoverage? {
+		ExtractionService.coverage(database: database, chatId: chatId, running: extractionRows.contains { $0.sourceId == chatId })
+	}
+
+	var extractionChunkTokens: Int {
+		resolveSettings((try? SettingsRepository(database).read()) ?? nil, catalog: catalog).graph.extractionChunkTokens
+	}
+
+	/// The per-session Extract action.
+	func extract(_ chatId: String) {
+		Task { _ = await extraction.extractNow(chatId) }
+	}
+
+	/// Delete nodes (or chains, by arg_ id) in one transaction. Refused while
+	/// an extraction runs. nil = done; otherwise the message to show.
+	func deleteGraphNodes(_ ids: [String]) async -> String? {
+		if await extraction.anyRunning { return "An extraction is running — try again when Background agents is clear." }
+		do {
+			try GraphRepository(database).transaction { tx in
+				for id in ids { _ = try deleteNodeTraces(tx, nodeId: id) }
+			}
+			return nil
+		} catch {
+			return "Delete failed — \(error)."
+		}
+	}
+
+	/// Import notes…: pick .md/.markdown/.txt files; only failures come back.
+	func importNotes() async -> [ExtractionService.NotesResult] {
+		let panel = NSOpenPanel()
+		panel.allowsMultipleSelection = true
+		panel.canChooseDirectories = false
+		panel.allowedContentTypes = ["md", "markdown", "txt"].compactMap { UTType(filenameExtension: $0) }
+		panel.prompt = "Import"
+		guard panel.runModal() == .OK else { return [] }
+		var files: [ExtractionService.NotesFile] = []
+		var failures: [ExtractionService.NotesResult] = []
+		for url in panel.urls {
+			if let text = url.withSecurityScope({ try? String(contentsOf: url, encoding: .utf8) }) {
+				files.append(.init(path: url.path, text: text))
+			} else {
+				failures.append(.init(path: url.path, outcome: .failed, stats: EmissionStats(nodes: 0, chains: 0), error: "The file isn't readable UTF-8 text."))
+			}
+		}
+		let results = await extraction.importNotes(files)
+		return failures + results.filter { $0.outcome != .completed }
 	}
 
 	// MARK: - Learner folders (M6)

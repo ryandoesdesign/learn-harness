@@ -93,3 +93,9 @@ enum GoldenGraph {
 		return (GraphDeps(chatStore: chats, graphStore: store), store)
 	}
 }
+
+extension MemoryGraphStore: GraphTraceStore {
+	func writePositions(_ positions: [String: Position]) { self.positions = positions }
+	func readCoverage() -> [CoverageEntry] { coverage }
+	func readCheckpoints() -> [SessionCheckpoint] { checkpoints }
+}

@@ -194,7 +194,7 @@ const chainsDescription =
 	"ones; conclusions reusable by id as premises of later chains; bare ideas (no argument) ride " +
 	"the propositions list alone; pass [] when none — never omit the field.";
 
-const findingsSchema = Type.Object({
+export const findingsSchema = Type.Object({
 	propositions: Type.Array(Type.Object(propositionProps), {
 		description: propositionsDescription,
 	}),
@@ -217,7 +217,7 @@ const sessionPropositionProps = {
 	}),
 };
 
-const sessionFindingsSchema = Type.Object({
+export const sessionFindingsSchema = Type.Object({
 	propositions: Type.Array(Type.Object(sessionPropositionProps), {
 		description: propositionsDescription,
 	}),
@@ -242,7 +242,7 @@ type SessionFindingsSubmit = Static<typeof sessionFindingsSchema>;
 // ENTIRE deliverable (owner, 2026-09-28 evening: the edges argument is
 // GONE; the auditor never mints edges. The graph connects across sources
 // solely through identified equivalences — a link, never an inference).
-const auditSchema = Type.Object({
+export const auditSchema = Type.Object({
 	links: Type.Array(
 		Type.Object({
 			id: Type.String({ description: 'The proposition id from the findings ("p1", …).' }),
@@ -530,7 +530,7 @@ function runNotesExtractor(
 // ─── the auditor ───────────────────────────────────────────────────────────
 
 
-const AUDITOR_INSTRUCTIONS = `You are the linking stage of a learning application's extraction pipeline. An extractor
+export const AUDITOR_INSTRUCTIONS = `You are the linking stage of a learning application's extraction pipeline. An extractor
 has read a source (a teaching session, or the author's personal notes) and reported findings: propositions and
 their reasoning chains. You NEVER see the source itself — the extractor is fully trusted, and you do not re-check
 its work. Your job is IDENTITY: connecting those findings to the CURRENT knowledge graph, preparing the merge.

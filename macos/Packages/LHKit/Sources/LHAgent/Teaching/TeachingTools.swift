@@ -34,11 +34,13 @@ public func quizMechanics(_ enabled: [String: Bool]?) -> QuizMechanics {
 }
 
 /// The prober's registry: probe|recall, ask_user_question, the file tools,
-/// research and pdf (every phase), probe_done.
-public func proberTools(_ ctx: TeachingContext, enabled: [String: Bool]?, background: BackgroundWiring? = nil) -> [any AgentTool] {
+/// research and pdf (every phase), the graph map (M7, gated), probe_done.
+public func proberTools(_ ctx: TeachingContext, enabled: [String: Bool]?, background: BackgroundWiring? = nil, graph: GraphToolDeps? = nil) -> [any AgentTool] {
 	let quizzing: any AgentTool = quizMechanics(enabled) == .free ? QuestionTool.recall : QuestionTool.probe
 	var tools: [any AgentTool] = [QuestionTool.ask]
 	if let background { tools += fileTools(background.files) + [DispatchTool.research(background), DispatchTool.pdf(background)] }
+	// M7: the persistent map, only while graphToolsEnabled (the caller gates).
+	if let graph { tools += proberGraphTools(graph) }
 	// probe_done stays on regardless (it is how the phase ends).
 	return [quizzing] + filteredOptional(tools, enabled) + [ProbeDoneTool(ctx: ctx)]
 }

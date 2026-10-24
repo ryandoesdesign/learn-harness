@@ -16,6 +16,7 @@ struct RootView: View {
 				DraftView(model: model)
 			} else if let session = model.session {
 				SessionView(session: session)
+					.environment(model)
 					.id(session.chatId)
 					.task(id: session.chatId) { await session.observe() }
 			} else if model.sessions.isEmpty {

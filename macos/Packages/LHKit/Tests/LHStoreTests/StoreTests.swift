@@ -254,3 +254,48 @@ private func tempDir() throws -> URL {
 		#expect(try repo.runningJobs().count == 2)
 	}
 }
+
+@Suite struct GraphTransactionTests {
+	@Test func aChatDeleteTakesItsCoverageAndCheckpoints() throws {
+		let db = try AppDatabase.inMemory()
+		let chat = try ChatRepository(db).createChat(title: "t")
+		let graph = GraphRepository(db)
+		try graph.appendCoverage(CoverageEntry(chatId: chat.id, fp: "f", tokens: 1, foldedAt: "x"))
+		try graph.appendCheckpoint(SessionCheckpoint(chatId: chat.id, foldedAt: "x"))
+		try graph.appendCoverage(CoverageEntry(chatId: "chat_other", fp: "g", tokens: 1, foldedAt: "x"))
+		try ChatRepository(db).delete(chat.id)
+		#expect(graph.readCoverage().map(\.chatId) == ["chat_other"])
+		#expect(graph.readCheckpoints().isEmpty)
+	}
+
+	@Test func tracesAndTheChatDeleteAreAllOrNothing() throws {
+		let db = try AppDatabase.inMemory()
+		let chat = try ChatRepository(db).createChat(title: "t")
+		let graph = GraphRepository(db)
+		try graph.appendNode(GraphNode(id: "n_a", name: "A", statement: "S", aliases: [], createdAt: "", provenance: [ProvenancePoint(chatId: chat.id, messageId: "")]))
+		struct Boom: Error {}
+		#expect(throws: Boom.self) {
+			try graph.transaction { tx in
+				try deleteChatTraces(tx, chatId: chat.id, mode: .deleteNodes)
+				throw Boom()
+			}
+		}
+		#expect(graph.readNodes().count == 1, "rolled back")
+		try graph.transaction { tx in
+			try deleteChatTraces(tx, chatId: chat.id, mode: .deleteNodes)
+			#expect(try tx.deleteChat(chat.id))
+		}
+		#expect(graph.readNodes().isEmpty)
+		#expect(try ChatRepository(db).get(chat.id) == nil)
+	}
+
+	@Test func theRevisionTicksOnGraphWrites() async throws {
+		let db = try AppDatabase.inMemory()
+		let graph = GraphRepository(db)
+		var it = graph.observeRevision().makeAsyncIterator()
+		let first = try await it.next()
+		try graph.appendNode(GraphNode(id: "n_a", name: "A", statement: "S", aliases: [], createdAt: "", provenance: []))
+		let second = try await it.next()
+		#expect(first != nil && second != nil && second != first)
+	}
+}

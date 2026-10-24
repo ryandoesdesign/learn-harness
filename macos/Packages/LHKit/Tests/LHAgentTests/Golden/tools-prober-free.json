@@ -227,6 +227,31 @@
 		}
 	},
 	{
+		"name": "list_sessions",
+		"description": "List the sessions of the learner's persistent knowledge graph — every chat or imported-notes file that ever contributed a proposition, most recent first. The map is organized into birth-session clusters (propositions grouped by the session they were first learned in), and session names are those clusters' labels. Each line: the session's name, kind (chat/file), how many propositions were born in it, its dates, and its id — use that id with list_propositions. Reading this first shows what he has already covered and when, before you probe anything.",
+		"input_schema": {
+			"type": "object",
+			"properties": {}
+		}
+	},
+	{
+		"name": "list_propositions",
+		"description": "List the propositions BORN in one knowledge-graph session — what was covered there. Names only — no statement text, no session contents (owner ruling 2026-09-23: the map's ORGANIZATION is your business, its prose is not).",
+		"input_schema": {
+			"type": "object",
+			"required": [
+				"session"
+			],
+			"properties": {
+				"session": {
+					"type": "string",
+					"minLength": 1,
+					"description": "The session's id exactly as list_sessions reported it (a chat id or a notes source id)"
+				}
+			}
+		}
+	},
+	{
 		"name": "probe_done",
 		"description": "Conclude the probing phase and hand off to the teaching phase. Call this ONCE, when the probe is complete: every strand the lesson depends on is bracketed (a floor he reliably gets right AND a ceiling where it runs out), and his learning goal is concrete. The input IS the learner assessment — one strand per dependency the lesson will rest on, with your read of where his edge sits on it (floor, ceiling, misconceptions, what to build from). It streams to the learner live and becomes the handoff artifact the teacher plans from. Refused while a question is still open, and after the probe is already concluded. After it succeeds, say your closing sentence and end your turn.",
 		"input_schema": {

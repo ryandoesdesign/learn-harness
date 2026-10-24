@@ -23,6 +23,7 @@ struct LearnHarnessApp: App {
 				.task { await model.observeSessions() }
 				.task { await model.observeService() }
 				.task { await model.observeJobs() }
+				.task { await model.observeExtraction() }
 				#if DEBUG
 				// `-LHOpenGallery YES` (with -LHScratch): open the Render Gallery.
 				.task { if UserDefaults.standard.bool(forKey: "LHOpenGallery"), UserDefaults.standard.bool(forKey: "LHScratch") { model.addRenderGallery() } }
@@ -51,6 +52,12 @@ struct LearnHarnessApp: App {
 		Settings {
 			SettingsView(model: model)
 		}
+		// The knowledge graph (M7, your answer): its own window.
+		Window("Knowledge Graph", id: "graph") {
+			GraphWindow(app: model)
+		}
+		.keyboardShortcut("g", modifiers: [.command, .shift])
+		.defaultSize(width: 1100, height: 760)
 		#if DEBUG
 		Window("Anthropic Playground", id: "playground") {
 			PlaygroundView(model: playground)

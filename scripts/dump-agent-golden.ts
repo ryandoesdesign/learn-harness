@@ -13,15 +13,21 @@ import { fileURLToPath } from "node:url";
 import { createProberTools, createTeacherTools } from "../src/agent/tools.ts";
 import { composeInstructions } from "../src/agent/teacher-agent.ts";
 import { listSourceSegments } from "../src/agent/prompt-segments.ts";
+import { auditorGraphTools } from "../src/agent/tools/graph.ts";
+import {
+	AUDITOR_INSTRUCTIONS, EXTRACTOR_INSTRUCTIONS, NOTES_EXTRACTOR_INSTRUCTIONS,
+	auditSchema, findingsSchema, sessionFindingsSchema,
+} from "../src/agent/subagents/extraction.ts";
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const OUT = path.join(ROOT, "macos/Packages/LHKit/Tests/LHAgentTests/Golden");
 mkdirSync(OUT, { recursive: true });
 
-/** The native set so far: M5 teaching + M6 jobs and learner files (graph tools are M7). */
+/** The native set: M5 teaching, M6 jobs and learner files, M7 the prober's graph tools. */
 const TEACHING = new Set([
 	"probe", "recall", "quiz", "explain", "ask_user_question", "probe_done", "plan_init",
 	"research", "demo", "visual", "pdf", "read", "ls", "find", "grep",
+	"list_sessions", "list_propositions",
 ]);
 
 const ctx = {
@@ -31,6 +37,7 @@ const ctx = {
 	jobStore: {},
 	spawn: () => {},
 	searchAvailable: () => true,
+	graphStore: {},
 } as never;
 
 function defs(tools: Record<string, { name: string; description: string; parameters: unknown }>) {
@@ -44,6 +51,18 @@ const dumps: Record<string, unknown> = {
 	"tools-prober-free": defs(createProberTools(ctx, { explain: true })),
 	"tools-teacher": defs(createTeacherTools(ctx)),
 	"tools-teacher-free": defs(createTeacherTools(ctx, { explain: true })),
+	// M7 (docs/native-macos-m7.md): the extraction stages' prompts and tools.
+	extraction: {
+		prompts: { extractor: EXTRACTOR_INSTRUCTIONS, notesExtractor: NOTES_EXTRACTOR_INSTRUCTIONS, auditor: AUDITOR_INSTRUCTIONS },
+		tools: [
+			{ name: "submit_findings", description: "Submit the session findings.", input_schema: JSON.parse(JSON.stringify(sessionFindingsSchema)) },
+			{ name: "submit_findings_notes", description: "Submit the notes findings.", input_schema: JSON.parse(JSON.stringify(findingsSchema)) },
+			{ name: "submit_review", description: "Submit the identity verdicts ONLY (links) — never the propositions themselves.", input_schema: JSON.parse(JSON.stringify(auditSchema)) },
+			...Object.values(auditorGraphTools({ chatStore: {}, graphStore: {} } as never)).map((t) => ({
+				name: t.name, description: t.description, input_schema: JSON.parse(JSON.stringify(t.parameters)),
+			})),
+		],
+	},
 	"prompt-prober": composeInstructions("prober"),
 	"prompt-teacher": composeInstructions("teacher"),
 	"prompt-segments": {

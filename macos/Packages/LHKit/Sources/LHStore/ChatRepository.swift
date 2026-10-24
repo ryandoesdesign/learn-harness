@@ -73,14 +73,21 @@ public struct ChatRepository: Sendable {
 	}
 
 	/// Delete a chat and everything it owns. False when it never existed.
+	/// M7: its coverage and checkpoint rows go too (TS drops them in both
+	/// delete modes); a traces delete runs deleteChatTraces first, in the
+	/// same transaction (GraphTransaction.deleteChat).
 	@discardableResult
 	public func delete(_ chatId: String) throws -> Bool {
-		try database.writer.write { db in
-			try db.execute(sql: "DELETE FROM usage_step WHERE owner_kind = 'turn' AND owner_id IN (SELECT id FROM turn WHERE chat_id = ?)", arguments: [chatId])
-			try UsageRows.deleteRuns(ownerKind: "chat", ownerId: chatId, db: db)
-			try db.execute(sql: "DELETE FROM chat WHERE id = ?", arguments: [chatId])
-			return db.changesCount > 0
-		}
+		try database.writer.write { db in try Self.deleteRows(chatId, db) }
+	}
+
+	static func deleteRows(_ chatId: String, _ db: Database) throws -> Bool {
+		try db.execute(sql: "DELETE FROM usage_step WHERE owner_kind = 'turn' AND owner_id IN (SELECT id FROM turn WHERE chat_id = ?)", arguments: [chatId])
+		try UsageRows.deleteRuns(ownerKind: "chat", ownerId: chatId, db: db)
+		try db.execute(sql: "DELETE FROM coverage WHERE chat_id = ?", arguments: [chatId])
+		try db.execute(sql: "DELETE FROM graph_session WHERE chat_id = ?", arguments: [chatId])
+		try db.execute(sql: "DELETE FROM chat WHERE id = ?", arguments: [chatId])
+		return db.changesCount > 0
 	}
 
 	/// Idempotent per turn id.

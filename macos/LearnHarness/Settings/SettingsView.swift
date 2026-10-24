@@ -36,6 +36,7 @@ struct SettingsView: View {
 			} header: {
 				Text("Models")
 			}
+			graphSection
 			Section {
 				if model.learnerFolders.isEmpty {
 					Text("No folders yet. The teacher can't read your files until you add one.").foregroundStyle(.secondary)
@@ -70,6 +71,58 @@ struct SettingsView: View {
 			reload()
 			model.reloadFolders()
 		}
+	}
+
+	// MARK: Knowledge graph (M7)
+
+	private var graphSection: some View {
+		let eff = resolveSettings(settings, catalog: model.catalog)
+		return Section {
+			Toggle(isOn: Binding(get: { eff.graph.enabled }, set: { v in update { $0.graph = graph($0) { $0.enabled = v } } })) {
+				Text("Extraction")
+				Text("After lessons, build the knowledge graph from what was taught. Off: no extraction and no graph tools.").font(.caption).foregroundStyle(.secondary)
+			}
+			Toggle(isOn: Binding(get: { eff.graph.rendering }, set: { v in update { $0.graph = graph($0) { $0.rendering = v } } })) {
+				Text("Graph rendering")
+				Text("Draw the graph in its window. Off: the window shows the chain table.").font(.caption).foregroundStyle(.secondary)
+			}
+			HStack {
+				VStack(alignment: .leading) {
+					Text("Chunk budget")
+					Text("Extraction runs once a session has this many unextracted tokens (at least \(EXTRACTION_CHUNK_TOKENS_FLOOR)).").font(.caption).foregroundStyle(.secondary)
+				}
+				Spacer()
+				TextField("Tokens", value: Binding(get: { eff.graph.extractionChunkTokens }, set: { v in
+					update { $0.graph = graph($0) { $0.extractionChunkTokens = max(EXTRACTION_CHUNK_TOKENS_FLOOR, v) } }
+				}), format: .number)
+					.frame(width: 80)
+					.multilineTextAlignment(.trailing)
+			}
+			Toggle(isOn: Binding(get: { eff.agent.graphTools.enabled ?? true }, set: { v in
+				update { s in
+					var agent = s.agent ?? AgentSettings()
+					agent.graphTools = GraphToolsSettings(enabled: v)
+					s.agent = agent
+				}
+			})) {
+				Text("Graph tools")
+				Text("Let the prober read your persistent map (list_sessions, list_propositions).").font(.caption).foregroundStyle(.secondary)
+			}
+			.disabled(!eff.graph.enabled)
+		} header: {
+			Text("Knowledge graph")
+		}
+	}
+
+	private func graph(_ s: UserSettings, _ edit: (inout GraphSettings) -> Void) -> GraphSettings {
+		var g = s.graph ?? GraphSettings()
+		edit(&g)
+		return g
+	}
+
+	private func update(_ edit: (inout UserSettings) -> Void) {
+		try? SettingsRepository(model.database).update(edit)
+		reload()
 	}
 
 	private func slotRow(_ title: String, _ name: ModelSlotName, help: String) -> some View {

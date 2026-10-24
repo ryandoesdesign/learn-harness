@@ -12,6 +12,17 @@ struct DraftView: View {
 			ContentUnavailableView("New session", systemImage: "graduationcap",
 				description: Text("The teacher will open by probing what you already know."))
 				.frame(maxHeight: .infinity)
+			if !model.draftPicks.isEmpty {
+				// New Session from Selection… (M7): the picks ride message[0].
+				HStack(spacing: 8) {
+					Image(systemName: "point.3.connected.trianglepath.dotted").foregroundStyle(Theme.muted)
+					Text("Graph context · \(model.draftPicks.count) proposition\(model.draftPicks.count == 1 ? "" : "s")").font(Theme.ui).foregroundStyle(Theme.muted)
+					Spacer()
+					Button("Remove") { model.draftPicks = [] }.buttonStyle(.link).font(Theme.ui)
+				}
+				.frame(maxWidth: DockView.width)
+				.padding(.horizontal, 16)
+			}
 			HStack(alignment: .bottom, spacing: 8) {
 				ZStack(alignment: .topLeading) {
 					if text.isEmpty {

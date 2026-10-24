@@ -140,15 +140,27 @@ func answer(_ text: String = "What does SQL stand for?") -> QuestionAnswerData {
 	}
 
 	@Test func theSystemPromptIsTheGatedProberAndTheToolsAreTheProbeSet() async throws {
+		// M7: the graph tools ride while graphToolsEnabled (on by default).
 		let h = try Harness([.sse(ScriptedSSE.message([.text("Hi.")]))])
 		let ev = await h.service.events()
 		try await h.service.send(h.chatId, .text("Teach me joins"))
 		try await settles(ev, h.chatId)
 		let req = try h.request(0)
-		#expect(req["tools"]?.arrayValue?.compactMap { $0["name"]?.stringValue } == ["probe", "ask_user_question", "probe_done"])
+		#expect(req["tools"]?.arrayValue?.compactMap { $0["name"]?.stringValue } == ["probe", "ask_user_question", "list_sessions", "list_propositions", "probe_done"])
 		let system = req["system"]?.arrayValue?.first?["text"]?.stringValue ?? ""
-		#expect(system.contains("probe_done") || system.contains("probe"))
-		#expect(!system.contains("`list_sessions`"))
+		#expect(system.contains("`list_sessions`"))
+	}
+
+	@Test func graphToolsOffStripTheMapFromTheProber() async throws {
+		let h = try Harness([.sse(ScriptedSSE.message([.text("Hi.")]))])
+		try SettingsRepository(h.db).update { $0.agent = AgentSettings(graphTools: GraphToolsSettings(enabled: false)) }
+		let ev = await h.service.events()
+		try await h.service.send(h.chatId, .text("Teach me joins"))
+		try await settles(ev, h.chatId)
+		let req = try h.request(0)
+		#expect(req["tools"]?.arrayValue?.compactMap { $0["name"]?.stringValue } == ["probe", "ask_user_question", "probe_done"])
+		let sys = req["system"]?.arrayValue?.first?["text"]?.stringValue ?? ""
+		#expect(!sys.contains("`list_sessions`"), "\(sys.components(separatedBy: "\n").filter { $0.contains("list_sessions") })")
 	}
 
 	@Test func anAnswerWithNoPendingQuestionIsRefused() async throws {

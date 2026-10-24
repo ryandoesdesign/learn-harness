@@ -1,3 +1,4 @@
+import LHAgent
 import LHCore
 import SwiftUI
 
@@ -75,6 +76,7 @@ struct SidebarView: View {
 								renameFocused = true
 							}
 							Button("Export as Markdown…") { model.exportMarkdown(chatId: s.id) }
+							if s.kind != .practice { CoverageMenuItems(model: model, chatId: s.id) }
 							Divider()
 							Button("Delete…", role: .destructive) {
 								deleteError = nil
@@ -96,9 +98,9 @@ struct SidebarView: View {
 			}
 		}
 		.sheet(item: $deleting) { s in
-			DeleteSessionSheet(summary: s, error: deleteError, onCancel: { deleting = nil }) {
+			DeleteSessionSheet(summary: s, error: deleteError, onCancel: { deleting = nil }) { traces in
 				Task {
-					if let error = await model.delete(s.id) { deleteError = error } else { deleting = nil }
+					if let error = await model.delete(s.id, removeGraphTraces: traces) { deleteError = error } else { deleting = nil }
 				}
 			}
 		}
@@ -170,31 +172,57 @@ struct SessionRow: View {
 
 extension ChatSummary: @retroactive Identifiable {}
 
-/// delete-session-dialog.tsx (the graph-traces option arrives with M7).
+/// delete-session-dialog.tsx, with the graph-traces option (M7). Its copy is
+/// corrected: TS mentions "links" and "events" the graph no longer has.
 struct DeleteSessionSheet: View {
 	var summary: ChatSummary
 	var error: String?
 	var onCancel: () -> Void
-	var onDelete: () -> Void
+	var onDelete: (_ removeTraces: Bool) -> Void
+	@State private var traces = false
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 12) {
 			Text("Delete session?").font(.headline).foregroundStyle(Theme.red)
 			Text(summary.title).font(Theme.mono)
-			Text("This permanently removes the session — its messages, background jobs, and extraction records. Everything it added to the graph stays. This cannot be undone.")
+			Text("This permanently removes the session — its messages, background jobs, and extraction records. This cannot be undone.")
 				.font(Theme.small)
 				.foregroundStyle(Theme.muted)
 				.fixedSize(horizontal: false, vertical: true)
+			Toggle(isOn: $traces) {
+				VStack(alignment: .leading, spacing: 2) {
+					Text("Also remove its graph traces")
+					Text("The propositions and chains this session added leave the graph too. Anything another session or imported notes also hold survives; what only this session created is removed entirely.")
+						.font(Theme.small)
+						.foregroundStyle(Theme.muted)
+						.fixedSize(horizontal: false, vertical: true)
+				}
+			}
+			.toggleStyle(.checkbox)
 			if let error {
 				Text(error).font(Theme.small).foregroundStyle(Theme.red)
 			}
 			HStack {
 				Spacer()
 				Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
-				Button(error == nil ? "Delete" : "Try again", role: .destructive, action: onDelete)
+				Button(error == nil ? "Delete" : "Try again", role: .destructive) { onDelete(traces) }
 			}
 		}
 		.padding(20)
-		.frame(width: 420)
+		.frame(width: 440)
+	}
+}
+
+/// sidebar.tsx CoverageMenuBlock: the session's extraction coverage and Extract.
+struct CoverageMenuItems: View {
+	var model: AppModel
+	var chatId: String
+
+	var body: some View {
+		if let c = model.coverage(chatId) {
+			Divider()
+			Text(c.running ? "extracting…" : c.uncoveredCount == 0 ? "fully extracted" : "\(c.uncoveredTokens) tok uncovered / \(c.uncoveredCount) messages unextracted")
+			Button(c.running ? "Running" : "Extract") { model.extract(chatId) }.disabled(c.running || c.uncoveredCount == 0)
+		}
 	}
 }

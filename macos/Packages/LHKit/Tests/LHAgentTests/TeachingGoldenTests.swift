@@ -23,11 +23,29 @@ private func canonical(_ v: JSONValue) -> JSONValue {
 
 private let ctx = TeachingContext(chatId: "chat_golden", record: { nil }, saveTree: { _ in }, queueHandoff: {})
 private let wiring = BackgroundWiring(files: FileAccess(folders: { [] })) { _, _, _, _ in "stub" }
+private let graphDeps = GraphToolDeps { GraphDeps(chatStore: NoChats(), graphStore: NoGraph()) }
+
+private struct NoChats: ChatStore {
+	func getChat(_ id: String) -> ChatRecord? { nil }
+	func listChats() -> [ChatSummary] { [] }
+}
+
+private struct NoGraph: GraphStore {
+	func appendNode(_ node: GraphNode) {}
+	func readNodes() -> [GraphNode] { [] }
+	func appendChain(_ assertion: GraphChain) {}
+	func readChains() -> [GraphChain] { [] }
+	func appendCheckpoint(_ checkpoint: SessionCheckpoint) {}
+	func appendCoverage(_ entry: CoverageEntry) {}
+	func readSources() -> [NotesSource] { [] }
+	func readPositions() -> [String: Position] { [:] }
+	func rewriteLedgers(_ next: GraphLedgerRewrite) {}
+}
 
 @Suite struct TeachingToolGoldenTests {
 	@Test(arguments: [
-		("tools-prober", proberTools(ctx, enabled: nil, background: wiring)),
-		("tools-prober-free", proberTools(ctx, enabled: ["explain": true], background: wiring)),
+		("tools-prober", proberTools(ctx, enabled: nil, background: wiring, graph: graphDeps)),
+		("tools-prober-free", proberTools(ctx, enabled: ["explain": true], background: wiring, graph: graphDeps)),
 		("tools-teacher", teacherTools(ctx, enabled: nil, background: wiring)),
 		("tools-teacher-free", teacherTools(ctx, enabled: ["explain": true], background: wiring)),
 	] as [(String, [any AgentTool])])
@@ -67,6 +85,7 @@ private let wiring = BackgroundWiring(files: FileAccess(folders: { [] })) { _, _
 		// M6: the teacher's tools are all registered — its source composes whole.
 		let teacherSet = Set(teacherTools(ctx, enabled: nil, background: wiring).map(\.name))
 		#expect(PromptComposer().compose(.teacher, tools: teacherSet) == PromptComposer().compose(.teacher, tools: nil))
+		// Graph tools off: the two list_sessions gates strip the map section.
 		let prober = PromptComposer().compose(.prober, tools: Set(proberTools(ctx, enabled: nil, background: wiring).map(\.name)))
 		#expect(!prober.contains("`list_sessions`"))
 		#expect(!prober.contains("Read his persistent map"))
@@ -74,6 +93,9 @@ private let wiring = BackgroundWiring(files: FileAccess(folders: { [] })) { _, _
 		#expect(prober.contains("## Grounding"))
 		#expect(prober.contains("## 2. Make the goal concrete"))
 		#expect(!prober.contains("\n\n\n"), "removal leaves no blank-line runs")
+		// Graph tools on: the prober's source composes whole (TS parity).
+		let withMap = PromptComposer().compose(.prober, tools: Set(proberTools(ctx, enabled: nil, background: wiring, graph: graphDeps).map(\.name)))
+		#expect(withMap == PromptComposer().compose(.prober, tools: nil))
 		// A learner who switches research off loses its prompt text too.
 		let noResearch = PromptComposer().compose(.teacher, tools: teacherSet.subtracting(["research"]))
 		#expect(noResearch == PromptComposer().compose(.teacher, tools: nil), "no research gate remains (TS parity: the prompt stays)")

@@ -1,3 +1,4 @@
+import LHAgent
 import LHCore
 import LHStore
 import SwiftUI
@@ -15,25 +16,27 @@ struct BackgroundAgentsSection: View {
 
 	var body: some View {
 		let jobs = model.runningJobs
+		let extractions = model.extractionRows
 		VStack(alignment: .leading, spacing: 4) {
 			HStack(spacing: 6) {
 				Image(systemName: "waveform.path.ecg")
 				Text("BACKGROUND AGENTS").tracking(1.2)
 				Spacer()
-				if !jobs.isEmpty {
-					let priced = jobs.compactMap { jobCost($0, catalog: model.catalog) }
+				if !jobs.isEmpty || !extractions.isEmpty {
+					let priced = jobs.compactMap { jobCost($0, catalog: model.catalog) } + extractions.compactMap(extractionCost)
 					Text(priced.isEmpty ? "—" : formatUsd(priced.reduce(0, +))).monospacedDigit().help("Total running cost (inferred)")
 				}
 			}
 			.font(Theme.ui)
 			.foregroundStyle(Theme.faint)
-			if !jobs.isEmpty {
+			if !jobs.isEmpty || !extractions.isEmpty {
 				TimelineView(.periodic(from: .now, by: 1)) { context in
 					ScrollView {
 						VStack(spacing: 2) {
 							ForEach(jobs, id: \.id) { job in
 								row(job, now: context.date)
 							}
+							ForEach(extractions) { row in extractionRow(row, now: context.date) }
 						}
 					}
 					.frame(maxHeight: 240)
@@ -84,6 +87,51 @@ struct BackgroundAgentsSection: View {
 		.padding(.horizontal, 6)
 		.padding(.vertical, 5)
 		.background(RoundedRectangle(cornerRadius: 6).fill(isOpen ? Color.primary.opacity(0.05) : .clear))
+	}
+
+	/// An extraction batch (activity-dock.tsx extraction blob): the title
+	/// (with "· i/N" for a chunked source), "Extraction — <phase>", cost,
+	/// elapsed, and End (aborts the whole source).
+	private func extractionRow(_ r: ExtractionService.Row, now: Date) -> some View {
+		let base = r.kind == .notes ? ((r.label ?? r.sourceId) as NSString).lastPathComponent : model.sessionTitle(r.sourceId)
+		let title = base + (r.part.map { " · \($0.i)/\($0.n)" } ?? "")
+		let elapsed = formatElapsed(now.timeIntervalSince1970 - Double(r.startedAt) / 1000)
+		return HStack(spacing: 8) {
+			Image(systemName: "point.3.connected.trianglepath.dotted").foregroundStyle(Theme.muted).frame(width: 14)
+			VStack(alignment: .leading, spacing: 1) {
+				Text(title).font(.system(size: 12, weight: .medium)).lineLimit(1)
+				Text("Extraction — \(r.phase.rawValue)").font(.system(size: 11)).foregroundStyle(Theme.muted).lineLimit(1)
+			}
+			Spacer(minLength: 4)
+			Text(extractionCost(r).map(formatUsd) ?? "—").monospacedDigit()
+			Text(elapsed).monospacedDigit()
+			Button {
+				ending[r.id] = .pending
+				Task { _ = await model.extraction.abort(r.sourceId) }
+			} label: { Image(systemName: "stop.fill").font(.system(size: 9)) }
+				.buttonStyle(.borderless)
+				.disabled(ending[r.id] != nil)
+				.help("End this background process")
+				.accessibilityLabel("End extraction in \(title)")
+		}
+		.font(.system(size: 11))
+		.foregroundStyle(Theme.muted)
+		.padding(.horizontal, 6)
+		.padding(.vertical, 5)
+	}
+
+	/// The batch's live cost: each stage's steps at its model's price.
+	private func extractionCost(_ r: ExtractionService.Row) -> Double? {
+		let stages = [r.extractor, r.auditor].compactMap { $0 }
+		if stages.isEmpty { return nil }
+		var total = 0.0
+		for stage in stages {
+			for step in stage.steps {
+				guard let c = callCost(step, model: stage.model, catalog: model.catalog) else { return nil }
+				total += c
+			}
+		}
+		return total
 	}
 
 	private func detail(_ job: JobRecord, cost: String, elapsed: String, activity: String) -> some View {

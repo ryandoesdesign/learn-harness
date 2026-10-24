@@ -45,6 +45,7 @@ struct SessionView: View {
 					}
 					.help("Open the plan")
 				}
+				if !session.isPractice { CoverageRing(chatId: session.chatId) }
 				if session.isPractice {
 					Label("Practice", systemImage: "dumbbell")
 						.labelStyle(.titleAndIcon)
