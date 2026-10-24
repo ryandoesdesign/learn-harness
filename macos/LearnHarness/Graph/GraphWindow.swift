@@ -2,8 +2,9 @@ import LHCore
 import SwiftUI
 
 /// The knowledge graph window (docs/native-macos-m7.md, your answer: its own
-/// window, ⌘⇧G). Toolbar: search, the Chains toggle, Import notes…, the cost
-/// pill, the gear. With Graph rendering off it shows the chain table.
+/// window, ⌘⇧G). Toolbar: the Chains toggle, Import notes… and the gear, then
+/// the search field; the cost sits in the bottom status bar. With Graph
+/// rendering off it shows the chain table.
 struct GraphWindow: View {
 	var app: AppModel
 	@State private var model: GraphWindowModel?
@@ -19,30 +20,38 @@ struct GraphWindow: View {
 private struct GraphWindowContent: View {
 	@Bindable var model: GraphWindowModel
 	@State private var showSettings = false
-	@State private var showCosts = false
 	@FocusState private var searchFocused: Bool
 
 	var body: some View {
 		let canvasMode = model.renderingEnabled && !model.showChains
-		ZStack(alignment: .topLeading) {
-			if model.snapshot == nil {
-				ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-			} else if model.isEmpty {
-				ContentUnavailableView("Knowledge graph", systemImage: "point.3.connected.trianglepath.dotted",
-					description: Text("Start a session or import notes to build your graph."))
-			} else if canvasMode {
-				GraphCanvas(model: model)
-				if model.noMatches {
-					Text("No matching nodes.").foregroundStyle(.secondary).padding(8).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6)).padding(12)
+		VStack(spacing: 0) {
+			ZStack(alignment: .topLeading) {
+				if model.snapshot == nil {
+					ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+				} else if model.isEmpty {
+					ContentUnavailableView("Knowledge graph", systemImage: "point.3.connected.trianglepath.dotted",
+						description: Text("Start a session or import notes to build your graph."))
+				} else if canvasMode {
+					GraphCanvas(model: model)
+					if model.noMatches {
+						Text("No matching nodes.").foregroundStyle(.secondary).padding(8).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6)).padding(12)
+					}
+					if let sel = model.selected { DetailCard(model: model, id: sel.id, anchor: sel.at) }
+				} else {
+					ChainTableView(model: model)
 				}
-				if let sel = model.selected { DetailCard(model: model, id: sel.id, anchor: sel.at) }
-			} else {
-				ChainTableView(model: model)
+				if !model.importErrors.isEmpty { importErrors.padding(12).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading) }
 			}
-			if !model.importErrors.isEmpty { importErrors.padding(12).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading) }
+			if let costs = model.costs, costs.stages.extraction.runs + costs.stages.audit.runs > 0 {
+				GraphStatusBar(costs: costs)
+			}
 		}
 		.navigationTitle("Knowledge Graph")
 		.toolbar { toolbar(canvasMode: canvasMode) }
+		// The native search field, its own group at the trailing edge (your
+		// call, 2026-10-24); Esc clears it.
+		.modifier(GraphSearch(enabled: !model.isEmpty, query: $model.query,
+			prompt: canvasMode ? "Search nodes…" : "Search chains…", focused: $searchFocused))
 		.task { await model.observe() }
 		.onChange(of: model.app.sessions) { _, sessions in model.sessionsChanged(sessions) }
 		.sheet(isPresented: Binding(get: { !model.deleteTargets.isEmpty }, set: { if !$0 { model.deleteTargets = [] } })) {
@@ -61,11 +70,6 @@ private struct GraphWindowContent: View {
 	private func toolbar(canvasMode: Bool) -> some ToolbarContent {
 		ToolbarItemGroup {
 			if !model.isEmpty {
-				TextField(canvasMode ? "Search nodes…" : "Search chains…", text: $model.query)
-					.textFieldStyle(.roundedBorder)
-					.frame(width: 200)
-					.focused($searchFocused)
-					.onKeyPress(.escape) { model.query = ""; searchFocused = false; return .handled }
 				if model.renderingEnabled {
 					Toggle(isOn: $model.showChains) { Label("Chains", systemImage: "list.bullet.indent") }
 						.help("Show the chain table")
@@ -76,13 +80,6 @@ private struct GraphWindowContent: View {
 			} label: { Label("Import notes…", systemImage: "square.and.arrow.down") }
 				.disabled(model.importing)
 				.help("Import .md, .markdown or .txt notes into the graph")
-			if let costs = model.costs, costs.stages.extraction.runs + costs.stages.audit.runs > 0 {
-				Button { showCosts.toggle() } label: {
-					Text("$\(String(format: "%.2f", displayCostTotals(costs).totalDollars))").monospacedDigit()
-				}
-				.help("Graph pipeline costs")
-				.popover(isPresented: $showCosts) { GraphCostPanel(costs: costs) }
-			}
 			if !model.isEmpty {
 				Button { showSettings.toggle() } label: { Label("Graph display settings", systemImage: "gearshape") }
 					.popover(isPresented: $showSettings) { GraphSettingsPanel(model: model) }
@@ -100,6 +97,52 @@ private struct GraphWindowContent: View {
 		.font(.system(size: 12))
 		.padding(10)
 		.background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+	}
+}
+
+/// `.searchable` only while the graph has nodes (no search on the empty state).
+private struct GraphSearch: ViewModifier {
+	var enabled: Bool
+	@Binding var query: String
+	var prompt: String
+	var focused: FocusState<Bool>.Binding
+
+	func body(content: Content) -> some View {
+		if enabled {
+			content
+				.searchable(text: $query, placement: .toolbar, prompt: prompt)
+				.searchFocused(focused)
+		} else {
+			content
+		}
+	}
+}
+
+/// The bottom status bar (your call, 2026-10-24: the cost moved from the
+/// toolbar): the graph pipeline total — click for GraphCostPanel. Shown once
+/// extraction or audit has run.
+private struct GraphStatusBar: View {
+	var costs: GraphCostSummary
+	@State private var open = false
+
+	var body: some View {
+		VStack(spacing: 0) {
+			Divider()
+			HStack {
+				Button { open.toggle() } label: {
+					Text("$\(String(format: "%.2f", displayCostTotals(costs).totalDollars))")
+						.font(Theme.ui)
+						.monospacedDigit()
+						.foregroundStyle(Theme.muted)
+				}
+				.buttonStyle(.plain)
+				.help("Graph pipeline costs")
+				.popover(isPresented: $open, arrowEdge: .top) { GraphCostPanel(costs: costs) }
+				Spacer()
+			}
+			.padding(.horizontal, 12)
+			.frame(height: 28)
+		}
 	}
 }
 
