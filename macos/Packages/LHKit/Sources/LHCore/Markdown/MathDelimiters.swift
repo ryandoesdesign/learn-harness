@@ -133,6 +133,75 @@ public func restoreMathEscapes(_ text: String) -> String {
 	return string(restoreDollarMathEscapes(restoreLegacyMathEscapes(s)))
 }
 
+/// Literal `\n` heal (native only; TS has no equivalent): a model sometimes
+/// double-escapes a tool argument's newlines, so the text arrives as one line
+/// with backslash-n pairs in it ("things:\\n\\n- The…"). Only a string with
+/// no real newline is touched, and math and code spans are copied as they
+/// are, since `\nu`, `\neq` and `\nabla` belong there. Display-only, like
+/// the math repairs: the recorded arguments keep the raw text.
+public func restoreLiteralNewlines(_ text: String) -> String {
+	let s = Array(text.utf16)
+	if s.contains(U.newline) { return text }
+	guard s.indices.dropLast().contains(where: { s[$0] == U.backslash && s[$0 + 1] == U.n }) else { return text }
+	var out: [UInt16] = []
+	out.reserveCapacity(s.count)
+	var i = 0
+	while i < s.count {
+		let ch = s[i]
+		if ch == U.tick {
+			let after = codeSpanEnd(s, i)
+			out.append(contentsOf: s[i..<after])
+			i = after
+			continue
+		}
+		if ch == U.dollar && !isEscaped(s, i) {
+			let run = dollarRun(s, i)
+			if let close = findDollarRun(s, i + run, run) {
+				out.append(contentsOf: s[i..<(close + run)])
+				i = close + run
+				continue
+			}
+			out.append(contentsOf: s[i..<(i + run)])
+			i += run
+			continue
+		}
+		if ch == U.backslash && !isEscaped(s, i) {
+			let next = at(s, i + 1)
+			if next == U.lparen || next == U.lbracket {
+				let closeAt = findClose(s, i + 2, next == U.lbracket ? U.rbracket : U.rparen)
+				if closeAt != -1 {
+					out.append(contentsOf: s[i..<(closeAt + 2)])
+					i = closeAt + 2
+					continue
+				}
+			}
+			if next == U.n {
+				out.append(U.newline)
+				i += 2
+				continue
+			}
+		}
+		out.append(ch)
+		i += 1
+	}
+	return string(out)
+}
+
+/// The next unescaped run of exactly `size` dollars at or after `from`.
+private func findDollarRun(_ s: [UInt16], _ from: Int, _ size: Int) -> Int? {
+	var j = from
+	while j < s.count {
+		if s[j] == U.dollar && !isEscaped(s, j) {
+			let run = dollarRun(s, j)
+			if run == size { return j }
+			j += run
+			continue
+		}
+		j += 1
+	}
+	return nil
+}
+
 /// Over-escaped command heal — collapse even backslash runs before a command
 /// start inside balanced math spans (see the TS for the rules).
 public func healOverescapedCommands(_ text: String) -> String {
@@ -198,6 +267,7 @@ private enum U {
 	static let rbracket: UInt16 = 0x5D
 	static let dollar: UInt16 = 0x24
 	static let tick: UInt16 = 0x60
+	static let n: UInt16 = 0x6E
 	static let tilde: UInt16 = 0x7E
 	static let newline: UInt16 = 0x0A
 	static let cr: UInt16 = 0x0D

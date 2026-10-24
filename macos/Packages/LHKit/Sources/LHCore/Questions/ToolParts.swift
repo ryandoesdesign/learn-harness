@@ -90,10 +90,11 @@ private func optionInputs(_ v: JSONValue?) -> [QuizOptionInput]? {
 
 /// LaTeX-escape restoration, deep over every string value: records persist
 /// RAW call args, so JSON-escape debris (FF ate the 'f' of \forall) and
-/// doubled command backslashes heal here, at the one display seam.
+/// doubled command backslashes heal here, at the one display seam — and so
+/// do double-escaped newlines (restoreLiteralNewlines).
 private func restoreMathEscapesDeep(_ value: JSONValue) -> JSONValue {
 	switch value {
-	case .string(let s): .string(repairMathForDisplay(s))
+	case .string(let s): .string(repairMathForDisplay(restoreLiteralNewlines(s)))
 	case .array(let a): .array(a.map(restoreMathEscapesDeep))
 	case .object(let o): .object(JSONObject(pairs: o.map { ($0.key, restoreMathEscapesDeep($0.value)) }))
 	default: value
