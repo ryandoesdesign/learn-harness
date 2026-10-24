@@ -281,7 +281,9 @@ extension SessionModel {
 		if id == nil, status == .submitted { return }
 		lastPendingId = id
 		guard id != nil else { return }
-		let arrival = questionArrival(atBottom: isAtBottom)
+		// The view's real position (your rule): reading content that grew past
+		// the window means not at the bottom, even while following is sticky.
+		let arrival = questionArrival(atBottom: viewAtBottom)
 		dockExpanded = arrival.expanded
 		revealed = arrival.revealed
 		readingThinking = ""
@@ -295,9 +297,11 @@ extension SessionModel {
 }
 
 /// How a new question arrives (your rule, 2026-10-24 — replaces the TS
-/// revealArrival/probeArrivalExpanded pair): expanded when you are at the
-/// bottom of the conversation, folded when you have scrolled up — every
-/// kind alike (a folded teach check shows "Check your understanding").
+/// revealArrival/probeArrivalExpanded pair): expanded when the view is at
+/// the bottom of the conversation, folded otherwise — every kind alike (a
+/// folded teach check shows "Check your understanding"). "At the bottom" is
+/// where the view really is (`viewAtBottom`): reading prose that grew past
+/// the window folds the question even though following stays on.
 func questionArrival(atBottom: Bool) -> (expanded: Bool, revealed: Bool) {
 	(atBottom, atBottom)
 }

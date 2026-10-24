@@ -206,6 +206,7 @@ struct TranscriptView: View {
 			.onScrollGeometryChange(for: Bool.self) { geo in
 				isBottom(geo)
 			} action: { _, atBottom in
+				session.viewAtBottom = atBottom
 				if atBottom { session.isAtBottom = true }
 			}
 			.followsBottomInset(position: $position, atBottom: session.isAtBottom) {

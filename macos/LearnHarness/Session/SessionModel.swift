@@ -52,6 +52,10 @@ final class SessionModel {
 	var executions: [String: LiveExecution] = [:]
 	var following = false
 	var isAtBottom = true
+	/// Where the view actually is, from its geometry on every change — unlike
+	/// the sticky `isAtBottom`, content growing past the window clears it.
+	/// A new question arrives open only when this holds.
+	var viewAtBottom = true
 	// The dock (pinned; folds on demand).
 	var dockExpanded = true
 	var revealed = true

@@ -49,6 +49,7 @@
 		A33882B7A9FFE5AA58FA641B /* Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94F8535212754EDDC96D37D7 /* Cards.swift */; };
 		A556EB7E5D70669343730E58 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43B3900E202814D386BCC7D /* Theme.swift */; };
 		A651672630F25EC6AE28E10D /* ShortcutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E470C1DF88EAC1BFDECEB0C /* ShortcutTests.swift */; };
+		AE36EC0DC7869EA48EA60D4B /* QuestionArrivalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8604D19DBD5266C03FD7991A /* QuestionArrivalTests.swift */; };
 		AFB5B9BAE08D8AF304A8BDCD /* FindModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22021EA11C44929384FB781 /* FindModel.swift */; };
 		B4C11A330D938FD2BCD9D9BB /* QuestionDockLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42572FF68EFE7BA60752D2F /* QuestionDockLayoutTests.swift */; };
 		C4A332BEF47766310AE53717 /* LHCore in Frameworks */ = {isa = PBXBuildFile; productRef = F64AFC2AD1FBED6B337A4C95 /* LHCore */; };
@@ -119,6 +120,7 @@
 		7A8987D59E09E10926C27DC1 /* MathImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathImage.swift; sourceTree = "<group>"; };
 		7B62164A85B73D6B163ECD60 /* DictationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationButton.swift; sourceTree = "<group>"; };
 		7B816D172C6FC188010E190B /* FocusOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusOverlay.swift; sourceTree = "<group>"; };
+		8604D19DBD5266C03FD7991A /* QuestionArrivalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionArrivalTests.swift; sourceTree = "<group>"; };
 		895FC170F13A1BE13D72206E /* QuestionDockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionDockView.swift; sourceTree = "<group>"; };
 		94F8535212754EDDC96D37D7 /* Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cards.swift; sourceTree = "<group>"; };
 		9D35D006AE2576BA7CBAB041 /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
@@ -316,6 +318,7 @@
 				EA09B326668A14B029E77026 /* LaunchTests.swift */,
 				D62AB68901A9DBD187B9B30D /* LiveSessionTests.swift */,
 				B364A0BC0064623E6E5A84B1 /* PracticeUITests.swift */,
+				8604D19DBD5266C03FD7991A /* QuestionArrivalTests.swift */,
 				A42572FF68EFE7BA60752D2F /* QuestionDockLayoutTests.swift */,
 				25BFF23D8C953FE56B9EE851 /* ScrollBottomTests.swift */,
 				284A90060F596F940D6791EE /* SettingsPaneTests.swift */,
@@ -522,6 +525,7 @@
 				EE1F5CFE55521435B8A0A7D9 /* LaunchTests.swift in Sources */,
 				9A92C75008E0B2E5FC58CC15 /* LiveSessionTests.swift in Sources */,
 				3532559E96FE9755EA3E8C49 /* PracticeUITests.swift in Sources */,
+				AE36EC0DC7869EA48EA60D4B /* QuestionArrivalTests.swift in Sources */,
 				B4C11A330D938FD2BCD9D9BB /* QuestionDockLayoutTests.swift in Sources */,
 				1632EB3C8BD3369394476A89 /* ScrollBottomTests.swift in Sources */,
 				EB33CA437CBE2D3353304705 /* SettingsPaneTests.swift in Sources */,
