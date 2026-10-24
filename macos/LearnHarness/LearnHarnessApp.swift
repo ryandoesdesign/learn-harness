@@ -41,6 +41,10 @@ struct LearnHarnessApp: App {
 			CommandGroup(after: .textEditing) {
 				Divider()
 				FindCommands()
+				Divider()
+				Button(model.dictation.isRecording ? "Stop Dictating" : "Dictate") { model.dictation.toggle() }
+					.keyboardShortcut("d")
+					.disabled(!model.dictation.available)
 			}
 			#if DEBUG
 			CommandMenu("Debug") {

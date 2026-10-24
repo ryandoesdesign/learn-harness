@@ -56,6 +56,8 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: LearnHarness
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.education
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "LearnHarness uses the microphone for dictation. Speech is transcribed on this Mac and never leaves it."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "LearnHarness transcribes your dictation on this Mac."
         CODE_SIGN_ENTITLEMENTS: LearnHarness/LearnHarness.entitlements
         ENABLE_APP_SANDBOX: YES
         ENABLE_HARDENED_RUNTIME: YES

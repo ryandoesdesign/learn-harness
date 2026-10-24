@@ -14,9 +14,11 @@
 		2DD5FDBE6AD6BBED906E8C28 /* PlaygroundModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C753281CFD184086DB7D25 /* PlaygroundModel.swift */; };
 		3460C1B26341E71954F7CB2A /* LHStore in Frameworks */ = {isa = PBXBuildFile; productRef = DF4715D73492700C49DDFE87 /* LHStore */; };
 		3532559E96FE9755EA3E8C49 /* PracticeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B364A0BC0064623E6E5A84B1 /* PracticeUITests.swift */; };
+		3FD7D7F0BDA20971E57471D0 /* DictationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B62164A85B73D6B163ECD60 /* DictationButton.swift */; };
 		4084A495D172E9065EC0E0A9 /* BackgroundAgents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 042C97B0F4E3F66618F5E4B7 /* BackgroundAgents.swift */; };
 		41CA20D3BB3E7CFC6B9A9406 /* LHAgent in Frameworks */ = {isa = PBXBuildFile; productRef = 524CCFF46CB739D0E4B3920F /* LHAgent */; };
 		44F48AC2C5528EC1080FEED7 /* QuestionDockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895FC170F13A1BE13D72206E /* QuestionDockView.swift */; };
+		4EAA195EA7C2501ADE8D0876 /* DictationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71F67E4DC2D5856E1ADD3 /* DictationTests.swift */; };
 		5491E8E43020B57B0379AE3B /* GraphWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1738FF6754630EC753231584 /* GraphWindow.swift */; };
 		572ED57A386A07E026EDCA74 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65642BEE29DC429C524A3A4E /* ImportView.swift */; };
 		5B383C3A76118F359E742C36 /* AnsweredOptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793A3818CB4F0F00B2E33867 /* AnsweredOptionTests.swift */; };
@@ -32,6 +34,7 @@
 		7F96DA8166858121B1FD9E81 /* GraphPhysics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EC22075ABA14666C25001B /* GraphPhysics.swift */; };
 		7F97A81103A912042A9E66B5 /* DraftView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07EF25719F261931E832EBEE /* DraftView.swift */; };
 		81D5074029CE728CB298445E /* MarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FF526C5C70A837E91DA0A /* MarkdownView.swift */; };
+		86226181174EAF9E3BEC74F2 /* DictationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3061DB72BF1ADF0EC4F3AF /* DictationService.swift */; };
 		87C681915FDABA557B55C16A /* TranscriptRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA887CA2144E1284AEEADDB /* TranscriptRows.swift */; };
 		90EAE8F04604637E4C97ABFD /* LHMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = AA9677732E7FB70B5618FCB9 /* LHMarkdown */; };
 		92A11961E0EACF14261C894B /* chats in Resources */ = {isa = PBXBuildFile; fileRef = B6AD793186A69DF940CEB0A7 /* chats */; };
@@ -92,6 +95,7 @@
 		34807431DA9BEFDC4D5BB0E9 /* DockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockView.swift; sourceTree = "<group>"; };
 		389F8439DE555C7DABE72FD6 /* SessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionModel.swift; sourceTree = "<group>"; };
 		3BA431BB50DD08A54F6F116E /* DemoSandboxHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSandboxHostTests.swift; sourceTree = "<group>"; };
+		40C71F67E4DC2D5856E1ADD3 /* DictationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationTests.swift; sourceTree = "<group>"; };
 		46DE353BFF880FCA14F35171 /* LHKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LHKit; path = Packages/LHKit; sourceTree = SOURCE_ROOT; };
 		479BA42ACE38D0E862565440 /* SessionLive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionLive.swift; sourceTree = "<group>"; };
 		5AB6E30E7949B9B4A6C787BC /* PracticeDockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeDockView.swift; sourceTree = "<group>"; };
@@ -104,6 +108,7 @@
 		7531E8BFE5854DDA89E26459 /* GraphWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphWindowTests.swift; sourceTree = "<group>"; };
 		793A3818CB4F0F00B2E33867 /* AnsweredOptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnsweredOptionTests.swift; sourceTree = "<group>"; };
 		7A8987D59E09E10926C27DC1 /* MathImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathImage.swift; sourceTree = "<group>"; };
+		7B62164A85B73D6B163ECD60 /* DictationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationButton.swift; sourceTree = "<group>"; };
 		7B816D172C6FC188010E190B /* FocusOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusOverlay.swift; sourceTree = "<group>"; };
 		895FC170F13A1BE13D72206E /* QuestionDockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionDockView.swift; sourceTree = "<group>"; };
 		94F8535212754EDDC96D37D7 /* Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cards.swift; sourceTree = "<group>"; };
@@ -121,6 +126,7 @@
 		C4D6BE581B40075C9A87E3FA /* RenderGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderGallery.swift; sourceTree = "<group>"; };
 		D62AB68901A9DBD187B9B30D /* LiveSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSessionTests.swift; sourceTree = "<group>"; };
 		DAED287E8E7A4D6285C89E09 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		DD3061DB72BF1ADF0EC4F3AF /* DictationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationService.swift; sourceTree = "<group>"; };
 		DF66A05E71DF8368D500E8F4 /* LearnHarnessApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnHarnessApp.swift; sourceTree = "<group>"; };
 		E0EA5B656C5CD8DBF07AD5F2 /* CalloutLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalloutLayoutTests.swift; sourceTree = "<group>"; };
 		EA09B326668A14B029E77026 /* LaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTests.swift; sourceTree = "<group>"; };
@@ -191,6 +197,7 @@
 				1C84F44649F29806FC6820DB /* RootView.swift */,
 				F43B3900E202814D386BCC7D /* Theme.swift */,
 				24C47101FC33144C3E312711 /* Debug */,
+				319EBC341BF64583F86FD0CC /* Dictation */,
 				98E047BCC8EFD062395A6DA7 /* Dock */,
 				AC585EA7D767FE8D54C25F51 /* Draft */,
 				5334C8A79C7F7AB86835A0DD /* Find */,
@@ -223,6 +230,15 @@
 				EEC87A58F541EAD8B013DACA /* SettingsView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		319EBC341BF64583F86FD0CC /* Dictation */ = {
+			isa = PBXGroup;
+			children = (
+				7B62164A85B73D6B163ECD60 /* DictationButton.swift */,
+				DD3061DB72BF1ADF0EC4F3AF /* DictationService.swift */,
+			);
+			path = Dictation;
 			sourceTree = "<group>";
 		};
 		361199880A0226D07026187F /* tests */ = {
@@ -282,6 +298,7 @@
 				793A3818CB4F0F00B2E33867 /* AnsweredOptionTests.swift */,
 				E0EA5B656C5CD8DBF07AD5F2 /* CalloutLayoutTests.swift */,
 				3BA431BB50DD08A54F6F116E /* DemoSandboxHostTests.swift */,
+				40C71F67E4DC2D5856E1ADD3 /* DictationTests.swift */,
 				7531E8BFE5854DDA89E26459 /* GraphWindowTests.swift */,
 				EA09B326668A14B029E77026 /* LaunchTests.swift */,
 				D62AB68901A9DBD187B9B30D /* LiveSessionTests.swift */,
@@ -476,6 +493,7 @@
 				5B383C3A76118F359E742C36 /* AnsweredOptionTests.swift in Sources */,
 				660E5FBD0993144EC17BC707 /* CalloutLayoutTests.swift in Sources */,
 				E3A88294203A28EAE52AC1A7 /* DemoSandboxHostTests.swift in Sources */,
+				4EAA195EA7C2501ADE8D0876 /* DictationTests.swift in Sources */,
 				CBFD4AA0F441BC6A34E21F36 /* GraphWindowTests.swift in Sources */,
 				EE1F5CFE55521435B8A0A7D9 /* LaunchTests.swift in Sources */,
 				9A92C75008E0B2E5FC58CC15 /* LiveSessionTests.swift in Sources */,
@@ -498,6 +516,8 @@
 				E81CD0915FDBE5E9D992B5D6 /* CodeHighlighter.swift in Sources */,
 				ECC2C59EEF35B85F6904BA6D /* Commands.swift in Sources */,
 				D8BD69A1440A616A59579756 /* CoverageRing.swift in Sources */,
+				3FD7D7F0BDA20971E57471D0 /* DictationButton.swift in Sources */,
+				86226181174EAF9E3BEC74F2 /* DictationService.swift in Sources */,
 				CF2ABC144070AAD3FEEAE7E6 /* DockView.swift in Sources */,
 				7F97A81103A912042A9E66B5 /* DraftView.swift in Sources */,
 				AFB5B9BAE08D8AF304A8BDCD /* FindModel.swift in Sources */,
@@ -555,6 +575,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = LearnHarness;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "LearnHarness uses the microphone for dictation. Speech is transcribed on this Mac and never leaves it.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "LearnHarness transcribes your dictation on this Mac.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -649,6 +671,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = LearnHarness;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "LearnHarness uses the microphone for dictation. Speech is transcribed on this Mac and never leaves it.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "LearnHarness transcribes your dictation on this Mac.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

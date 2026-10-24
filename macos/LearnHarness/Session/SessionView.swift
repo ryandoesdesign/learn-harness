@@ -10,6 +10,7 @@ import SwiftUI
 struct SessionView: View {
 	@Bindable var session: SessionModel
 	@State private var abortAsk: AbortMode?
+	@Environment(DictationService.self) private var dictation: DictationService?
 
 	var body: some View {
 		VStack(spacing: 0) {
@@ -89,6 +90,8 @@ struct SessionView: View {
 
 	/// chat.tsx escAbortTarget: overlays and Find claim Esc first.
 	private func escape() {
+		// Dictation first (dictation.tsx): Esc stops and discards the run.
+		if let dictation, dictation.isActive { dictation.cancel(); return }
 		if session.find.isOpen { session.find.close(); return }
 		switch escAbortTarget(abortAsk: abortAsk != nil, diagram: session.overlays.diagram != nil, plan: session.overlays.planOpen,
 			setup: false, pending: session.pending != nil, problem: session.activeProblem != nil, busy: session.busy)
@@ -365,6 +368,8 @@ struct StatusBar: View {
 					.buttonStyle(.plain)
 					.popover(isPresented: $open, arrowEdge: .top) { SessionStats(turns: turns, catalog: session.catalog) }
 				}
+				Spacer()
+				DictationButton()
 				Spacer()
 				if session.record != nil, session.service != nil { ModelControl(session: session) }
 			}

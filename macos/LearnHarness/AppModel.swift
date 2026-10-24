@@ -28,6 +28,8 @@ final class AppModel {
 	/// The extraction pipeline (M7) and its running batch jobs.
 	let extraction: ExtractionService
 	private(set) var extractionRows: [ExtractionService.Row] = []
+	/// On-device dictation (M8): one microphone for the app.
+	let dictation: DictationService
 	/// Propositions the next ⌘N draft starts with (New Session from Selection…).
 	var draftPicks: [GraphContextPick] = []
 	/// The learner folders the file tools may read (Settings → Learner folders).
@@ -59,9 +61,10 @@ final class AppModel {
 		case failed(String)
 	}
 
-	init(dataDirectory: URL = AppDatabase.defaultDirectory, keychain: any KeychainStore = SystemKeychain()) {
+	init(dataDirectory: URL = AppDatabase.defaultDirectory, keychain: any KeychainStore = SystemKeychain(), speech: any SpeechEngine = SystemSpeechEngine()) {
 		self.dataDirectory = dataDirectory
 		self.keychain = keychain
+		dictation = DictationService(engine: speech)
 		catalog = (try? ModelCatalog(data: LHResources.modelsJSON)) ?? ModelCatalog(models: [])
 		do {
 			database = try AppDatabase.open(directory: dataDirectory)

@@ -11,6 +11,7 @@ struct PracticeDockView: View {
 	@Bindable var session: SessionModel
 	var problem: (toolCallId: String, statement: String)
 	@FocusState private var focused: Bool
+	@Environment(DictationService.self) private var dictation: DictationService?
 
 	static let maxBody: CGFloat = 320
 
@@ -42,11 +43,12 @@ struct PracticeDockView: View {
 						TextEditor(text: $session.practiceThinking)
 							.scrollContentBackground(.hidden)
 							.focused($focused)
+							.dictationTarget("practice", .practice, text: $session.practiceThinking)
 							.frame(minHeight: 54, maxHeight: 200)
 							.fixedSize(horizontal: false, vertical: true)
 							.onKeyPress(.return, phases: .down) { press in
 								if press.modifiers.contains(.shift) { return .ignored }
-								session.submitThinking()
+								submit()
 								return .handled
 							}
 					}
@@ -55,7 +57,7 @@ struct PracticeDockView: View {
 				HStack {
 					Text(session.compacting ? "compacting session…" : "↵ submits · ⇧↵ newline").font(Theme.ui).foregroundStyle(Theme.faint)
 					Spacer()
-					Button("Submit thinking") { session.submitThinking() }
+					Button("Submit thinking") { submit() }
 						.buttonStyle(.borderedProminent)
 						.disabled(session.practiceThinking.jsTrimmed.isEmpty || session.compacting)
 				}
@@ -65,5 +67,9 @@ struct PracticeDockView: View {
 			.overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border))
 			.onAppear { focused = true }
 		}
+	}
+
+	private func submit() {
+		if let dictation { dictation.thenSubmit { session.submitThinking() } } else { session.submitThinking() }
 	}
 }

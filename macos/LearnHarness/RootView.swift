@@ -31,6 +31,7 @@ struct RootView: View {
 				ContentUnavailableView("No Session Selected", systemImage: "graduationcap", description: Text("Choose a session in the sidebar."))
 			}
 		}
+		.environment(model.dictation)
 		.sheet(isPresented: Binding(get: { model.importState != .idle }, set: { if !$0 { model.importState = .idle } })) {
 			ImportSheet(model: model)
 		}

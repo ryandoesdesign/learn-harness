@@ -9,6 +9,7 @@ struct DraftView: View {
 	@State private var text = ""
 	@State private var picking = false
 	@FocusState private var focused: Bool
+	@Environment(DictationService.self) private var dictation: DictationService?
 
 	private var practice: Bool { model.draftKind == .practice }
 
@@ -52,6 +53,7 @@ struct DraftView: View {
 					TextEditor(text: $text)
 						.scrollContentBackground(.hidden)
 						.focused($focused)
+						.dictationTarget("draft", .composer, text: $text)
 						.frame(minHeight: 36, maxHeight: 192)
 						.fixedSize(horizontal: false, vertical: true)
 						.padding(.vertical, 4)
@@ -84,6 +86,11 @@ struct DraftView: View {
 	}
 
 	private func start() {
+		guard let dictation, dictation.isRecording else { return startNow() }
+		dictation.thenSubmit { startNow() }
+	}
+
+	private func startNow() {
 		model.startSession(prompt: text)
 		text = ""
 	}

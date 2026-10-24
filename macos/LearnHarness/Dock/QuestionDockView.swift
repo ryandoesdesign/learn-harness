@@ -21,6 +21,7 @@ struct QuestionDockView: View {
 	@State private var walked: Int?
 	static let maxBody: CGFloat = 420
 	@FocusState private var focus: Field?
+	@Environment(DictationService.self) private var dictation: DictationService?
 
 	enum Field: Hashable { case rows, other, learner }
 
@@ -199,6 +200,7 @@ struct QuestionDockView: View {
 						.allowsHitTesting(false)
 				}
 				TextEditor(text: binding)
+					.dictationTarget("question", .question, text: binding)
 					.scrollContentBackground(.hidden)
 					.focused($focus, equals: .learner)
 					.frame(minHeight: session.phase == .teach || textMode ? 54 : 40, maxHeight: 160)
@@ -258,7 +260,13 @@ struct QuestionDockView: View {
 		return sel.dontKnow || (sel.otherSelected && !other.jsTrimmed.isEmpty) || !sel.selected.isEmpty
 	}
 
+	/// A running dictation lands in its field first (dictation.tsx finishDictation).
 	private func submit(_ qd: QuestionData) {
+		if let dictation, dictation.isRecording { return dictation.thenSubmit { submitNow(qd) } }
+		submitNow(qd)
+	}
+
+	private func submitNow(_ qd: QuestionData) {
 		guard canSubmit(qd), !session.compacting else { return }
 		let req = AnswerRequest(
 			dontKnow: sel.dontKnow,

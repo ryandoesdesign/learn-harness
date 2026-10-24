@@ -71,6 +71,7 @@ struct ComposerView: View {
 	var placeholder = "Ask, answer, or steer the lesson…"
 	var onSend: (() -> Void)?
 	@FocusState private var focused: Bool
+	@Environment(DictationService.self) private var dictation: DictationService?
 
 	var body: some View {
 		let action = enterAction(busy: session.busy, canSend: session.canSend, nextProblem: session.nextReady)
@@ -86,6 +87,7 @@ struct ComposerView: View {
 				TextEditor(text: $session.draft)
 					.scrollContentBackground(.hidden)
 					.focused($focused)
+					.dictationTarget("composer", .composer, text: $session.draft)
 					.frame(minHeight: 36, maxHeight: 192)
 					.fixedSize(horizontal: false, vertical: true)
 					.padding(.vertical, 4)
@@ -128,10 +130,14 @@ struct ComposerView: View {
 		.onAppear { focused = true }
 	}
 
+	private func send() {
+		if let onSend { onSend() } else { session.sendDraft() }
+	}
+
 	private func act(_ action: EnterAction) {
 		switch action {
 		case .send:
-			if let onSend { onSend() } else { session.sendDraft() }
+			if let dictation, dictation.isRecording { dictation.thenSubmit { send() } } else { send() }
 		case .stop:
 			session.abortTurn()
 		case .next:
@@ -233,6 +239,7 @@ struct ReadingThinkingField: View {
 				TextEditor(text: $text)
 					.scrollContentBackground(.hidden)
 					.frame(minHeight: 24, maxHeight: 160)
+					.dictationTarget("reading", .readingThinking, text: $text)
 					.fixedSize(horizontal: false, vertical: true)
 					.onKeyPress(.return, phases: .down) { press in
 						if checkOpen || press.modifiers.contains(.shift) { return .ignored }
