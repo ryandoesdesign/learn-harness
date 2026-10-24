@@ -429,6 +429,22 @@ struct AnsweredCard: View {
 	}
 
 	private func optionRow(_ opt: QuestionAnswerData.OptionSnapshot, selected sel: Bool, key: Bool, description: String?) -> some View {
+		AnsweredOptionRow(opt: opt, selected: sel, key: key, quiz: isQuiz, description: description, unit: id)
+	}
+}
+
+/// One answered option: the mark slot (✓ the key, ✗ a wrong pick), the label
+/// and its description, tinted by selection and correctness.
+struct AnsweredOptionRow: View {
+	var opt: QuestionAnswerData.OptionSnapshot
+	var selected: Bool
+	var key: Bool
+	var quiz: Bool
+	var description: String?
+	var unit: String
+
+	var body: some View {
+		let sel = selected, isQuiz = quiz, id = unit
 		let stroke: Color = sel && key ? Theme.green.opacity(0.6) : sel && isQuiz ? Theme.red.opacity(0.6) : sel ? Color.accentColor : key ? Theme.green.opacity(0.4) : Theme.border
 		let fill: Color = sel && key ? Theme.green.opacity(0.1) : sel && isQuiz ? Theme.red.opacity(0.1) : sel ? Color.accentColor.opacity(0.1) : .clear
 		return HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -436,7 +452,9 @@ struct AnsweredCard: View {
 				Group {
 					if key { Image(systemName: "checkmark").foregroundStyle(Theme.green) }
 					else if sel { Image(systemName: "xmark").foregroundStyle(Theme.red) }
-					else { Color.clear }
+					// An invisible mark, not Color.clear: the slot needs a text
+					// baseline, or the label drops below the row's border.
+					else { Image(systemName: "checkmark").hidden() }
 				}
 				.font(.system(size: 11, weight: .semibold))
 				.frame(width: 14)

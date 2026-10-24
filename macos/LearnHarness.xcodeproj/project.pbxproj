@@ -18,6 +18,7 @@
 		44F48AC2C5528EC1080FEED7 /* QuestionDockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895FC170F13A1BE13D72206E /* QuestionDockView.swift */; };
 		5491E8E43020B57B0379AE3B /* GraphWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1738FF6754630EC753231584 /* GraphWindow.swift */; };
 		572ED57A386A07E026EDCA74 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65642BEE29DC429C524A3A4E /* ImportView.swift */; };
+		5B383C3A76118F359E742C36 /* AnsweredOptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793A3818CB4F0F00B2E33867 /* AnsweredOptionTests.swift */; };
 		6297E01E1152ECC74934C816 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7102F5BBA2AC97F42CEB10A7 /* SessionView.swift */; };
 		69E6F3EB6D5BBDF305719339 /* GraphPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F4F5A900054B197060AEB2 /* GraphPanels.swift */; };
 		6C725DC58FE4108644BF2EEB /* GraphWindowModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB60C2FAF867F0D2F492442C /* GraphWindowModel.swift */; };
@@ -96,6 +97,7 @@
 		6BD12B7925DD31AD387962B2 /* SteerCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteerCards.swift; sourceTree = "<group>"; };
 		7102F5BBA2AC97F42CEB10A7 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
 		7531E8BFE5854DDA89E26459 /* GraphWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphWindowTests.swift; sourceTree = "<group>"; };
+		793A3818CB4F0F00B2E33867 /* AnsweredOptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnsweredOptionTests.swift; sourceTree = "<group>"; };
 		7A8987D59E09E10926C27DC1 /* MathImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathImage.swift; sourceTree = "<group>"; };
 		7B816D172C6FC188010E190B /* FocusOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusOverlay.swift; sourceTree = "<group>"; };
 		895FC170F13A1BE13D72206E /* QuestionDockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionDockView.swift; sourceTree = "<group>"; };
@@ -269,6 +271,7 @@
 		7B2F42C089BC870FF2E45622 /* LearnHarnessTests */ = {
 			isa = PBXGroup;
 			children = (
+				793A3818CB4F0F00B2E33867 /* AnsweredOptionTests.swift */,
 				3BA431BB50DD08A54F6F116E /* DemoSandboxHostTests.swift */,
 				7531E8BFE5854DDA89E26459 /* GraphWindowTests.swift */,
 				EA09B326668A14B029E77026 /* LaunchTests.swift */,
@@ -458,6 +461,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B383C3A76118F359E742C36 /* AnsweredOptionTests.swift in Sources */,
 				E3A88294203A28EAE52AC1A7 /* DemoSandboxHostTests.swift in Sources */,
 				CBFD4AA0F441BC6A34E21F36 /* GraphWindowTests.swift in Sources */,
 				EE1F5CFE55521435B8A0A7D9 /* LaunchTests.swift in Sources */,
