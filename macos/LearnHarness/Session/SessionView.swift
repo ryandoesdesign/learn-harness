@@ -104,11 +104,15 @@ struct SessionView: View {
 	}
 }
 
-/// The view sits at the bottom of the transcript. `containerSize` already
-/// excludes the dock's inset (measured: a 400pt window with a 150pt dock
-/// reports 250), so the bottom is offset + container = content height.
+/// The view sits at the bottom of the transcript. `containerSize` excludes
+/// BOTH insets — the dock below and the toolbar the transcript scrolls under
+/// above — while the offset at rest at the bottom only accounts for the
+/// dock (measured: content 2793, dock 150, toolbar 52 → offset 2443,
+/// container 298). So the bottom is offset + container + top inset =
+/// content height. Ignoring the top inset left the toolbar's height short
+/// of the 24pt tolerance: the button never hid.
 func isBottom(_ geo: ScrollGeometry) -> Bool {
-	geo.contentOffset.y + geo.containerSize.height >= geo.contentSize.height - 24
+	geo.contentOffset.y + geo.containerSize.height + geo.contentInsets.top >= geo.contentSize.height - 24
 }
 
 /// The transcript column (chat.tsx Conversation): rows in a lazy stack,
