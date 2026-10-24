@@ -1,5 +1,6 @@
 import LHCore
 import LHMarkdown
+import LHStore
 import LHWeb
 import SwiftUI
 
@@ -505,5 +506,48 @@ struct SessionStats: View {
 		.monospacedDigit()
 		.padding(16)
 		.frame(width: 340)
+	}
+}
+
+// MARK: - Previews
+
+/// A session as RootView shows it: an AppModel on a scratch directory (the
+/// coverage ring reads it), the chat inserted, then selected.
+@MainActor
+private func sessionPreview(_ insert: (ChatRepository) throws -> String) -> some View {
+	let dir = FileManager.default.temporaryDirectory.appending(path: "lhpv-\(UUID().uuidString)", directoryHint: .isDirectory)
+	let app = AppModel(dataDirectory: dir, keychain: InMemoryKeychain())
+	app.selection = try! insert(ChatRepository(app.database))
+	let session = app.session!
+	session.load()
+	return NavigationStack {
+		SessionView(session: session)
+	}
+	.environment(app)
+	.environment(app.dictation)
+	.frame(width: 900, height: 700)
+}
+
+#Preview("Render Gallery") {
+	sessionPreview { repo in
+		try repo.insert(RenderGallery.record(), origin: .native)
+		return RenderGallery.chatId
+	}
+}
+
+#Preview("New session") {
+	sessionPreview { try $0.createChat(title: "New session").id }
+}
+
+#Preview("Practice") {
+	sessionPreview { repo in
+		let chat = try repo.createChat(title: "Joins", kind: .practice)
+		let input: JSONValue = ["statement": "Join `a` and `b` keeping every row of `a`.", "mode": "recall", "modelSolution": "LEFT JOIN"]
+		try repo.append([
+			newUserMessage("Practise joins", now: 0),
+			Message(id: "a_p1", timestamp: 1, body: .assistant(AssistantBody(content: [.toolUse(id: "p1", name: "problem", input: input)], model: "claude-opus-5-5", stopReason: "tool_use"))),
+			Message(id: "r_p1", timestamp: 2, body: .toolResult(ToolResultBody(toolUseId: "p1", toolName: "problem", content: [.text("Problem posed")], isError: false, details: nil))),
+		], to: chat.id)
+		return chat.id
 	}
 }

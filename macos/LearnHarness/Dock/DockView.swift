@@ -1,5 +1,7 @@
 import AppKit
 import LHCore
+import LHResources
+import LHStore
 import SwiftUI
 
 /// The pinned dock (docs/native-macos-m5.md: pinned below the transcript,
@@ -283,4 +285,21 @@ struct PlanMarginalia: View {
 		.frame(height: 170)
 		.allowsHitTesting(true)
 	}
+}
+
+// MARK: - Previews
+
+/// The dock under an idle teaching session: the composer.
+#Preview("Composer") {
+	let dir = FileManager.default.temporaryDirectory.appending(path: "lhpv-\(UUID().uuidString)", directoryHint: .isDirectory)
+	let db = try! AppDatabase.open(directory: dir)
+	let chat = try! ChatRepository(db).createChat(title: "Joins")
+	let session = SessionModel(chatId: chat.id, database: db, dataDirectory: dir, catalog: try! ModelCatalog(data: LHResources.modelsJSON))
+	session.load()
+	return DockView(session: session)
+		.environment(session)
+		.environment(session.find)
+		.environment(session.overlays)
+		.environment(DictationService(engine: SystemSpeechEngine()))
+		.frame(width: 900)
 }
