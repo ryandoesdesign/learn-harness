@@ -62,12 +62,17 @@ public struct AgentConfig: Sendable {
 	/// after this message's tools — WITHOUT draining steers, which wait for
 	/// the next run (a posed question must always end the turn).
 	public var shouldStop: (@Sendable (_ assistant: Message, _ results: [(ToolUse, ToolOutput)]) -> Bool)?
+	/// Vets a message's tool calls before they run: a call id mapped to an
+	/// output takes that output instead of running (the hidden-reply
+	/// rejection). `earlier` is this run's messages before the message.
+	public var vetCalls: (@Sendable (_ assistant: Message, _ earlier: [Message]) -> [String: ToolOutput])?
 
 	public init(model: String, effort: Effort, system: String? = nil, tools: [any AgentTool] = [], serverTools: [ToolDefinition] = [],
 		thinkingDisplay: MessagesRequest.ThinkingDisplay = .summarized, cacheTTL: MessagesRequest.CacheTTL = .fiveMinutes,
 		maxTokens: Int = 64_000, projection: WireProjection.Options = WireProjection.Options(), chatId: String? = nil,
 		toolTimeout: Duration = ToolGuard.defaultTimeout, updateInterval: Duration = .milliseconds(33),
-		shouldStop: (@Sendable (_ assistant: Message, _ results: [(ToolUse, ToolOutput)]) -> Bool)? = nil)
+		shouldStop: (@Sendable (_ assistant: Message, _ results: [(ToolUse, ToolOutput)]) -> Bool)? = nil,
+		vetCalls: (@Sendable (_ assistant: Message, _ earlier: [Message]) -> [String: ToolOutput])? = nil)
 	{
 		self.model = model
 		self.effort = effort
@@ -82,6 +87,7 @@ public struct AgentConfig: Sendable {
 		self.toolTimeout = toolTimeout
 		self.updateInterval = updateInterval
 		self.shouldStop = shouldStop
+		self.vetCalls = vetCalls
 		maxTurns = nil
 	}
 
@@ -191,7 +197,8 @@ public struct AgentLoop: Sendable {
 						emit(.toolEnd(toolCallId: call.id, output: out))
 					}
 				} else {
-					outputs = await executeAll(calls, response: response, emit: emit)
+					let vetoed = config.vetCalls?(assistant, Array(added.dropLast())) ?? [:]
+					outputs = await executeAll(calls, response: response, vetoed: vetoed, emit: emit)
 				}
 				// 3. Results, adjacent to their calls.
 				for (call, out) in outputs {
@@ -298,7 +305,7 @@ public struct AgentLoop: Sendable {
 
 	// MARK: Tools
 
-	func executeAll(_ calls: [ToolUse], response: AssistantResponse, emit: @escaping @Sendable (AgentEvent) -> Void) async -> [(ToolUse, ToolOutput)] {
+	func executeAll(_ calls: [ToolUse], response: AssistantResponse, vetoed: [String: ToolOutput] = [:], emit: @escaping @Sendable (AgentEvent) -> Void) async -> [(ToolUse, ToolOutput)] {
 		let toolsByName = Dictionary(config.tools.map { ($0.name, $0) }, uniquingKeysWith: { a, _ in a })
 		// Which content index each call came from (invalid streamed JSON is keyed by index).
 		let invalid: [String: String] = Dictionary(uniqueKeysWithValues: response.invalidToolInput.compactMap { (index, raw) in
@@ -312,7 +319,7 @@ public struct AgentLoop: Sendable {
 		if calls.contains(where: { toolsByName[$0.name]?.sequential == true }) {
 			var out: [(ToolUse, ToolOutput)] = []
 			for call in calls {
-				let o = await Self.execute(call, tool: toolsByName[call.name], invalidJSON: invalid[call.id], timeout: timeout, chatId: chatId)
+				let o = await Self.execute(call, tool: toolsByName[call.name], invalidJSON: invalid[call.id], vetoed: vetoed[call.id], timeout: timeout, chatId: chatId)
 				emit(.toolEnd(toolCallId: call.id, output: o))
 				out.append((call, o))
 			}
@@ -321,7 +328,7 @@ public struct AgentLoop: Sendable {
 		let results = await withTaskGroup(of: (Int, ToolOutput).self) { group in
 			for (i, call) in calls.enumerated() {
 				group.addTask {
-					(i, await Self.execute(call, tool: toolsByName[call.name], invalidJSON: invalid[call.id], timeout: timeout, chatId: chatId))
+					(i, await Self.execute(call, tool: toolsByName[call.name], invalidJSON: invalid[call.id], vetoed: vetoed[call.id], timeout: timeout, chatId: chatId))
 				}
 			}
 			var out = [ToolOutput?](repeating: nil, count: calls.count)
@@ -334,8 +341,9 @@ public struct AgentLoop: Sendable {
 		return Array(zip(calls, results))
 	}
 
-	static func execute(_ call: ToolUse, tool: (any AgentTool)?, invalidJSON: String?, timeout: Duration, chatId: String?) async -> ToolOutput {
+	static func execute(_ call: ToolUse, tool: (any AgentTool)?, invalidJSON: String?, vetoed: ToolOutput? = nil, timeout: Duration, chatId: String?) async -> ToolOutput {
 		if Task.isCancelled { return .error(ToolGuardError.aborted.description) }
+		if let vetoed { return vetoed }
 		guard let tool else { return .error("Tool \(call.name) not found") }
 		if let raw = invalidJSON {
 			return ToolOutput(content: [.text(JSONValue.object(JSONObject(["INVALID_JSON": .string(raw)])).serialized())], details: [:], isError: true)

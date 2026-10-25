@@ -424,7 +424,7 @@ public actor TurnService {
 			model: spec.model, effort: spec.effort, system: system, tools: tools,
 			thinkingDisplay: .summarized, cacheTTL: .oneHour, maxTokens: maxTokens,
 			projection: WireProjection.Options(stripProberThinking: teaching), chatId: record.id,
-			shouldStop: questionStopper)
+			shouldStop: questionStopper, vetCalls: hiddenReplyVetter)
 	}
 
 	func queueHandoff(_ chatId: String) { handoffQueued.insert(chatId) }
@@ -461,6 +461,28 @@ let questionStopper: @Sendable (Message, [(ToolUse, ToolOutput)]) -> Bool = { as
 	let called = Set((assistant.assistant?.toolUses ?? []).filter { QUESTION_TOOLS.contains($0.name) }.map(\.id))
 	guard !called.isEmpty else { return false }
 	return !results.contains { called.contains($0.0.id) && $0.1.isError }
+}
+
+/// The hidden-reply rejection's result text (your wording).
+let HIDDEN_REPLY_TEXT = "Your reply had no visible text; the learner can't see thinking. Write it out, then ask again."
+
+/// A question whose reply went into thinking: no visible text and two or
+/// more thinking blocks (the model wrote the learner's explanation into a
+/// second, interleaved thinking block, which the learner never sees). Its
+/// question calls fail once per run so the teacher writes it out; a second
+/// hidden reply goes through, so the run can't loop.
+let hiddenReplyVetter: @Sendable (Message, [Message]) -> [String: ToolOutput] = { assistant, earlier in
+	guard let a = assistant.assistant else { return [:] }
+	let questions = a.toolUses.filter { QUESTION_TOOLS.contains($0.name) }
+	guard !questions.isEmpty else { return [:] }
+	let visible = a.content.contains { $0.type == "text" && !($0.raw["text"]?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+	guard !visible, a.content.filter({ $0.type == "thinking" }).count >= 2 else { return [:] }
+	let rejectedBefore = earlier.contains { m in
+		guard let r = m.toolResult, r.isError else { return false }
+		return r.content.contains { $0.raw["text"]?.stringValue == HIDDEN_REPLY_TEXT }
+	}
+	guard !rejectedBefore else { return [:] }
+	return Dictionary(questions.map { ($0.id, ToolOutput.error(HIDDEN_REPLY_TEXT)) }, uniquingKeysWith: { a, _ in a })
 }
 
 /// Carries compaction notifications back to the service once it exists.
