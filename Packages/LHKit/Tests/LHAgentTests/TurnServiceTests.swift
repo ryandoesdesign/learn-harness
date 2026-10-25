@@ -78,7 +78,18 @@ struct Harness {
 	func request(_ i: Int) throws -> JSONValue { try JSONValue.parse(transport.requestBodies[i]) }
 }
 
-let MODELS_JSON = #"{"version":1,"models":[{"id":"claude-opus-5-5","name":"Claude Opus 5.5","contextWindow":1000000,"maxTokens":128000,"input":["text","image"],"efforts":["low","medium","high","xhigh","max"],"price":{"input":5,"output":25,"cacheRead":0.5,"cacheWrite":6.25,"cacheWrite1h":10}}]}"#
+/// A request's loaded and deferred tool names, in declaration order.
+func toolNames(_ req: JSONValue, deferred: Bool = false) -> [String] {
+	(req["tools"]?.arrayValue ?? []).filter { ($0["defer_loading"]?.boolValue ?? false) == deferred }.compactMap { $0["name"]?.stringValue }
+}
+
+/// The text of a request's `role: "system"` messages, in order.
+func systemMessages(_ req: JSONValue) -> [String] {
+	(req["messages"]?.arrayValue ?? []).filter { $0["role"]?.stringValue == "system" }
+		.map { ($0["content"]?.arrayValue ?? []).compactMap { $0["text"]?.stringValue }.joined() }
+}
+
+let MODELS_JSON = #"{"version":1,"models":[{"id":"claude-opus-5-5","name":"Claude Opus 5.5","contextWindow":1000000,"maxTokens":128000,"input":["text","image"],"efforts":["low","medium","high","xhigh","max"],"price":{"input":5,"output":25,"cacheRead":0.5,"cacheWrite":6.25,"cacheWrite1h":10}},{"id":"claude-haiku-5-5","name":"Claude Haiku 5.5","contextWindow":1000000,"maxTokens":128000,"input":["text","image"],"efforts":["low","medium","high","xhigh","max"],"price":{"input":0.1,"output":0.5,"cacheRead":0.01,"cacheWrite":0.125,"cacheWrite1h":0.2}}]}"#
 
 /// Wait for `count` settles of the chat (with a timeout).
 func settles(_ events: AsyncStream<TurnService.Event>, _ chatId: String, count: Int = 1, timeout: Duration = .seconds(10)) async throws {
@@ -139,16 +150,34 @@ func answer(_ text: String = "What does SQL stand for?") -> QuestionAnswerData {
 		#expect(r.turns?.count == 2, "usage recorded per turn")
 	}
 
-	@Test func theSystemPromptIsTheGatedProberAndTheToolsAreTheProbeSet() async throws {
+	@Test func theDoctrineIsTheGatedProberAndTheToolsAreTheProbeSet() async throws {
 		// M7: the graph tools ride while graphToolsEnabled (on by default).
 		let h = try Harness([.sse(ScriptedSSE.message([.text("Hi.")]))])
 		let ev = await h.service.events()
 		try await h.service.send(h.chatId, .text("Teach me joins"))
 		try await settles(ev, h.chatId)
 		let req = try h.request(0)
-		#expect(req["tools"]?.arrayValue?.compactMap { $0["name"]?.stringValue } == ["probe", "ask_user_question", "list_sessions", "list_propositions", "probe_done"])
+		#expect(toolNames(req) == ["probe", "ask_user_question", "list_sessions", "list_propositions", "probe_done"])
+		#expect(toolNames(req, deferred: true) == ["quiz", "plan_init"], "the teacher's tools wait, deferred")
+		#expect(req["messages"]?.arrayValue?.map { $0["role"]?.stringValue ?? "" } == ["user", "system"])
+		let doctrine = systemMessages(req).first ?? ""
+		#expect(doctrine.contains("`list_sessions`"))
 		let system = req["system"]?.arrayValue?.first?["text"]?.stringValue ?? ""
-		#expect(system.contains("`list_sessions`"))
+		#expect(!system.contains("`list_sessions`"), "the top-level prompt carries no phase doctrine")
+		#expect(h.transport.requests.first?.value(forHTTPHeaderField: "anthropic-beta")?.contains("mid-conversation-tool-changes-2026-07-01") == true)
+	}
+
+	@Test func aModelWithoutMidConversationChangesKeepsThePlainShape() async throws {
+		let h = try Harness([.sse(ScriptedSSE.message([.text("Hi.")]))])
+		try ChatRepository(h.db).saveSettings(ChatSettings(model: "claude-haiku-5-5"), chatId: h.chatId)
+		let ev = await h.service.events()
+		try await h.service.send(h.chatId, .text("Teach me joins"))
+		try await settles(ev, h.chatId)
+		let req = try h.request(0)
+		#expect(toolNames(req) == ["probe", "ask_user_question", "list_sessions", "list_propositions", "probe_done"])
+		#expect(toolNames(req, deferred: true).isEmpty)
+		#expect(systemMessages(req).isEmpty)
+		#expect(req["system"]?.arrayValue?.first?["text"]?.stringValue?.contains("`list_sessions`") == true)
 	}
 
 	@Test func graphToolsOffStripTheMapFromTheProber() async throws {
@@ -158,8 +187,9 @@ func answer(_ text: String = "What does SQL stand for?") -> QuestionAnswerData {
 		try await h.service.send(h.chatId, .text("Teach me joins"))
 		try await settles(ev, h.chatId)
 		let req = try h.request(0)
-		#expect(req["tools"]?.arrayValue?.compactMap { $0["name"]?.stringValue } == ["probe", "ask_user_question", "probe_done"])
-		let sys = req["system"]?.arrayValue?.first?["text"]?.stringValue ?? ""
+		#expect(toolNames(req) == ["probe", "ask_user_question", "probe_done"])
+		let sys = systemMessages(req).first ?? ""
+		#expect(sys.contains("probe"), "the doctrine still rides")
 		#expect(!sys.contains("`list_sessions`"), "\(sys.components(separatedBy: "\n").filter { $0.contains("list_sessions") })")
 	}
 
@@ -246,10 +276,10 @@ func answer(_ text: String = "What does SQL stand for?") -> QuestionAnswerData {
 		#expect(try await h.service.send(h.chatId, .answer(toolCallId: "rp1_c1", answer: answer())) == .started)
 		try await settles(ev3, h.chatId)
 		let msgs = try #require(h.request(2)["messages"]?.arrayValue)
-		#expect(msgs.map { $0["role"]?.stringValue ?? "" } == ["user", "assistant", "user", "assistant", "assistant", "user"])
-		#expect(msgs[3]["content"]?.arrayValue?.map { $0["type"]?.stringValue ?? "" } == ["text"])
-		#expect(msgs[4]["content"]?.arrayValue?.map { $0["id"]?.stringValue ?? "" } == ["rp1_c1"])
-		#expect(msgs[5]["content"]?.arrayValue?.first?["tool_use_id"]?.stringValue == "rp1_c1")
+		#expect(msgs.map { $0["role"]?.stringValue ?? "" } == ["user", "system", "assistant", "user", "assistant", "assistant", "user"])
+		#expect(msgs[4]["content"]?.arrayValue?.map { $0["type"]?.stringValue ?? "" } == ["text"])
+		#expect(msgs[5]["content"]?.arrayValue?.map { $0["id"]?.stringValue ?? "" } == ["rp1_c1"])
+		#expect(msgs[6]["content"]?.arrayValue?.first?["tool_use_id"]?.stringValue == "rp1_c1")
 		r = try h.record
 		#expect(danglingQuestionOf(r.messages) == nil)
 	}
@@ -286,8 +316,25 @@ func answer(_ text: String = "What does SQL stand for?") -> QuestionAnswerData {
 		#expect(done.content.first?.raw["text"]?.stringValue == PROBE_DONE_ACK_TEXT)
 		#expect(r.messages.contains { $0.marker?.kind == .probeHandoff })
 		let teacher = try h.request(2)
-		#expect(teacher["tools"]?.arrayValue?.compactMap { $0["name"]?.stringValue } == ["quiz", "ask_user_question", "plan_init"])
 		#expect(r.messages.last?.assistant != nil)
+
+		// The prefix survives the handoff: the same system prompt and tools, and the
+		// prober's last request is the start of the teacher's first.
+		let prober = try h.request(1)
+		#expect(teacher["system"] == prober["system"])
+		#expect(teacher["tools"] == prober["tools"])
+		let before = try #require(prober["messages"]?.arrayValue)
+		let after = try #require(teacher["messages"]?.arrayValue)
+		#expect(Array(after.prefix(before.count)) == before)
+
+		// The teach phase arrives after the handoff: its lead, its doctrine, then the tool changes.
+		#expect(after.map { $0["role"]?.stringValue ?? "" } == ["user", "system", "assistant", "user", "assistant", "user", "system"])
+		let teach = try #require(after.last?["content"]?.arrayValue)
+		#expect(teach.first?["text"]?.stringValue?.hasPrefix(TEACH_PHASE_LEAD + "\n\n---\n\n") == true)
+		#expect(teach.dropFirst().map { "\($0["type"]?.stringValue ?? "") \($0["tool"]?["name"]?.stringValue ?? "")" } == [
+			"tool_removal probe", "tool_removal list_sessions", "tool_removal list_propositions", "tool_removal probe_done",
+			"tool_addition quiz", "tool_addition plan_init",
+		])
 	}
 
 	@Test func probeDoneRefusesASecondConclusion() async throws {

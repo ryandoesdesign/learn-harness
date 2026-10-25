@@ -19,11 +19,13 @@ public struct MessagesRequest: Sendable, Hashable {
 	public var fallbacks: Bool
 	/// `thinking.block_binding.prefix_mismatch_behavior: "drop_block"`.
 	public var dropMismatchedThinking: Bool
+	/// The messages carry `tool_addition` / `tool_removal` blocks (their beta header).
+	public var toolChanges: Bool
 	public var stream: Bool
 
 	public init(model: String, maxTokens: Int, system: String? = nil, messages: [WireMessage], tools: [ToolDefinition] = [],
 		effort: Effort, thinkingDisplay: ThinkingDisplay = .summarized, cacheTTL: CacheTTL = .fiveMinutes,
-		fallbacks: Bool = true, dropMismatchedThinking: Bool = true, stream: Bool = true)
+		fallbacks: Bool = true, dropMismatchedThinking: Bool = true, toolChanges: Bool = false, stream: Bool = true)
 	{
 		self.model = model
 		self.maxTokens = maxTokens
@@ -35,6 +37,7 @@ public struct MessagesRequest: Sendable, Hashable {
 		self.cacheTTL = cacheTTL
 		self.fallbacks = fallbacks
 		self.dropMismatchedThinking = dropMismatchedThinking
+		self.toolChanges = toolChanges
 		self.stream = stream
 	}
 
@@ -48,9 +51,16 @@ public struct MessagesRequest: Sendable, Hashable {
 	/// Models with no server-side fallback (a `fallbacks` value is ignored or 400s).
 	public static func supportsFallbacks(_ model: String) -> Bool { !model.hasPrefix("claude-haiku") }
 
+	/// Models that take mid-conversation `role: "system"` messages and tool
+	/// changes (the cache-keeping probe→teach handoff).
+	public static func supportsMidConversationChanges(_ model: String) -> Bool {
+		["claude-opus-5-5", "claude-opus-5", "claude-opus-4-8", "claude-fable-5-1", "claude-fable-5", "claude-mythos-5-1", "claude-mythos-5", "claude-sonnet-5-5"].contains(model)
+	}
+
 	public static let apiVersion = "2026-10-21"
 	static let fallbackBeta = "server-side-fallback-2026-07-01"
 	static let bindingBeta = "thinking-binding-controls-2026-08-01"
+	static let toolChangesBeta = "mid-conversation-tool-changes-2026-07-01"
 
 	public var useFallbacks: Bool { fallbacks && Self.supportsFallbacks(model) }
 
@@ -59,6 +69,7 @@ public struct MessagesRequest: Sendable, Hashable {
 		var betas: [String] = []
 		if useFallbacks { betas.append(Self.fallbackBeta) }
 		if dropMismatchedThinking { betas.append(Self.bindingBeta) }
+		if toolChanges { betas.append(Self.toolChangesBeta) }
 		return betas.isEmpty ? nil : betas.joined(separator: ",")
 	}
 
@@ -85,7 +96,7 @@ public struct MessagesRequest: Sendable, Hashable {
 }
 
 public struct WireMessage: Sendable, Hashable {
-	public enum Role: String, Sendable, Hashable { case user, assistant }
+	public enum Role: String, Sendable, Hashable { case user, assistant, system }
 	public var role: Role
 	/// Raw content blocks.
 	public var content: [JSONValue]
@@ -104,10 +115,13 @@ public enum ToolDefinition: Sendable, Hashable {
 	case client(name: String, description: String, inputSchema: JSONValue)
 	/// A server tool (`web_search_20260209`, `web_fetch_20260209`, …) with its options.
 	case server(type: String, name: String, options: JSONObject = JSONObject())
+	/// Declared but not loaded until a `tool_addition` surfaces it (`defer_loading`).
+	indirect case deferred(ToolDefinition)
 
 	public var name: String {
 		switch self {
 		case .client(let name, _, _), .server(_, let name, _): name
+		case .deferred(let tool): tool.name
 		}
 	}
 
@@ -119,6 +133,10 @@ public enum ToolDefinition: Sendable, Hashable {
 			var o = JSONObject(["type": .string(type), "name": .string(name)])
 			for (k, v) in options { o[k] = v }
 			return .object(o)
+		case .deferred(let tool):
+			var j = tool.json
+			j["defer_loading"] = true
+			return j
 		}
 	}
 

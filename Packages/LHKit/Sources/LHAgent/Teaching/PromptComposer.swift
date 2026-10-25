@@ -41,11 +41,23 @@ public struct PromptComposer: Sendable {
 		name.wholeMatch(of: /\d+-[A-Za-z0-9_.\-]+\.md/) != nil
 	}
 
+	/// Which of an agent's segments compose: all of them, the ones the
+	/// prober and teacher share (the base and `shared/`), or the agent's own.
+	public enum Part: Sendable { case all, shared, own }
+
 	/// The composed system prompt. `tools` = the names registered for this
 	/// agent; nil composes without gates (the TS source composition).
-	public func compose(_ agent: PromptAgent, tools: Set<String>?) -> String {
+	public func compose(_ agent: PromptAgent, tools: Set<String>?, part: Part = .all) -> String {
 		let gates = tools.map { registered in Self.gates.filter { !registered.contains($0.tool) } } ?? []
-		return Self.segmentPaths(agent).compactMap { path -> String? in
+		let own = "\(agent.rawValue)/"
+		let paths = Self.segmentPaths(agent).filter { path in
+			switch part {
+			case .all: true
+			case .shared: !path.hasPrefix(own)
+			case .own: path.hasPrefix(own)
+			}
+		}
+		return paths.compactMap { path -> String? in
 			if gates.contains(where: { $0.segment == path && $0.prefix == nil }) { return nil }
 			var text = switches[path] == true ? (overrides[path] ?? source(path)) : source(path)
 			let lineGates = gates.filter { $0.segment == path && $0.prefix != nil }

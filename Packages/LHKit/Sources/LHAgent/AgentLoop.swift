@@ -45,8 +45,14 @@ public struct AgentConfig: Sendable {
 	public var model: String
 	public var effort: Effort
 	public var system: String?
+	/// The tools this agent runs.
 	public var tools: [any AgentTool]
+	/// The client tools the request declares, when they differ from `tools`
+	/// (the handoff declares both phases' tools on every request).
+	public var declaredTools: [ToolDefinition]?
 	public var serverTools: [ToolDefinition]
+	/// The projected messages carry tool changes (their beta header).
+	public var toolChanges: Bool
 	public var thinkingDisplay: MessagesRequest.ThinkingDisplay
 	public var cacheTTL: MessagesRequest.CacheTTL
 	public var maxTokens: Int
@@ -67,7 +73,8 @@ public struct AgentConfig: Sendable {
 	/// rejection). `earlier` is this run's messages before the message.
 	public var vetCalls: (@Sendable (_ assistant: Message, _ earlier: [Message]) -> [String: ToolOutput])?
 
-	public init(model: String, effort: Effort, system: String? = nil, tools: [any AgentTool] = [], serverTools: [ToolDefinition] = [],
+	public init(model: String, effort: Effort, system: String? = nil, tools: [any AgentTool] = [], declaredTools: [ToolDefinition]? = nil,
+		serverTools: [ToolDefinition] = [], toolChanges: Bool = false,
 		thinkingDisplay: MessagesRequest.ThinkingDisplay = .summarized, cacheTTL: MessagesRequest.CacheTTL = .fiveMinutes,
 		maxTokens: Int = 64_000, projection: WireProjection.Options = WireProjection.Options(), chatId: String? = nil,
 		toolTimeout: Duration = ToolGuard.defaultTimeout, updateInterval: Duration = .milliseconds(33),
@@ -78,7 +85,9 @@ public struct AgentConfig: Sendable {
 		self.effort = effort
 		self.system = system
 		self.tools = tools
+		self.declaredTools = declaredTools
 		self.serverTools = serverTools
+		self.toolChanges = toolChanges
 		self.thinkingDisplay = thinkingDisplay
 		self.cacheTTL = cacheTTL
 		self.maxTokens = maxTokens
@@ -95,7 +104,8 @@ public struct AgentConfig: Sendable {
 	func request(for context: [Message]) -> MessagesRequest {
 		MessagesRequest(
 			model: model, maxTokens: maxTokens, system: system, messages: WireProjection.project(context, options: projection),
-			tools: tools.map(\.definition) + serverTools, effort: effort, thinkingDisplay: thinkingDisplay, cacheTTL: cacheTTL)
+			tools: (declaredTools ?? tools.map(\.definition)) + serverTools, effort: effort, thinkingDisplay: thinkingDisplay, cacheTTL: cacheTTL,
+			toolChanges: toolChanges)
 	}
 }
 

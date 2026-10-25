@@ -139,6 +139,26 @@ func wire(_ m: [Message], _ o: WireProjection.Options = .init()) -> String {
 		#expect(w[3].content.map { $0["type"] } == ["thinking", "text"])
 	}
 
+	@Test func thePhasesRideAsSystemMessagesBeforeTheirFirstAssistantTurn() {
+		let phases = WireProjection.Phases(probe: "PROBE", teach: [["type": "text", "text": "TEACH"]])
+		let record = [
+			user("u1", "a"),
+			assistant("a1", [think("probe", sig: "p"), .text("probing")]),
+			marker("h", .probeHandoff, HANDOFF_TEXT),
+			assistant("a2", [think("teach", sig: "t"), .text("teaching")]),
+		]
+		let w = WireProjection.project(record, options: .init(phases: phases))
+		#expect(w.map(\.role) == [.user, .system, .assistant, .user, .system, .assistant])
+		#expect(w[1].content == [["type": "text", "text": "PROBE"]])
+		#expect(w[4].content == [["type": "text", "text": "TEACH"]])
+		#expect(w[2].content.map { $0["type"] } == ["thinking", "text"], "the prober's thinking stays")
+
+		// Before the first reply (and right after the handoff) the phase message comes last.
+		#expect(WireProjection.project([user("u1", "a")], options: .init(phases: phases)).map(\.role) == [.user, .system])
+		#expect(WireProjection.project(Array(record.prefix(3)), options: .init(phases: phases)).map(\.role) == [.user, .system, .assistant, .user, .system])
+		#expect(WireProjection.project(record).allSatisfy { $0.role != .system }, "no phases, no system messages")
+	}
+
 	@Test func compactionRendersTheSummaryOnceAndStripsRetainedThinking() {
 		let record = [
 			user("u1", "old"),
@@ -237,6 +257,19 @@ func wire(_ m: [Message], _ o: WireProjection.Options = .init()) -> String {
 			user("u2", "go"),
 			assistant("a3", [think("t2"), .text("teach")]),
 		], WireProjection.Options(stripProberThinking: true), from: 3)
+	}
+
+	@Test func acrossThePhasedHandoff() {
+		check([
+			user("u1", "a"),
+			assistant("a1", [think("p"), call("toolu_1", "probe_done")], stop: "tool_use"),
+			result("r1", call: "toolu_1", name: "probe_done", "Concluded"),
+			assistant("a2", [.text("over to planning")]),
+			marker("h", .probeHandoff, HANDOFF_TEXT),
+			assistant("a3", [think("t"), .text("plan")]),
+			user("u2", "go"),
+			assistant("a4", [think("t2"), .text("teach")]),
+		], WireProjection.Options(phases: WireProjection.Phases(probe: "PROBE", teach: [["type": "text", "text": "TEACH"]])))
 	}
 
 	@Test func afterACompaction() {

@@ -53,6 +53,39 @@ struct LiveLessonTests {
 		#expect(r.messages.last?.assistant?.stopReason != "error")
 	}
 
+	/// `--filter LiveLesson/theHandoffKeepsTheCache`: the phased handoff's
+	/// system messages and tool changes are accepted, and the teacher's first
+	/// request reads the prober's cached prefix instead of rewriting it.
+	@Test(.timeLimit(.minutes(5)))
+	func theHandoffKeepsTheCache() async throws {
+		let key = try #require(ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"])
+		let db = try AppDatabase.inMemory()
+		let catalog = try ModelCatalog(data: LHResources.modelsJSON)
+		try SettingsRepository(db).update { s in s.models = ModelsSettings(strong: ModelSlot(model: "claude-sonnet-5-5", effort: .low)) }
+		let service = TurnService(database: db, keychain: InMemoryKeychain(key: key), catalog: catalog)
+		let chat = try ChatRepository(db).createChat(title: "SQL joins")
+		let repo = ChatRepository(db)
+		func runTurn(_ input: ChatInput) async throws {
+			let events = await service.events()
+			guard try await service.send(chat.id, input) == .started else { return }
+			try await settles(events, chat.id, timeout: .seconds(240))
+			while await service.isRunning(chat.id) { try await Task.sleep(for: .milliseconds(200)) }
+		}
+
+		let skip = "I write basic SELECT queries with WHERE and have never used a join. That's my whole background: skip any questions, conclude the probe now with probe_done."
+		try await runTurn(.text("Teach me what an SQL inner join is. " + skip))
+		for _ in 0..<3 where !(try #require(try repo.get(chat.id)).messages.contains { $0.marker?.kind == .probeHandoff }) {
+			try await runTurn(.text(skip))
+		}
+		let r = try #require(try repo.get(chat.id))
+		let handoff = try #require(r.messages.firstIndex { $0.marker?.kind == .probeHandoff }, "the prober concluded")
+		let first = try #require(r.messages[(handoff + 1)...].compactMap(\.assistant).first, "the teacher replied")
+		let usage = try #require(first.usage)
+		print("LIVE handoff: stop", first.stopReason, first.errorMessage ?? "", "cacheRead", usage.cacheRead, "cacheWrite", usage.cacheWrite, "input", usage.input)
+		#expect(first.stopReason != "error", "the API accepted the phase message and tool changes")
+		#expect(usage.cacheRead > usage.cacheWrite, "the teacher's first request read the prober's prefix")
+	}
+
 	@Test(.timeLimit(.minutes(10)))
 	func aRealLessonGoesProbeToTeach() async throws {
 		let key = try #require(ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"])

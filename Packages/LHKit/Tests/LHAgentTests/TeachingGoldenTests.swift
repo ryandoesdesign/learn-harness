@@ -130,3 +130,18 @@ private struct NoGraph: GraphStore {
 		#expect(PromptComposer().compose(.prober, tools: all) == PromptComposer().compose(.prober, tools: nil))
 	}
 }
+
+/// The phased handoff's split: the shared part (the base and `shared/`) and
+/// each agent's own segments partition the full composition.
+@Suite struct PromptPartTests {
+	@Test(arguments: [PromptAgent.prober, .teacher])
+	func sharedAndOwnPartitionTheComposition(_ agent: PromptAgent) {
+		let c = PromptComposer()
+		let full = c.compose(agent, tools: nil)
+		let shared = c.compose(agent, tools: nil, part: .shared)
+		let own = c.compose(agent, tools: nil, part: .own)
+		#expect(!own.isEmpty && full.contains(own) && !shared.contains(own))
+		#expect(full.count == shared.count + own.count + "\n\n---\n\n".count)
+		#expect(c.compose(.prober, tools: nil, part: .shared) == c.compose(.teacher, tools: nil, part: .shared), "one top-level prompt for both phases")
+	}
+}

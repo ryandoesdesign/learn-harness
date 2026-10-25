@@ -91,7 +91,7 @@ macos/
 - **Preserved thinking / prefix stability (highest risk).** `WireProjection` (ported from `native-messages.ts toLlmMessages`) must turn the record into a byte-stable, append-only prefix. A property test enforces this.
   - Anthropic blocks are re-sent untouched.
   - Imported foreign-provider history (e.g. OpenRouter/DeepSeek) is sent as text and tool_use only, with no thinking.
-  - At the prober→teacher handoff, prober-era thinking is stripped deterministically. This is backed by `drop_block` mismatch handling, with debug logging.
+  - At the prober→teacher handoff, the phased shape keeps the prefix (each phase's doctrine a `role: "system"` message, tool changes by reference; see M3). On models without those features, prober-era thinking is stripped deterministically, backed by `drop_block` mismatch handling with debug logging.
   - Compaction sends the summary plus a kept tail with thinking stripped.
   - Interrupted tool calls get a deterministic synthesized result.
   - Steers go in as a text block after the tool results.

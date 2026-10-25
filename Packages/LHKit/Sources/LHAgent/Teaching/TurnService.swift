@@ -411,25 +411,58 @@ public actor TurnService {
 		let graph: GraphToolDeps? = graphToolsEnabled(resolveSettings(settings, catalog: catalog))
 			? GraphToolDeps { [database] in GraphDeps(chatStore: ChatRepository(database), graphStore: GraphRepository(database)) }
 			: nil
-		let agent: PromptAgent = record.kind == .practice ? .practice : teaching ? .teacher : .prober
-		let tools: [any AgentTool]
-		switch agent {
-		case .practice:
+		let maxTokens = min(64_000, catalog.model(spec.model)?.maxTokens ?? 64_000)
+		let composer = composer(settings)
+		func config(system: String, tools: [any AgentTool], declaredTools: [ToolDefinition]? = nil, toolChanges: Bool = false,
+			projection: WireProjection.Options) -> AgentConfig
+		{
+			AgentConfig(
+				model: spec.model, effort: spec.effort, system: system, tools: tools, declaredTools: declaredTools, toolChanges: toolChanges,
+				thinkingDisplay: .summarized, cacheTTL: .oneHour, maxTokens: maxTokens,
+				projection: projection, chatId: record.id,
+				shouldStop: questionStopper, vetCalls: hiddenReplyVetter)
+		}
+		if record.kind == .practice {
 			// M8: one agent from the first turn; the gate seeds from the record
 			// as this turn's tools are built (practice.ts createPracticeGate).
-			tools = practiceTools(gate: PracticeGate(messages: record.messages),
+			let tools = practiceTools(gate: PracticeGate(messages: record.messages),
 				graphNodes: { [database] in GraphRepository(database).readNodes() },
 				enabled: enabled, background: wiring, graph: graph)
-		case .teacher: tools = teacherTools(ctx, enabled: enabled, background: wiring)
-		case .prober: tools = proberTools(ctx, enabled: enabled, background: wiring, graph: graph)
+			return config(system: composer.compose(.practice, tools: Set(tools.map(\.name))), tools: tools, projection: WireProjection.Options())
 		}
-		let system = composer(settings).compose(agent, tools: Set(tools.map(\.name)))
-		let maxTokens = min(64_000, catalog.model(spec.model)?.maxTokens ?? 64_000)
-		return AgentConfig(
-			model: spec.model, effort: spec.effort, system: system, tools: tools,
-			thinkingDisplay: .summarized, cacheTTL: .oneHour, maxTokens: maxTokens,
-			projection: WireProjection.Options(stripProberThinking: teaching), chatId: record.id,
-			shouldStop: questionStopper, vetCalls: hiddenReplyVetter)
+		let prober = proberTools(ctx, enabled: enabled, background: wiring, graph: graph)
+		let teacher = teacherTools(ctx, enabled: enabled, background: wiring)
+		guard phasedHandoff(record, model: spec.model) else {
+			// The plain shape: each phase's own system prompt and tools (the
+			// handoff rewrites the prefix).
+			let (agent, tools) = teaching ? (PromptAgent.teacher, teacher) : (PromptAgent.prober, prober)
+			return config(system: composer.compose(agent, tools: Set(tools.map(\.name))), tools: tools,
+				projection: WireProjection.Options(stripProberThinking: teaching))
+		}
+		// The phased shape: one system prompt and one declared tool set for
+		// both phases, each phase's doctrine a system message, the handoff's
+		// tool changes by reference — the prefix survives the handoff.
+		let proberNames = prober.map(\.name)
+		let teacherNames = teacher.map(\.name)
+		let added = teacher.filter { !proberNames.contains($0.name) }
+		let changes: [JSONValue] = proberNames.filter { !teacherNames.contains($0) }.map(toolChange("tool_removal"))
+			+ added.map(\.name).map(toolChange("tool_addition"))
+		let phases = WireProjection.Phases(
+			probe: composer.compose(.prober, tools: Set(proberNames), part: .own),
+			teach: [["type": "text", "text": .string(TEACH_PHASE_LEAD + "\n\n---\n\n" + composer.compose(.teacher, tools: Set(teacherNames), part: .own))]] + changes)
+		return config(
+			system: composer.compose(.teacher, tools: Set(proberNames + teacherNames), part: .shared),
+			tools: teaching ? teacher : prober,
+			declaredTools: prober.map(\.definition) + added.map { .deferred($0.definition) },
+			toolChanges: true,
+			projection: WireProjection.Options(phases: phases))
+	}
+
+	/// Whether the conversation runs the phased handoff: a model that takes
+	/// mid-conversation system messages and tool changes, and no active
+	/// compaction (its cut rewrites the prefix anyway; the plain shape runs).
+	func phasedHandoff(_ record: ChatRecord, model: String) -> Bool {
+		record.kind != .practice && MessagesRequest.supportsMidConversationChanges(model) && activeCompactionOf(record.messages) == nil
 	}
 
 	func queueHandoff(_ chatId: String) { handoffQueued.insert(chatId) }
@@ -451,7 +484,12 @@ public actor TurnService {
 		let settings = (try? SettingsRepository(database).read()) ?? nil
 		let spec = conversationSpec(record, settings)
 		let teaching = hasProbeDone(record.messages)
-		let system = agentConfig(record).system ?? ""
+		// The phased shape moves each phase's doctrine into the messages; the
+		// estimate counts the composed prompt either way.
+		let agent: PromptAgent = record.kind == .practice ? .practice : teaching ? .teacher : .prober
+		let system = phasedHandoff(record, model: spec.model)
+			? composer(settings).compose(agent, tools: Set(agentConfig(record).tools.map(\.name)))
+			: agentConfig(record).system ?? ""
 		return CompactionService.Deps(
 			spec: spec,
 			kind: record.kind == .practice ? .practice : teaching ? .teach : .probe,
@@ -499,4 +537,9 @@ final class CompactionRelay: @unchecked Sendable {
 		set { lock.withLock { _target = newValue } }
 	}
 	func fire(_ chatId: String, _ running: Bool) { target?(chatId, running) }
+}
+
+/// A tool change by reference (`tool_addition` / `tool_removal`).
+private func toolChange(_ type: String) -> (String) -> JSONValue {
+	{ name in ["type": .string(type), "tool": ["type": "tool_reference", "name": .string(name)]] }
 }

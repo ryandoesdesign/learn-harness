@@ -12,7 +12,28 @@ public enum WireProjection {
 		/// Strip every thinking block before the probe-handoff marker (the
 		/// teach phase runs under a different system prompt and tool set).
 		public var stripProberThinking: Bool
-		public init(stripProberThinking: Bool = false) { self.stripProberThinking = stripProberThinking }
+		/// Each phase's instructions as `role: "system"` messages (the
+		/// cache-keeping handoff); nil projects no system messages.
+		public var phases: Phases?
+		public init(stripProberThinking: Bool = false, phases: Phases? = nil) {
+			self.stripProberThinking = stripProberThinking
+			self.phases = phases
+		}
+	}
+
+	/// The phase messages, each placed before the first assistant turn after
+	/// its anchor (a system message must follow a user message and precede
+	/// an assistant one), or last when no assistant turn follows yet.
+	public struct Phases: Sendable, Hashable {
+		/// The prober's doctrine, anchored at the start of the history.
+		public var probe: String
+		/// The teach phase's blocks (its instructions, then the tool changes),
+		/// anchored at the probe-handoff marker.
+		public var teach: [JSONValue]
+		public init(probe: String, teach: [JSONValue]) {
+			self.probe = probe
+			self.teach = teach
+		}
 	}
 
 	public static let errorImagePlaceholder = "(image attached after the tool results)"
@@ -40,6 +61,13 @@ public enum WireProjection {
 		}
 		let handoffIndex = options.stripProberThinking ? (messages.firstIndex { $0.marker?.kind == .probeHandoff } ?? -1) : -1
 
+		var pendingPhase: [JSONValue]? = options.phases.map { [textBlock($0.probe)] }
+		func placePhase() {
+			guard let blocks = pendingPhase, out.contains(where: { if case .assistant = $0 { false } else { true } }) else { return }
+			out.append(.system(blocks))
+			pendingPhase = nil
+		}
+
 		var ids = ToolIdMap()
 		var emittedCalls = Set<String>() // original ids of tool_use blocks on the wire
 		var answered = Set<String>()
@@ -51,6 +79,10 @@ public enum WireProjection {
 				if marker.kind == .compaction, m.id == activeId { continue }
 				if marker.content.isEmpty { continue }
 				out.append(.user([textBlock(marker.content)]))
+				if marker.kind == .probeHandoff, let phases = options.phases {
+					placePhase()
+					pendingPhase = phases.teach
+				}
 			case .user(let u):
 				let content = u.content.filter { !isEmptyText($0) }.map(\.raw)
 				if !content.isEmpty { out.append(.user(content)) }
@@ -70,6 +102,7 @@ public enum WireProjection {
 					c["id"] = .string(wireId)
 					return c
 				}
+				placePhase()
 				out.append(.assistant(blocks))
 				// Dangling-call synthesis: calls with no result anywhere after.
 				let later = Set(messages[(i + 1)...].compactMap { $0.toolResult?.toolUseId })
@@ -91,6 +124,7 @@ public enum WireProjection {
 				out.append(.result(toolResult(id: ids.result(r.toolUseId), content: content, isError: r.isError), extra: extra))
 			}
 		}
+		placePhase()
 		return merge(out)
 	}
 
@@ -165,6 +199,7 @@ public enum WireProjection {
 	enum Entry {
 		case user([JSONValue])
 		case assistant([JSONValue])
+		case system([JSONValue])
 		/// A tool_result block plus blocks that must follow all results (error-result images).
 		case result(JSONValue, extra: [JSONValue])
 	}
@@ -189,6 +224,9 @@ public enum WireProjection {
 			case .assistant(let blocks):
 				flush()
 				out.append(WireMessage(role: .assistant, content: blocks))
+			case .system(let blocks):
+				flush()
+				out.append(WireMessage(role: .system, content: blocks))
 			case .user(let blocks):
 				others += blocks
 			case .result(let block, let extra):
