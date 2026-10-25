@@ -27,6 +27,8 @@ struct TranscriptRow: Identifiable {
 		case separator
 		case planBlock(PlanBlockData)
 		case answered(QuestionAnswerData, input: JSONValue?)
+		/// An open question, shown where it was asked (the inline card).
+		case pendingQuestion(tool: String, toolCallId: String, input: JSONValue)
 		case tool(ViewPart)
 		case retrying
 		case refusal(explanation: String?)
@@ -49,6 +51,7 @@ func transcriptRows(native: [Message], view: [ViewMessage], streaming: Bool = fa
 	let phases = viewPhaseTimeline(view)
 	let sourceTextParts = firstSourceTextParts(view)
 	let refusals = refusalsByGroup(native: native, view: view)
+	let open = Dictionary(danglingQuestionsOf(native).map { ($0.toolCallId, $0) }, uniquingKeysWith: { a, _ in a })
 	var rows: [TranscriptRow] = []
 
 	for (mi, m) in view.enumerated() {
@@ -115,9 +118,11 @@ func transcriptRows(native: [Message], view: [ViewMessage], streaming: Bool = fa
 					rows.append(TranscriptRow(id: id, kind: .planBlock(block)))
 				}
 			case .tool(let name) where ANSWERED_TOOLS.contains(name):
-				// Pending questions live in the dock (M5); answered ones are records.
+				// Answered questions are records; open ones are cards where they were asked.
 				if part.state == .outputAvailable, let output = part.output, let answer = QuestionAnswerData(json: output) {
 					rows.append(TranscriptRow(id: id, kind: .answered(answer, input: part.input)))
+				} else if let callId = part.toolCallId, let q = open[callId] {
+					rows.append(TranscriptRow(id: id, kind: .pendingQuestion(tool: q.tool, toolCallId: q.toolCallId, input: q.input)))
 				}
 			case .tool where part.state == .inputStreaming:
 				rows.append(TranscriptRow(id: id, kind: .liveTool(part)))

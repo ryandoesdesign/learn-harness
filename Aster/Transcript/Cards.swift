@@ -332,7 +332,8 @@ struct AnsweredCard: View {
 				.card()
 		} else {
 			VStack(alignment: .leading, spacing: 0) {
-				if let reading = answer.readingThinking {
+				// Paragraph notes show under their paragraphs; older answers keep the one field here.
+				if let reading = answer.readingThinking, answer.readingNotes == nil {
 					ThinkingBlock(text: reading, id: "\(id).reading", defaultOpen: true)
 				}
 				content.card()

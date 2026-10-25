@@ -1,7 +1,8 @@
 import LHCore
 import SwiftUI
 
-/// question-dock.tsx: the pending question, every teaching kind — quiz
+/// question-dock.tsx: the pending question, shown inline where it was
+/// asked — every teaching kind — quiz
 /// single/multi (seeded shuffle), predict, probe, recall/explain (free
 /// text), ask (option descriptions + "Other"). "I don't know", the
 /// confidence rail, the thinking field; Submit builds the answer (buildAnswer).
@@ -41,8 +42,10 @@ struct QuestionDockView: View {
 				guard let d = session.cardDrafts.removeValue(forKey: reposeOrigin(toolCallId)) else { return }
 				(sel, thinking, other, text, confIdx) = (d.sel, d.thinking, d.other, d.text, d.confIdx)
 			}
+			// Also a card scrolled out of the lazy transcript keeps what was started;
+			// an answered one (in flight, not set aside) has nothing to keep.
 			.onDisappear {
-				guard session.discussedOrigin == reposeOrigin(toolCallId) else { return }
+				guard session.discussedOrigin == reposeOrigin(toolCallId) || session.status == .idle else { return }
 				session.cardDrafts[reposeOrigin(toolCallId)] = QuestionCardDraft(sel: sel, thinking: thinking, other: other, text: text, confIdx: confIdx)
 			}
 	}
@@ -50,8 +53,8 @@ struct QuestionDockView: View {
 	@ViewBuilder private var card: some View {
 		if let qd = dockQuestion(tool: tool, toolCallId: toolCallId, input: input) {
 			let label = dockLabel(tool: tool, question: qd, skill: skill)
-			if !session.dockExpanded || !session.revealed {
-				DockBar(reveal: session.requiresReveal && !session.revealed, label: label, question: qd.question) { session.expandDock() }
+			if session.waitsForReveal(tool: tool, toolCallId: toolCallId, input: input) {
+				DockBar(reveal: true, label: label, question: qd.question) { session.revealedChecks.insert(toolCallId) }
 			} else {
 				form(qd, label: label)
 			}
@@ -71,15 +74,8 @@ struct QuestionDockView: View {
 		let mode: SelectMode = qd.mode == .multiSelect ? .multiSelect : .singleSelect
 		let rows = rowCount(qd)
 		return VStack(alignment: .leading, spacing: 10) {
-			HStack {
-				Eyebrow(label + (qd.mode == .multiSelect ? " · select all that apply" : ""))
-					.lineLimit(1)
-				Spacer()
-				Button { session.dockExpanded = false } label: { Image(systemName: "chevron.down") }
-					.buttonStyle(.borderless)
-					.help("Fold the question")
-					.accessibilityLabel("Fold the question")
-			}
+			Eyebrow(label + (qd.mode == .multiSelect ? " · select all that apply" : ""))
+				.lineLimit(1)
 			HuggingScroll(maxHeight: Self.maxBody) {
 				VStack(alignment: .leading, spacing: 10) {
 					MarkdownView(qd.question, unit: "dock.q").fontWeight(.medium)
@@ -112,11 +108,18 @@ struct QuestionDockView: View {
 					.buttonStyle(.borderedProminent)
 					.disabled(!canSubmit(qd) || session.compacting)
 			}
+			// Asking about the question instead of answering it (it stays open): the
+			// composer itself, which leaves the dock while a question is open.
+			ComposerView(session: session)
 		}
 		.padding(16)
 		.background(RoundedRectangle(cornerRadius: 12).fill(Theme.card))
 		.overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border))
-		.onAppear { if qd.mode != .text { focus = .rows } else { focus = .learner } }
+		// The first time a card shows it takes the focus — not again when it scrolls back into view.
+		.onAppear {
+			guard session.focusedCards.insert(toolCallId).inserted else { return }
+			focus = qd.mode != .text ? .rows : .learner
+		}
 	}
 
 	private func optionRow(_ opt: QuizOption, index: Int, mode: SelectMode, kind: QuestionKind, walkedHere: Bool) -> some View {

@@ -4,9 +4,10 @@ import LHResources
 import LHStore
 import SwiftUI
 
-/// The pinned dock (docs/native-macos-m5.md: pinned below the transcript,
-/// folds on demand, never on scroll): queued steers, the reading-thinking
-/// field, then the question dock or the composer.
+/// The pinned dock (docs/native-macos-m5.md: pinned below the transcript):
+/// queued steers, then the composer — or practice's problem. Questions show
+/// inline where they were asked, the composer inside the open card (the
+/// transcript's "Question below" pill jumps to one out of view).
 struct DockView: View {
 	@Bindable var session: SessionModel
 	@Environment(\.openSettings) private var openSettings
@@ -37,14 +38,8 @@ struct DockView: View {
 			if !session.queuedSteers.isEmpty {
 				QueuedSteersView(steers: session.queuedSteers)
 			}
-			if let p = session.pending {
-				if session.requiresReveal {
-					ReadingThinkingField(text: $session.readingThinking, onOpenCheck: { session.expandDock() }, checkOpen: session.revealed && session.dockExpanded)
-				}
-				QuestionDockView(session: session, tool: p.tool, toolCallId: p.toolCallId, input: p.input)
-					.id(reposeOrigin(p.toolCallId))
-				// Asking about the question instead of answering it (it stays open).
-				ComposerView(session: session)
+			if session.pending != nil {
+				// The composer moves into the open question's card ("Ask about the question…").
 			} else if let problem = session.activeProblem {
 				// Practice (M8): the problem replaces the composer while it's active.
 				PracticeDockView(session: session, problem: problem)
@@ -134,7 +129,7 @@ struct ComposerView: View {
 	}
 }
 
-// MARK: - Bars, steers, reading thinking
+// MARK: - Bars, steers
 
 /// question-dock.tsx teaserText: math and commands flattened to one line.
 func teaserText(_ q: String) -> String {
@@ -208,39 +203,6 @@ struct QueuedSteersView: View {
 	}
 }
 
-/// reading-thinking.tsx: "Thinking while reading" — rides on the answer.
-/// Enter opens a closed check; with the check open Enter is a newline.
-struct ReadingThinkingField: View {
-	@Binding var text: String
-	var onOpenCheck: () -> Void
-	var checkOpen: Bool
-
-	var body: some View {
-		VStack(alignment: .leading, spacing: 4) {
-			Eyebrow("Thinking while reading")
-			ZStack(alignment: .topLeading) {
-				if text.isEmpty {
-					Text("Whatever comes to mind as you read.").foregroundStyle(Theme.faint).padding(.horizontal, 5).padding(.vertical, 2).allowsHitTesting(false)
-				}
-				TextEditor(text: $text)
-					.scrollContentBackground(.hidden)
-					.frame(minHeight: 24, maxHeight: 160)
-					.dictationTarget("reading", .readingThinking, text: $text)
-					.fixedSize(horizontal: false, vertical: true)
-					.onKeyPress(.return, phases: .down) { press in
-						if checkOpen || press.modifiers.contains(.shift) { return .ignored }
-						onOpenCheck()
-						return .handled
-					}
-			}
-			.font(Theme.small)
-		}
-		.padding(.horizontal, 12)
-		.padding(.vertical, 8)
-		.background(RoundedRectangle(cornerRadius: 12).fill(Theme.card.opacity(0.6)))
-	}
-}
-
 // MARK: - Previews
 
 /// The dock under an idle teaching session: the composer.
@@ -257,3 +219,4 @@ struct ReadingThinkingField: View {
 		.environment(DictationService(engine: SystemSpeechEngine()))
 		.frame(width: 900)
 }
+

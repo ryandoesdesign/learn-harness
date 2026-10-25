@@ -211,8 +211,23 @@ struct TranscriptView: View {
 			.onChange(of: session.streaming?.assistant?.content.count) {
 				if session.isAtBottom { proxy.scrollTo("bottom", anchor: .bottom) }
 			}
+			// Overlays, never the dock: a control that changed the dock's height would
+			// move the bottom inset, which snaps a following view back down — scrolling
+			// up a little would loop (pill shows, snap, pill hides).
 			.overlay(alignment: .bottom) {
-				if !session.isAtBottom {
+				if session.pending != nil, !session.viewAtBottom {
+					Button { session.showPendingQuestion() } label: {
+						HStack(spacing: 4) { Text("Question below"); Image(systemName: "arrow.down") }
+							.font(Theme.uiMedium)
+							.padding(.horizontal, 12)
+							.padding(.vertical, 6)
+							.background(Capsule().fill(Theme.card))
+							.overlay(Capsule().strokeBorder(Theme.border))
+					}
+					.buttonStyle(.plain)
+					.help("Scroll to the open question")
+					.padding(.bottom, 8)
+				} else if !session.isAtBottom {
 					Button {
 						withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("bottom", anchor: .bottom) }
 					} label: {
@@ -232,6 +247,10 @@ struct TranscriptView: View {
 				if let match = session.find.activeMatch {
 					withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(match.rowId, anchor: UnitPoint(x: 0, y: 0.04)) }
 				}
+			}
+			.onChange(of: session.rowRequest) {
+				guard let row = session.rowRequest?.anchor else { return }
+				withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(row, anchor: UnitPoint(x: 0, y: 0.04)) }
 			}
 			.onChange(of: session.anchorRequest) {
 				guard let request = session.anchorRequest, let row = session.rowId(forAnchor: request) else { return }
@@ -268,15 +287,100 @@ struct RowView: View {
 			}
 			.frame(maxWidth: .infinity)
 			.padding(.vertical, 16)
-		case .textBlock(let block, _): BlockView(block: block, unit: blockUnitId(row.id, 0), font: Theme.prose, fontSize: Theme.proseSize)
+		case .textBlock(let block, _): NotedParagraph(rowId: row.id) { BlockView(block: block, unit: blockUnitId(row.id, 0), font: Theme.prose, fontSize: Theme.proseSize) }
 		case .reasoning(let text, let streaming): ReasoningRow(text: text, id: row.id, streaming: streaming)
 		case .liveTool(let part): LiveToolCard(part: part, id: row.id)
 		case .separator: Divider().padding(.vertical, 4)
 		case .planBlock(let data): PlanBlockView(data: data)
 		case .answered(let answer, let input): AnsweredCard(answer: answer, input: input, id: row.id)
+		case .pendingQuestion(let tool, let toolCallId, let input): InlineQuestion(tool: tool, toolCallId: toolCallId, input: input)
 		case .tool(let part): ToolPartCard(part: part, id: row.id)
 		case .retrying: SystemLine(text: "Retrying…")
 		case .refusal(let explanation): RefusalLine(explanation: explanation, id: row.id)
+		}
+	}
+}
+
+/// An open question where it was asked: its card while the chat is idle
+/// (an answer in flight or a running turn shows nothing, as the dock did).
+struct InlineQuestion: View {
+	var tool: String
+	var toolCallId: String
+	var input: JSONValue
+	@Environment(SessionModel.self) private var session
+
+	var body: some View {
+		if session.pendingAll.contains(where: { $0.toolCallId == toolCallId }) {
+			QuestionDockView(session: session, tool: tool, toolCallId: toolCallId, input: input)
+				.id(reposeOrigin(toolCallId))
+		}
+	}
+}
+
+/// A paragraph of the teacher's prose with its reading notes: hovering shows
+/// ✎, which opens a note field under it; sent notes stay under it, muted.
+struct NotedParagraph<Content: View>: View {
+	var rowId: String
+	@ViewBuilder var content: Content
+	@Environment(SessionModel.self) private var session
+	@State private var hovering = false
+	@FocusState private var focused: Bool
+
+	var body: some View {
+		@Bindable var session = session
+		VStack(alignment: .leading, spacing: 8) {
+			HStack(alignment: .top, spacing: 6) {
+				content.frame(maxWidth: .infinity, alignment: .leading)
+				Button {
+					if session.noteDrafts[rowId] == nil { session.noteDrafts[rowId] = "" }
+					// The field exists from the next update on.
+					Task { @MainActor in focused = true }
+				} label: {
+					Image(systemName: "pencil").font(.system(size: 11))
+				}
+				.buttonStyle(.borderless)
+				.foregroundStyle(Theme.muted)
+				.help("Add your thinking about this paragraph")
+				.accessibilityLabel("Add your thinking about this paragraph")
+				.opacity(hovering && session.takesNotes(rowId) && session.noteDrafts[rowId] == nil ? 1 : 0)
+				.disabled(!session.takesNotes(rowId))
+			}
+			ForEach(Array((session.sentNotes[rowId] ?? []).enumerated()), id: \.offset) { _, note in
+				Text(note)
+					.font(Theme.small)
+					.foregroundStyle(Theme.muted)
+					.textSelection(.enabled)
+					.padding(.leading, 10)
+					.overlay(alignment: .leading) { Rectangle().fill(Theme.border).frame(width: 2) }
+			}
+			if let draft = session.noteDrafts[rowId] {
+				noteField(Binding(get: { session.noteDrafts[rowId] ?? draft }, set: { session.noteDrafts[rowId] = $0 }))
+			}
+		}
+		.onHover { hovering = $0 }
+	}
+
+	/// The composer's box (the ReadingThinkingField it replaces had the same).
+	private func noteField(_ text: Binding<String>) -> some View {
+		ZStack(alignment: .topLeading) {
+			if text.wrappedValue.isEmpty {
+				Text("Your thinking about this paragraph.").foregroundStyle(Theme.faint).padding(.horizontal, 5).padding(.vertical, 2).allowsHitTesting(false)
+			}
+			TextEditor(text: text)
+				.scrollContentBackground(.hidden)
+				.frame(minHeight: 24, maxHeight: 160)
+				.fixedSize(horizontal: false, vertical: true)
+				.focused($focused)
+				.dictationTarget("note.\(rowId)", .readingThinking, text: text)
+		}
+		.font(Theme.prose)
+		.padding(.horizontal, 7)
+		.padding(.vertical, 10)
+		.background(RoundedRectangle(cornerRadius: 8).fill(Theme.card))
+		.overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.border))
+		// A note emptied and left removes itself.
+		.onChange(of: focused) { _, now in
+			if !now, session.noteDrafts[rowId]?.jsTrimmed.isEmpty == true { session.noteDrafts[rowId] = nil }
 		}
 	}
 }
@@ -512,14 +616,16 @@ struct SessionStats: View {
 // MARK: - Previews
 
 /// A session as RootView shows it: an AppModel on a scratch directory (the
-/// coverage ring reads it), the chat inserted, then selected.
+/// coverage ring reads it), the chat inserted, then selected; `configure`
+/// sets view state on the loaded session (an opened check, note drafts).
 @MainActor
-private func sessionPreview(_ insert: (ChatRepository) throws -> String) -> some View {
+private func sessionPreview(_ insert: (ChatRepository) throws -> String, configure: (SessionModel) throws -> Void = { _ in }) -> some View {
 	let dir = FileManager.default.temporaryDirectory.appending(path: "lhpv-\(UUID().uuidString)", directoryHint: .isDirectory)
 	let app = AppModel(dataDirectory: dir, keychain: InMemoryKeychain())
 	app.selection = try! insert(ChatRepository(app.database))
 	let session = app.session!
 	session.load()
+	try! configure(session)
 	return NavigationStack {
 		SessionView(session: session)
 	}
@@ -549,5 +655,75 @@ private func sessionPreview(_ insert: (ChatRepository) throws -> String) -> some
 			Message(id: "r_p1", timestamp: 2, body: .toolResult(ToolResultBody(toolUseId: "p1", toolName: "problem", content: [.text("Problem posed")], isError: false, details: nil))),
 		], to: chat.id)
 		return chat.id
+	}
+}
+
+// MARK: Inline questions and paragraph notes
+
+private let previewProse = "An inner join pairs each row of one table with the rows of another whose join key matches.\n\nRows with no match on either side are dropped from the result."
+
+/// A probe-phase chat whose last reply ends in an open question.
+private func probeQuestion(_ repo: ChatRepository) throws -> String {
+	let chat = try repo.createChat(title: "Joins")
+	let input: JSONValue = [
+		"question": "Which join keeps every row of the left table?",
+		"options": [["label": "LEFT JOIN", "value": "left"], ["label": "INNER JOIN", "value": "inner"], ["label": "Not sure yet", "value": "unsure"]],
+	]
+	try repo.append([
+		newUserMessage("Teach me SQL joins", now: 0),
+		Message(id: "a_q1", timestamp: 1, body: .assistant(AssistantBody(content: [.text(previewProse), .toolUse(id: "q1", name: "ask_user_question", input: input)], model: "claude-opus-5-5", stopReason: "tool_use"))),
+	], to: chat.id)
+	return chat.id
+}
+
+/// A teach-phase chat (probe concluded, plan handed off) ending in a tagged check.
+private func teachCheck(_ repo: ChatRepository) throws -> String {
+	let chat = try repo.createChat(title: "Joins")
+	let quiz: JSONValue = [
+		"question": "Which rows survive an inner join?",
+		"options": [["label": "Only rows whose key matches on both sides", "value": "a"], ["label": "Every row of the left table", "value": "b"]],
+		"correctAnswer": "a", "explanation": "Unmatched rows are dropped.", "nodeId": "n1",
+	]
+	try repo.append([
+		newUserMessage("Teach me SQL joins", now: 0),
+		Message(id: "a_d", timestamp: 1, body: .assistant(AssistantBody(content: [.toolUse(id: "d1", name: "probe_done", input: ["assessment": ["summary": "Knows SELECT."]])], model: "claude-opus-5-5", stopReason: "tool_use"))),
+		Message(id: "r_d", timestamp: 2, body: .toolResult(ToolResultBody(toolUseId: "d1", toolName: "probe_done", content: [.text(PROBE_DONE_ACK_TEXT)], isError: false))),
+		Message(id: "h", timestamp: 3, body: .marker(MarkerBody(kind: .probeHandoff, content: HANDOFF_TEXT, display: true, details: [:]))),
+		Message(id: "a_k1", timestamp: 4, body: .assistant(AssistantBody(content: [.text(previewProse), .toolUse(id: "k1", name: "quiz", input: quiz)], model: "claude-opus-5-5", stopReason: "tool_use"))),
+	], to: chat.id)
+	return chat.id
+}
+
+/// The probe question open: the card inline at its call, the composer inside it asking about it.
+#Preview("Question open") {
+	sessionPreview(probeQuestion)
+}
+
+/// A teach check arrives behind its bar.
+#Preview("Teach check · waiting") {
+	sessionPreview(teachCheck)
+}
+
+/// The same check opened in place.
+#Preview("Teach check · opened") {
+	sessionPreview(teachCheck) { $0.revealedChecks.insert("k1") }
+}
+
+/// Paragraph notes: one sent with an earlier answer (muted, under its
+/// paragraph), one drafted on the next paragraph (the open field).
+#Preview("Paragraph notes") {
+	sessionPreview(probeQuestion) { s in
+		// The note anchors to the first paragraph's row, so answer once the rows exist.
+		let first = s.rows.first { if case .textBlock = $0.kind { true } else { false } }!.id
+		var a = dismissedAnswer(.ask, questionText: "Which join keeps every row of the left table?")
+		a.readingNotes = [ReadingNote(anchor: first, quote: readingQuote(previewProse), text: "So it's a filtered cross product?")]
+		a.readingThinking = readingThinkingText(a.readingNotes!)
+		try ChatRepository(s.database).append([
+			newAnswerResult(toolCallId: "q1", toolName: "ask_user_question", answer: a, now: 2),
+			Message(id: "a_more", timestamp: 3, body: .assistant(AssistantBody(content: [.text("A left join keeps them instead, filling the missing side with NULLs.")], model: "claude-opus-5-5", stopReason: "end_turn"))),
+		], to: s.chatId)
+		s.load()
+		let last = s.rows.last { if case .textBlock = $0.kind { true } else { false } }!.id
+		s.noteDrafts[last] = "Why NULLs and not empty strings?"
 	}
 }

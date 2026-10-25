@@ -124,7 +124,7 @@ Pending steers ride along as input.
   - **Answer:** built by M1 `buildAnswer` and submitted as the call's toolResult.
 - **Folding:**
   - **The reveal bar:** a teach-phase check (`questionNeedsReveal`) arrives collapsed behind "Check your understanding · Open ›" (the `revealArrival` rules).
-  - **The reading-thinking field:** "Thinking while reading" rides along on the answer.
+  - **Reading thinking (now paragraph notes):** questions show inline where they were asked, and the learner notes any paragraph of the teacher's prose (hover ✎). The notes ride on the next answer or dismissal as `readingNotes`, and as quoted `readingThinking` for the model. Sent notes stay under their paragraphs.
   - **The dock's own bar:** it folds and unfolds the dock ("Answer ↓"). Scrolling never folds it.
 - **Queued steers:** muted right-aligned lines above the dock until delivered.
 - **Plan marginalia:** beside the dock when a question is pending, a plan exists and the window is wide enough. A click opens the plan popup.

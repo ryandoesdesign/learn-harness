@@ -112,3 +112,19 @@ public func findUnits(_ blocks: [MDBlock], prefix: String) -> [FindUnit] {
 	}
 	return out
 }
+
+/// A block's text as a reading note quotes it: inline runs as displayed
+/// but math as its TeX, children and cells space-joined; diagrams and
+/// rules have none.
+public func quotedText(_ block: MDBlock) -> String {
+	switch block {
+	case .paragraph(let runs), .heading(_, let runs): runs.plainText
+	case .list(_, _, let items): items.flatMap(\.blocks).map(quotedText).joined(separator: " ")
+	case .quote(let children), .callout(_, let children): children.map(quotedText).joined(separator: " ")
+	case .code(_, let source, _, _): source
+	case .displayMath(let tex, _): tex
+	case .table(let header, let rows, _): ([header] + rows).flatMap { $0.map(\.plainText) }.joined(separator: " ")
+	case .html(let s): s
+	case .mermaid, .thematicBreak: ""
+	}
+}

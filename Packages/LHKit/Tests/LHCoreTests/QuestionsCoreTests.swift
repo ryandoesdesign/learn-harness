@@ -588,3 +588,25 @@ private func quizData(kind: QuestionKind = .quiz, mode: QuestionMode = .singleSe
 		#expect(cleaned["type"] == "check", "role survives the display parse")
 	}
 }
+
+/// Paragraph notes (the inline reading-thinking fields): stored on the
+/// answer, sent to the model as `thinkingWhileReading` quotes.
+@Suite struct ReadingNoteTests {
+	@Test func notesRoundTripAndReachTheModelAsQuotedBlocks() throws {
+		var a = QuestionAnswerData(kind: .quiz, questionText: "Q?", dontKnow: false, answers: [], answeredAt: "2026-10-25T00:00:00.000Z")
+		let notes = [ReadingNote(anchor: "m1/0/b0", quote: "Rows match on the key.", text: "the primary key?"), ReadingNote(anchor: "m1/0/b2", quote: "Unmatched rows drop.", text: "even LEFT?")]
+		a.readingNotes = notes
+		a.readingThinking = readingThinkingText(notes)
+		#expect(a.readingThinking == "> Rows match on the key.\nthe primary key?\n\n> Unmatched rows drop.\neven LEFT?")
+		let back = try #require(QuestionAnswerData(json: a.json))
+		#expect(back.readingNotes == notes)
+		#expect(compactAnswerForModel(back)["thinkingWhileReading"]?.stringValue == a.readingThinking)
+		#expect(compactAnswerForModel(back)["readingNotes"] == nil, "the model gets the quoted text only")
+	}
+
+	@Test func quotesCollapseWhitespaceAndCutAtTheLimit() {
+		#expect(readingQuote("a\n  b\tc") == "a b c")
+		let long = String(repeating: "x", count: READING_QUOTE_LIMIT + 50)
+		#expect(readingQuote(long) == String(repeating: "x", count: READING_QUOTE_LIMIT) + "…")
+	}
+}

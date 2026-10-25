@@ -263,8 +263,12 @@ public struct QuestionAnswerData: Sendable, Hashable {
 	public var thinking: String?
 	/// Deprecated pre-rename key — read via `thinking ?? note`.
 	public var note: String?
-	/// The thinking WHILE READING the teaching prose (rides check answers).
+	/// The thinking WHILE READING the teaching prose (rides check answers):
+	/// with paragraph notes, `readingThinkingText(readingNotes)`.
 	public var readingThinking: String?
+	/// The notes on specific paragraphs this answer carried (the inline
+	/// reading-thinking fields; older answers have only `readingThinking`).
+	public var readingNotes: [ReadingNote]?
 	/// quiz only: stated probability (0-100) the selection is correct.
 	public var confidence: Double?
 	public var correct: Bool?
@@ -310,6 +314,7 @@ public struct QuestionAnswerData: Sendable, Hashable {
 		thinking = json["thinking"]?.stringValue
 		note = json["note"]?.stringValue
 		readingThinking = json["readingThinking"]?.stringValue
+		readingNotes = json["readingNotes"]?.arrayValue?.compactMap(ReadingNote.init(json:))
 		confidence = json["confidence"]?.doubleValue
 		correct = json["correct"]?.boolValue
 		correctIndices = json["correctIndices"]?.arrayValue?.compactMap(\.intValue)
@@ -331,6 +336,7 @@ public struct QuestionAnswerData: Sendable, Hashable {
 		if let thinking { o["thinking"] = .string(thinking) }
 		if let note { o["note"] = .string(note) }
 		if let readingThinking { o["readingThinking"] = .string(readingThinking) }
+		if let readingNotes { o["readingNotes"] = .array(readingNotes.map(\.json)) }
 		if let dismissed { o["dismissed"] = .bool(dismissed) }
 		if let discussed { o["discussed"] = .bool(discussed) }
 		o["answeredAt"] = .string(answeredAt)
@@ -667,4 +673,40 @@ public func compactAnswerForModel(_ ad: JSONValue) -> JSONObject {
 
 public func compactAnswerForModel(_ ad: QuestionAnswerData) -> JSONObject {
 	compactAnswerForModel(ad.json)
+}
+
+/// One note on a paragraph of the teaching: the paragraph's transcript row
+/// (`anchor`), its text as quoted to the teacher, and what he thought.
+public struct ReadingNote: Sendable, Hashable {
+	public var anchor: String
+	public var quote: String
+	public var text: String
+	public init(anchor: String, quote: String, text: String) {
+		self.anchor = anchor
+		self.quote = quote
+		self.text = text
+	}
+
+	init?(json: JSONValue) {
+		guard let anchor = json["anchor"]?.stringValue, let text = json["text"]?.stringValue else { return nil }
+		self.init(anchor: anchor, quote: json["quote"]?.stringValue ?? "", text: text)
+	}
+
+	var json: JSONValue { ["anchor": .string(anchor), "quote": .string(quote), "text": .string(text)] }
+}
+
+/// The longest quote a note carries (characters).
+public let READING_QUOTE_LIMIT = 300
+
+/// A paragraph's text as a note quotes it: whitespace runs collapsed, cut at
+/// `READING_QUOTE_LIMIT` with an ellipsis.
+public func readingQuote(_ paragraph: String) -> String {
+	let flat = paragraph.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+	return flat.count <= READING_QUOTE_LIMIT ? flat : String(flat.prefix(READING_QUOTE_LIMIT)) + "…"
+}
+
+/// The `thinkingWhileReading` text for paragraph notes: each note as its
+/// quoted paragraph then the note, blank-line separated.
+public func readingThinkingText(_ notes: [ReadingNote]) -> String {
+	notes.map { "> \($0.quote)\n\($0.text)" }.joined(separator: "\n\n")
 }

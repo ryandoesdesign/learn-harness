@@ -1,6 +1,7 @@
 import Foundation
 import LHAgent
 import LHCore
+import LHMarkdown
 import LHStore
 
 /// The live session (port of components/session-core.ts as a native model):
@@ -15,10 +16,41 @@ extension SessionModel {
 		return danglingQuestionOf(record.messages)
 	}
 
-	/// A teach-phase check arrives behind the reveal bar (questionNeedsReveal).
-	var requiresReveal: Bool {
-		guard let p = pending else { return false }
-		return questionNeedsReveal(tool: p.tool, rawInput: p.input, phase: phase.rawValue)
+	/// Every open question (siblings included), each shown at its call.
+	var pendingAll: [(toolCallId: String, tool: String, input: JSONValue)] {
+		guard !running, status == .idle, let record else { return [] }
+		return danglingQuestionsOf(record.messages)
+	}
+
+	/// A teach-phase check waits behind its reveal bar (questionNeedsReveal)
+	/// until opened.
+	func waitsForReveal(tool: String, toolCallId: String, input: JSONValue) -> Bool {
+		questionNeedsReveal(tool: tool, rawInput: input, phase: phase.rawValue) && !revealedChecks.contains(toolCallId)
+	}
+
+	/// The first open question's card row (the "Question below" pill's target).
+	var pendingRowId: String? {
+		guard let id = pending?.toolCallId else { return nil }
+		return rows.first { if case .pendingQuestion(_, id, _) = $0.kind { true } else { false } }?.id
+	}
+
+	/// The drafted paragraph notes, in transcript order, quoted — then cleared.
+	func takeReadingNotes() -> [ReadingNote] {
+		var out: [ReadingNote] = []
+		for row in rows {
+			guard case .textBlock(let block, _) = row.kind, let text = noteDrafts[row.id]?.jsTrimmed, !text.isEmpty else { continue }
+			out.append(ReadingNote(anchor: row.id, quote: readingQuote(quotedText(block)), text: text))
+		}
+		noteDrafts = [:]
+		return out
+	}
+
+	/// An answer or dismissal carries the drafted notes.
+	private func attachReadingNotes(_ a: inout QuestionAnswerData) {
+		let notes = takeReadingNotes()
+		guard !notes.isEmpty else { return }
+		a.readingNotes = notes
+		a.readingThinking = readingThinkingText(notes)
 	}
 
 	var busy: Bool { running || status != .idle }
@@ -171,9 +203,7 @@ extension SessionModel {
 	func submitAnswer(_ answer: QuestionAnswerData, toolCallId: String) {
 		guard let service else { return }
 		var a = answer
-		let reading = readingThinking.jsTrimmed
-		if !reading.isEmpty { a.readingThinking = reading }
-		readingThinking = ""
+		attachReadingNotes(&a)
 		status = .submitted
 		Task {
 			do {
@@ -197,9 +227,7 @@ extension SessionModel {
 		let text = dockQuestion(tool: p.tool, toolCallId: p.toolCallId, input: p.input)?.question
 			?? record.messages.last?.assistant?.toolUses.first?.input["question"]?.stringValue ?? ""
 		var a = dismissedAnswer(toolQuestionKind(p.tool), questionText: text)
-		let reading = readingThinking.jsTrimmed
-		if !reading.isEmpty { a.readingThinking = reading }
-		readingThinking = ""
+		attachReadingNotes(&a)
 		Task {
 			do { try await service.dismiss(chatId, toolCallId: p.toolCallId, answer: a) } catch { refused(error, draft: nil) }
 			load()
@@ -301,38 +329,17 @@ extension SessionModel {
 		// turn actually runs (or the sibling arrives).
 		if id == nil, status == .submitted { return }
 		lastPendingId = id
-		guard let id else { return }
-		// A re-posed question picks up where the learner left it: open, reading thinking kept.
-		if reposeOrigin(id) == discussedOrigin {
-			discussedOrigin = nil
-			dockExpanded = true
-			revealed = true
-			return
-		}
+		guard id != nil else { return }
+		// A re-posed question picks up where the learner left it: open. Any
+		// other teach check arrives behind its bar (your rule: inline questions).
+		for q in pendingAll where reposeOrigin(q.toolCallId) == discussedOrigin { revealedChecks.insert(q.toolCallId) }
 		discussedOrigin = nil
-		// The view's real position (your rule): reading content that grew past
-		// the window means not at the bottom, even while following is sticky.
-		let arrival = questionArrival(atBottom: viewAtBottom)
-		dockExpanded = arrival.expanded
-		revealed = arrival.revealed
-		readingThinking = ""
 	}
 
-	/// Open the folded dock (reveals a teach check).
-	func expandDock() {
-		dockExpanded = true
-		revealed = true
+	/// Scroll the first open question's card into view.
+	func showPendingQuestion() {
+		if let row = pendingRowId { rowRequest = AnchorRequest(anchor: row) }
 	}
-}
-
-/// How a new question arrives (your rule, 2026-10-24 — replaces the TS
-/// revealArrival/probeArrivalExpanded pair): expanded when the view is at
-/// the bottom of the conversation, folded otherwise — every kind alike (a
-/// folded teach check shows "Check your understanding"). "At the bottom" is
-/// where the view really is (`viewAtBottom`): reading prose that grew past
-/// the window folds the question even though following stays on.
-func questionArrival(atBottom: Bool) -> (expanded: Bool, revealed: Bool) {
-	(atBottom, atBottom)
 }
 
 /// composer.tsx enterAction.

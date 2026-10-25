@@ -56,16 +56,25 @@ final class SessionModel {
 	/// the sticky `isAtBottom`, content growing past the window clears it.
 	/// A new question arrives open only when this holds.
 	var viewAtBottom = true
-	// The dock (pinned; folds on demand).
-	var dockExpanded = true
-	var revealed = true
-	var readingThinking = ""
+	/// Teach checks opened from their "Check your understanding" bar, by call id.
+	var revealedChecks: Set<String> = []
+	/// Paragraph notes not yet sent, by paragraph row id (an open field is a
+	/// key); they ride on the next answer or dismissal.
+	var noteDrafts: [String: String] = [:]
+	/// Sent paragraph notes by paragraph row id (the record's answers).
+	private(set) var sentNotes: [String: [String]] = [:]
+	/// The streaming message's row-id prefix: its paragraphs aren't settled, so take no notes.
+	private(set) var unsettledRowPrefix: String?
 	var lastPendingId: String?
+	/// Set to scroll the transcript to a row (the "Question below" pill).
+	var rowRequest: AnchorRequest?
 	/// The question set aside to ask about it (its origin call id): its re-posed copy arrives open.
 	var discussedOrigin: String?
 	/// What the learner had started in a question card, by origin call id — a set-aside card leaves
 	/// the dock while the teacher replies and gets it back when it's re-posed.
 	var cardDrafts: [String: QuestionCardDraft] = [:]
+	/// Cards that have taken the focus once (an inline card scrolled back into view doesn't again).
+	var focusedCards: Set<String> = []
 	// Practice (M8): the dock's thinking draft and fold.
 	var practiceThinking = ""
 	var problemDockExpanded = true
@@ -129,6 +138,13 @@ final class SessionModel {
 			: nil
 		view = projectView(messages, live: live)
 		rows = transcriptRows(native: messages, view: view, streaming: status == .streaming)
+		var sent: [String: [String]] = [:]
+		for m in messages {
+			guard let details = m.toolResult?.details, let notes = QuestionAnswerData(json: details)?.readingNotes else { continue }
+			for n in notes { sent[n.anchor, default: []].append(n.text) }
+		}
+		sentNotes = sent
+		unsettledRowPrefix = status == .streaming ? view.last.map { "\($0.id.isEmpty ? "m-\(view.count - 1)" : $0.id)/" } : nil
 		plan = latestTree(view)
 		phase = viewPhaseTimeline(view).last ?? .probe
 		refreshFindUnits()
@@ -178,7 +194,7 @@ final class SessionModel {
 			case .practiceThinking: openState[row.id] = open
 			case .answered(let a, _):
 				if a.thinking != nil || a.note != nil { openState["\(row.id).thinking"] = open }
-				if a.readingThinking != nil { openState["\(row.id).reading"] = open }
+				if a.readingThinking != nil, a.readingNotes == nil { openState["\(row.id).reading"] = open }
 			default: break
 			}
 		}
@@ -324,5 +340,12 @@ final class SessionOverlays {
 			return true
 		}
 		return false
+	}
+}
+
+extension SessionModel {
+	/// A paragraph row takes notes: the teacher's settled prose, outside practice.
+	func takesNotes(_ rowId: String) -> Bool {
+		!isPractice && !(unsettledRowPrefix.map(rowId.hasPrefix) ?? false)
 	}
 }

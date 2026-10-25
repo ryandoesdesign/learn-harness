@@ -27,12 +27,6 @@ import Testing
 		#expect(escAbortTarget(abortAsk: false, diagram: false, plan: false, setup: false, pending: false, problem: false, busy: false) == nil)
 	}
 
-	/// New questions: expanded at the bottom, folded when scrolled up — every kind.
-	@Test func questionArrivalFollowsTheScroll() {
-		#expect(questionArrival(atBottom: true) == (true, true))
-		#expect(questionArrival(atBottom: false) == (false, false))
-	}
-
 	@Test func abortDialogCopy() {
 		#expect(AbortMode.turn.title == "Abort this turn?")
 		#expect(AbortMode.turn.line(busy: true) == "The partial answer stays in the transcript.")
