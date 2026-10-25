@@ -42,8 +42,8 @@ private final class HeightBox { var height: CGFloat = 0 }
 
 	@Test func aShortQuestionHugsItsContents() async throws {
 		let h = try await height(question: "Which join keeps every left row?", options: 2)
-		// The card now carries the composer (asking about the question): ~60pt more.
-		#expect(h < 360, "two options, a line of question and the ask field: \(h)")
+		// The "Ask about it" row adds ~40pt to every card.
+		#expect(h < 340, "two options, a line of question, Other and Ask about it: \(h)")
 	}
 
 	@Test func aLongQuestionStopsAtTheCap() async throws {

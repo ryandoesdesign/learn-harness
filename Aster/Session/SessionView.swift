@@ -694,7 +694,7 @@ private func teachCheck(_ repo: ChatRepository) throws -> String {
 	return chat.id
 }
 
-/// The probe question open: the card inline at its call, the composer inside it asking about it.
+/// The probe question open: the card inline at its call ("Ask about it" last in its rows).
 #Preview("Question open") {
 	sessionPreview(probeQuestion)
 }

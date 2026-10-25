@@ -149,8 +149,9 @@ extension SessionModel {
 	}
 
 	/// Ask about the open question instead of answering it: it is set aside,
-	/// the teacher replies, and it comes back open (Discuss.swift).
-	private func discuss(_ text: String, toolCallId: String) {
+	/// the teacher replies, and it comes back open (Discuss.swift). From the
+	/// card ("Ask about it") a refused send stays in the card, not the composer.
+	func discuss(_ text: String, toolCallId: String, fromCard: Bool = false) {
 		guard let service else { return }
 		errorText = nil
 		needsKey = false
@@ -163,7 +164,7 @@ extension SessionModel {
 			} catch {
 				status = .idle
 				discussedOrigin = nil
-				refused(error, draft: text)
+				refused(error, draft: fromCard ? nil : text)
 			}
 		}
 	}

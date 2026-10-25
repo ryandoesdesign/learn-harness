@@ -6,8 +6,9 @@ import SwiftUI
 
 /// The pinned dock (docs/native-macos-m5.md: pinned below the transcript):
 /// queued steers, then the composer — or practice's problem. Questions show
-/// inline where they were asked, the composer inside the open card (the
-/// transcript's "Question below" pill jumps to one out of view).
+/// inline where they were asked, and the dock is empty while one is open
+/// (the card's "Ask about it" asks the teacher instead; the transcript's
+/// "Question below" pill jumps to one out of view).
 struct DockView: View {
 	@Bindable var session: SessionModel
 	@Environment(\.openSettings) private var openSettings
@@ -39,7 +40,7 @@ struct DockView: View {
 				QueuedSteersView(steers: session.queuedSteers)
 			}
 			if session.pending != nil {
-				// The composer moves into the open question's card ("Ask about the question…").
+				// Nothing: the open question's card asks about it ("Ask about it").
 			} else if let problem = session.activeProblem {
 				// Practice (M8): the problem replaces the composer while it's active.
 				PracticeDockView(session: session, problem: problem)

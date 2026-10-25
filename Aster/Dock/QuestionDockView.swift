@@ -6,6 +6,8 @@ import SwiftUI
 /// single/multi (seeded shuffle), predict, probe, recall/explain (free
 /// text), ask (option descriptions + "Other"). "I don't know", the
 /// confidence rail, the thinking field; Submit builds the answer (buildAnswer).
+/// "Ask about it" sets the question aside to ask the teacher instead (the
+/// field below becomes the question; Discuss.swift).
 /// Keys (the dock's own): ↑/↓ walk the rows (clamped), Space acts on the
 /// walked row, ←/→ step confidence, Enter submits.
 struct QuestionDockView: View {
@@ -19,6 +21,9 @@ struct QuestionDockView: View {
 	@State private var other = ""
 	@State private var text = ""
 	@State private var confIdx = DEFAULT_CONFIDENCE_INDEX
+	/// "Ask about it": the learner field holds a question for the teacher.
+	@State private var asking = false
+	@State private var askText = ""
 	@State private var walked: Int?
 	static let maxBody: CGFloat = 420
 	@FocusState private var focus: Field?
@@ -41,12 +46,15 @@ struct QuestionDockView: View {
 			.onAppear {
 				guard let d = session.cardDrafts.removeValue(forKey: reposeOrigin(toolCallId)) else { return }
 				(sel, thinking, other, text, confIdx) = (d.sel, d.thinking, d.other, d.text, d.confIdx)
+				// The same card (scrolled back, or a refused ask) keeps its asking; a
+				// re-posed copy comes back without the question already asked.
+				if d.callId == toolCallId { (asking, askText) = (d.asking, d.askText) }
 			}
 			// Also a card scrolled out of the lazy transcript keeps what was started;
 			// an answered one (in flight, not set aside) has nothing to keep.
 			.onDisappear {
 				guard session.discussedOrigin == reposeOrigin(toolCallId) || session.status == .idle else { return }
-				session.cardDrafts[reposeOrigin(toolCallId)] = QuestionCardDraft(sel: sel, thinking: thinking, other: other, text: text, confIdx: confIdx)
+				session.cardDrafts[reposeOrigin(toolCallId)] = QuestionCardDraft(callId: toolCallId, sel: sel, thinking: thinking, other: other, text: text, confIdx: confIdx, asking: asking, askText: askText)
 			}
 	}
 
@@ -89,6 +97,7 @@ struct QuestionDockView: View {
 							}
 							if qd.kind == .quiz { dontKnowRow(walkedHere: walked == qd.options.count) }
 							if qd.kind == .ask { otherRow(mode: mode, index: qd.options.count, walkedHere: walked == qd.options.count) }
+							askRow(walkedHere: walked == askIndex(qd))
 						}
 						.focusable()
 						.focused($focus, equals: .rows)
@@ -97,20 +106,17 @@ struct QuestionDockView: View {
 							handleRowKey(press.key, qd: qd, mode: mode, rows: rows)
 						}
 					}
-					if qd.kind == .quiz { confidence(disabled: sel.dontKnow) }
+					if qd.kind == .quiz { confidence(disabled: sel.dontKnow || asking) }
 				}
 			}
 			learnerField(qd)
 			HStack {
-				Text(session.compacting ? "compacting session…" : "↵ submits · ⇧↵ newline").font(Theme.ui).foregroundStyle(Theme.faint)
+				Text(session.compacting ? "compacting session…" : asking ? "↵ asks · ⇧↵ newline" : "↵ submits · ⇧↵ newline").font(Theme.ui).foregroundStyle(Theme.faint)
 				Spacer()
-				Button("Submit answer") { submit(qd) }
+				Button(asking ? "Ask" : "Submit answer") { submit(qd) }
 					.buttonStyle(.borderedProminent)
 					.disabled(!canSubmit(qd) || session.compacting)
 			}
-			// Asking about the question instead of answering it (it stays open): the
-			// composer itself, which leaves the dock while a question is open.
-			ComposerView(session: session)
 		}
 		.padding(16)
 		.background(RoundedRectangle(cornerRadius: 12).fill(Theme.card))
@@ -126,6 +132,7 @@ struct QuestionDockView: View {
 		let selected = sel.selected.contains(index)
 		return Button {
 			sel = toggleOption(mode, sel, index)
+			asking = false
 			walked = index
 		} label: {
 			HStack(alignment: .firstTextBaseline, spacing: 10) {
@@ -161,6 +168,7 @@ struct QuestionDockView: View {
 	private func dontKnowRow(walkedHere: Bool) -> some View {
 		Button {
 			sel = sel.dontKnow ? emptyDockSelection() : DockSelection(selected: [], otherSelected: false, dontKnow: true)
+			asking = false
 		} label: {
 			HStack(spacing: 10) {
 				indicator(selected: sel.dontKnow, multi: false)
@@ -175,16 +183,41 @@ struct QuestionDockView: View {
 		.buttonStyle(.plain)
 	}
 
+	/// "Ask about it": last in the rows, dashed like "I don't know"; it
+	/// clears any selection (and an option or "I don't know" clears it).
+	private func askRow(walkedHere: Bool) -> some View {
+		Button { toggleAsking() } label: {
+			HStack(spacing: 10) {
+				indicator(selected: asking, multi: false)
+				Text("Ask about it").font(Theme.small).foregroundStyle(asking ? .primary : Theme.muted)
+				Spacer()
+			}
+			.padding(.horizontal, 12)
+			.padding(.vertical, 8)
+			.contentShape(Rectangle())
+			.overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(asking ? Color.accentColor : walkedHere ? Theme.muted : Theme.border, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+		}
+		.buttonStyle(.plain)
+	}
+
+	private func toggleAsking() {
+		asking.toggle()
+		if asking {
+			sel = emptyDockSelection()
+			focus = .learner
+		}
+	}
+
 	private func otherRow(mode: SelectMode, index: Int, walkedHere: Bool) -> some View {
 		HStack(spacing: 10) {
-			Button { sel = toggleOther(mode, sel) } label: { indicator(selected: sel.otherSelected, multi: mode == .multiSelect) }
+			Button { sel = toggleOther(mode, sel); asking = false } label: { indicator(selected: sel.otherSelected, multi: mode == .multiSelect) }
 				.buttonStyle(.plain)
 			TextField("Type your own answer…", text: $other)
 				.textFieldStyle(.plain)
 				.font(Theme.small)
 				.focused($focus, equals: .other)
 				.onChange(of: other) { _, v in
-					if !v.isEmpty, !sel.otherSelected { sel = toggleOther(mode, sel) }
+					if !v.isEmpty, !sel.otherSelected { sel = toggleOther(mode, sel); asking = false }
 				}
 				// Esc leaves the field and parks the row cursor on "Other".
 				.onKeyPress(.escape) {
@@ -216,11 +249,12 @@ struct QuestionDockView: View {
 	private func learnerField(_ qd: QuestionData) -> some View {
 		let textMode = qd.mode == .text
 		VStack(alignment: .leading, spacing: 4) {
-			Eyebrow(textMode ? "Your answer" : "Your thinking")
+			Eyebrow(asking ? "Your question" : textMode ? "Your answer" : "Your thinking")
 			ZStack(alignment: .topLeading) {
-				let binding = textMode ? $text : $thinking
+				// The asked question is its own text: switching back restores the answer or thinking.
+				let binding = asking ? $askText : textMode ? $text : $thinking
 				if binding.wrappedValue.isEmpty {
-					Text(textMode ? "Type your answer…" : "Why this answer? Whatever comes to mind.")
+					Text(asking ? "Ask about the question…" : textMode ? "Type your answer…" : "Why this answer? Whatever comes to mind.")
 						.foregroundStyle(Theme.faint)
 						.padding(.horizontal, 5)
 						.padding(.vertical, 2)
@@ -239,12 +273,26 @@ struct QuestionDockView: View {
 					}
 			}
 			.font(Theme.small)
+			// Text answers have no rows: asking is a link under the box.
+			if textMode {
+				Button(asking ? "Answer instead" : "Ask about it instead") {
+					asking.toggle()
+					focus = .learner
+				}
+				.buttonStyle(.link)
+				.font(Theme.ui)
+			}
 		}
 	}
 
 	// MARK: Keys and submit
 
+	/// The rows: the options, "I don't know" (quiz) or "Other" (ask), then "Ask about it".
 	private func rowCount(_ qd: QuestionData) -> Int {
+		askIndex(qd) + 1
+	}
+
+	private func askIndex(_ qd: QuestionData) -> Int {
 		qd.options.count + (qd.kind == .quiz || qd.kind == .ask ? 1 : 0)
 	}
 
@@ -265,14 +313,15 @@ struct QuestionDockView: View {
 			walked = max((walked ?? 1) - 1, 0)
 		case .space:
 			guard let w = walked else { return .ignored }
-			if w < qd.options.count { sel = toggleOption(mode, sel, w) }
-			else if qd.kind == .quiz { sel = sel.dontKnow ? emptyDockSelection() : DockSelection(selected: [], otherSelected: false, dontKnow: true) }
-			else { sel = toggleOther(mode, sel); focus = .other }
+			if w < qd.options.count { sel = toggleOption(mode, sel, w); asking = false }
+			else if w == askIndex(qd) { toggleAsking() }
+			else if qd.kind == .quiz { sel = sel.dontKnow ? emptyDockSelection() : DockSelection(selected: [], otherSelected: false, dontKnow: true); asking = false }
+			else { sel = toggleOther(mode, sel); asking = false; focus = .other }
 		case .leftArrow:
-			guard qd.kind == .quiz, !sel.dontKnow else { return .ignored }
+			guard qd.kind == .quiz, !sel.dontKnow, !asking else { return .ignored }
 			confIdx = max(confIdx - 1, 0)
 		case .rightArrow:
-			guard qd.kind == .quiz, !sel.dontKnow else { return .ignored }
+			guard qd.kind == .quiz, !sel.dontKnow, !asking else { return .ignored }
 			confIdx = min(confIdx + 1, CONFIDENCE_STOPS.count - 1)
 		case .return:
 			submit(qd)
@@ -283,6 +332,7 @@ struct QuestionDockView: View {
 	}
 
 	private func canSubmit(_ qd: QuestionData) -> Bool {
+		if asking { return !askText.jsTrimmed.isEmpty }
 		if qd.mode == .text { return !text.jsTrimmed.isEmpty }
 		return sel.dontKnow || (sel.otherSelected && !other.jsTrimmed.isEmpty) || !sel.selected.isEmpty
 	}
@@ -295,6 +345,11 @@ struct QuestionDockView: View {
 
 	private func submitNow(_ qd: QuestionData) {
 		guard canSubmit(qd), !session.compacting else { return }
+		if asking {
+			// Set aside, not answered: it comes back open (without the asked text).
+			session.discuss(askText.jsTrimmed, toolCallId: toolCallId, fromCard: true)
+			return
+		}
 		let req = AnswerRequest(
 			dontKnow: sel.dontKnow,
 			values: sel.selected.sorted().map { qd.options[$0].value },
@@ -335,9 +390,13 @@ struct HuggingScroll<Content: View>: View {
 
 /// A question card's unsent state (SessionModel.cardDrafts).
 struct QuestionCardDraft {
-	var sel: DockSelection
-	var thinking: String
-	var other: String
-	var text: String
-	var confIdx: Int
+	/// The call the draft was saved from (a re-posed copy has a new one).
+	var callId = ""
+	var sel = emptyDockSelection()
+	var thinking = ""
+	var other = ""
+	var text = ""
+	var confIdx = DEFAULT_CONFIDENCE_INDEX
+	var asking = false
+	var askText = ""
 }
