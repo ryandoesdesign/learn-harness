@@ -17,7 +17,10 @@ private let askOptionProperties: [JSONSchema.Property] = quizOptionProperties + 
 	.init("description", .string(description: "Optional extra detail shown below the option").optional()),
 ]
 
-private let detailsSchema = JSONSchema.string(description: "Optional extra context or instructions shown under the question.").optional()
+private let detailsSchema = JSONSchema.string(description:
+	"Optional, a line at most: HOW to answer — the format or shorthand you'll accept (e.g. \"Shorthand is fine: " +
+	"'1 H/H – because…'\"). Never teaching: cards, reference lists, definitions, recaps and explanations go in " +
+	"your reply's visible text, above the question.").optional()
 
 private let nodeIdSchema = JSONSchema.string(description:
 	"REQUIRED plan-tree node id this question is about — must EXACTLY match one of this session's " +

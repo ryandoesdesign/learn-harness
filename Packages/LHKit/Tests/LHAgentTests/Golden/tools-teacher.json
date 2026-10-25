@@ -79,7 +79,7 @@
 				},
 				"details": {
 					"type": "string",
-					"description": "Optional extra context or instructions shown under the question."
+					"description": "Optional, a line at most: HOW to answer — the format or shorthand you'll accept (e.g. \"Shorthand is fine: '1 H/H – because…'\"). Never teaching: cards, reference lists, definitions, recaps and explanations go in your reply's visible text, above the question."
 				}
 			}
 		}
@@ -99,7 +99,7 @@
 				},
 				"details": {
 					"type": "string",
-					"description": "Optional extra context or instructions shown under the question."
+					"description": "Optional, a line at most: HOW to answer — the format or shorthand you'll accept (e.g. \"Shorthand is fine: '1 H/H – because…'\"). Never teaching: cards, reference lists, definitions, recaps and explanations go in your reply's visible text, above the question."
 				},
 				"options": {
 					"type": "array",
