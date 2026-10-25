@@ -104,7 +104,7 @@ public func decodeVerdicts(_ v: JSONValue) -> AuditVerdicts? {
 	var out: [IdentityLink] = []
 	for l in links {
 		guard let id = l["id"]?.stringValue, let to = l["linkTo"]?.stringValue else { return nil }
-		out.append(IdentityLink(id: id, linkTo: to))
+		out.append(IdentityLink(id: id, linkTo: to, rewrite: l["rewrite"]?.boolValue ?? false))
 	}
 	return AuditVerdicts(links: out)
 }

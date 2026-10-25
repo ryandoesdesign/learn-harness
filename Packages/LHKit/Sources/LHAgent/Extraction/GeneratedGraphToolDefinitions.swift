@@ -45,6 +45,7 @@ enum GeneratedGraphTools {
 		.init("links", JSONSchema.array(JSONSchema.object(properties: [
 			.init("id", JSONSchema.string(description: "The proposition id from the findings (\"p1\", …).")),
 			.init("linkTo", JSONSchema.string(description: "The id of the EXISTING graph node this proposition IS — your identity verdict. EQUIVALENCE BIAS (2026-09-27): paraphrases, rewordings, and compressions of the same claim MERGE; only genuinely distinct propositions stay apart.")),
+			.init("rewrite", JSONSchema.boolean(description: "true = this proposition states the node's SAME claim better — more precisely, or in more standard terminology — so its name and statement replace the node's. Never for a broader, narrower, or different claim, or a mere rewording. Default false.").optional()),
 		]), description: "Identity verdicts — which findings propositions ARE existing graph nodes. A proposition absent from here = create a new node. Pass [] when none — never omit the field.")),
 	])
 	static let auditorFindDescription = "Search the knowledge graph for existing propositions — glob over names, statements, and aliases. Returns each match's id, name, full statement, and the session(s) it was born in (a list_propositions id). This is how you decide whether a new proposition IS an existing one: search its key words, its synonyms, its phrasings."

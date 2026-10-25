@@ -74,17 +74,18 @@ public func mergeFindings(
 	var existingIds = Set(ledgers.readNodes().map(\.id))
 	var mapping: [String: String] = [:]
 	let nowISO = GraphJS.isoString(now)
-	var linkOf: [String: String] = [:]
-	for link in verdicts.links { linkOf[link.id] = link.linkTo }
+	var linkOf: [String: IdentityLink] = [:]
+	for link in verdicts.links { linkOf[link.id] = link }
 
 	for p in findings.propositions {
 		if mapping[p.id] != nil { continue } // duplicate id within this submit — first resolution stands
 		let points = pointOf(chatId, p.messageId)
 		let graphNodeId: String
-		if let linkTo = linkOf[p.id], existingIds.contains(linkTo) {
-			// Identity verdict: append a link line (first line's name/statement stand at read time).
-			graphNodeId = linkTo
-			try ledgers.appendNode(GraphNode(id: graphNodeId, name: p.name, statement: p.statement, aliases: p.aliases, createdAt: nowISO, provenance: points))
+		if let link = linkOf[p.id], existingIds.contains(link.linkTo) {
+			// Identity verdict: append a link line (the node's name/statement stand at read time unless it revises).
+			graphNodeId = link.linkTo
+			try ledgers.appendNode(GraphNode(id: graphNodeId, name: p.name, statement: p.statement, aliases: p.aliases, createdAt: nowISO, provenance: points,
+				revises: link.rewrite ? true : nil))
 		} else {
 			let node = GraphNode(id: newGraphNodeId(random), name: p.name, statement: p.statement, aliases: p.aliases, createdAt: nowISO, provenance: points)
 			try ledgers.appendNode(node)
@@ -236,7 +237,8 @@ public struct DerivedGraph: Sendable, Hashable {
 
 /// The whole graph from the ledgers. Node lines merge by id: the FIRST line
 /// defines name/statement/createdAt; later lines' statements and aliases join
-/// `aliases`, provenance unions. Chain lines merge by (premises, conclusion):
+/// `aliases`, provenance unions. A revising line instead replaces the name and
+/// statement, the previous statement joining `aliases`; the last revision wins. Chain lines merge by (premises, conclusion):
 /// the first line's id/premises/createdAt stand, provenance unions.
 public func getGraph(_ graphStore: any GraphStore) -> DerivedGraph {
 	var nodes: [GraphNode] = []
@@ -247,8 +249,15 @@ public func getGraph(_ graphStore: any GraphStore) -> DerivedGraph {
 			nodes.append(line)
 			continue
 		}
-		// A later line's statement is a phrasing, not a replacement.
-		for phrasing in [line.statement] + line.aliases where !phrasing.isEmpty && !nodes[i].aliases.contains(phrasing) {
+		// A later line's statement is a phrasing, not a replacement — unless it revises.
+		var phrasings = [line.statement] + line.aliases
+		if line.revises == true {
+			phrasings = [nodes[i].statement] + line.aliases.filter { $0 != line.statement }
+			nodes[i].name = line.name
+			nodes[i].statement = line.statement
+			nodes[i].aliases.removeAll { $0 == line.statement }
+		}
+		for phrasing in phrasings where !phrasing.isEmpty && !nodes[i].aliases.contains(phrasing) {
 			nodes[i].aliases.append(phrasing)
 		}
 		for pt in line.provenance where !nodes[i].provenance.contains(pt) {

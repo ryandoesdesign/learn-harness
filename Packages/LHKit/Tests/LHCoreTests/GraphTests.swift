@@ -135,6 +135,41 @@ struct GraphMergerTests {
 		#expect(alpha.provenance.contains { $0.chatId == "chat_2" }, "provenance unions")
 	}
 
+	@Test func aRewriteVerdictRevisesTheNodeAndKeepsTheOldStatement() throws {
+		let w = World()
+		w.chats.create("chat_1", title: "Graph fixture")
+		try w.merge("chat_1", fixtureFindings())
+		let alphaId = try #require(w.scoped(["chat_1"]).nodes.first { $0.statement == "Alpha intuition" }).id
+		w.chats.create("chat_2", title: "Graph fixture 2")
+		try w.merge("chat_2", SessionFindings(propositions: [prop("q1", "Alpha principle", "Alpha, stated precisely")], chains: []),
+			links: [IdentityLink(id: "q1", linkTo: alphaId, rewrite: true)])
+		#expect(w.graph.nodes.last?.revises == true)
+		var alpha = try #require(getGraph(w.graph).nodes.first { $0.id == alphaId })
+		#expect(alpha.name == "Alpha principle" && alpha.statement == "Alpha, stated precisely")
+		#expect(alpha.aliases.contains("Alpha intuition") && alpha.aliases.contains("alpha feel"))
+		#expect(!alpha.aliases.contains("Alpha, stated precisely"))
+		#expect(alpha.createdAt == w.graph.nodes.first { $0.id == alphaId }?.createdAt, "the identity stands")
+		#expect(getGraph(w.graph).chains.count == 1, "chains are untouched")
+
+		w.chats.create("chat_3", title: "Graph fixture 3")
+		try w.merge("chat_3", SessionFindings(propositions: [prop("r1", "Alpha law", "Alpha, stated best")], chains: []),
+			links: [IdentityLink(id: "r1", linkTo: alphaId, rewrite: true)])
+		alpha = try #require(getGraph(w.graph).nodes.first { $0.id == alphaId })
+		#expect(alpha.name == "Alpha law" && alpha.statement == "Alpha, stated best", "the last revision wins")
+		#expect(alpha.aliases.contains("Alpha, stated precisely") && alpha.aliases.contains("Alpha intuition"))
+	}
+
+	@Test func aPlainLinkLineCarriesNoRevisesField() throws {
+		let w = World()
+		w.chats.create("chat_1", title: "Graph fixture")
+		try w.merge("chat_1", fixtureFindings())
+		let alphaId = try #require(w.scoped(["chat_1"]).nodes.first { $0.statement == "Alpha intuition" }).id
+		try w.merge("chat_1", SessionFindings(propositions: [prop("q1", "Alpha", "Alpha feel")], chains: []), links: [IdentityLink(id: "q1", linkTo: alphaId)])
+		let line = try #require(w.graph.nodes.last)
+		#expect(line.revises == nil)
+		#expect(try JSONCodec.encode(line)["revises"] == nil, "the ledger JSON is unchanged")
+	}
+
 	@Test func resolvesImportedNotesIdsToTheirFilePathsInTheSnapshot() throws {
 		let w = World()
 		w.graph.upsertSource(NotesSource(id: "src_snapfixture", filePath: "/vault/learn vim.md", importedAt: "2026-09-13T00:00:00.000Z"))

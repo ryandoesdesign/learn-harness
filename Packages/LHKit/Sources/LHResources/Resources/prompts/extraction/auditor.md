@@ -27,6 +27,13 @@ IDENTITY — links, per proposition:
   propositions — different claims about the world — stay apart. You are NOT guarding against wrong merges; you are
   hunting for right ones.
 
+REWRITE — per link, rarely:
+- A link may carry "rewrite": true when the proposition states the node's SAME claim BETTER than the node does:
+  more precisely, or in the discipline's more standard terminology. Its name and statement then replace the
+  node's; the node's old statement stays as an alias.
+- NEVER rewrite to a broader, narrower, or different claim, a new angle on it, or a mere rewording of equal
+  quality — other sessions' arguments run through this node and must still hold. When in doubt, leave it out.
+
 Your deliverable is ONLY the identity verdicts: "links". NEVER restate the propositions —
 the merger already has them. You NEVER create relations between propositions — they come from the
 extractor alone, and the batch connects to the existing graph ONLY through the equivalences you identify. Your

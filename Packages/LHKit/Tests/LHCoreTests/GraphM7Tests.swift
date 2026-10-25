@@ -50,6 +50,16 @@ private func twoSessions() -> MemoryGraphStore {
 		#expect(try deleteChatTraces(s, chatId: "chat_a", mode: .deleteNodes) == ChatDeletionStats(), "idempotent")
 	}
 
+	@Test func deletingTheRevisingSessionRevertsTheNode() throws {
+		let s = twoSessions()
+		s.nodes.append(GraphNode(id: "n_x", name: "Core, precisely", statement: "The core, stated precisely", aliases: [], createdAt: "2026-09-24T00:00:00.000Z",
+			provenance: [ProvenancePoint(chatId: "chat_c", messageId: "")], revises: true))
+		#expect(getGraph(s).nodes.first { $0.id == "n_x" }?.statement == "The core, stated precisely")
+		try deleteChatTraces(s, chatId: "chat_c", mode: .deleteNodes)
+		let x = try #require(getGraph(s).nodes.first { $0.id == "n_x" })
+		#expect(x.name == "Shared core" && x.statement == "Shared core statement")
+	}
+
 	@Test func preserveGraphDropsOnlyTheBookkeeping() throws {
 		let s = twoSessions()
 		let (nodes, chains, positions) = (s.nodes, s.chains, s.positions)
@@ -203,6 +213,7 @@ private func twoSessions() -> MemoryGraphStore {
 		#expect(validateSessionAnchors(f, batchIds: ["t1"]) == nil)
 		#expect(validateSessionAnchors(f, batchIds: ["t2"])?.contains("not a passage of THIS stretch") == true)
 		#expect(decodeVerdicts(["links": [["id": "p1", "linkTo": "n_x"]]]) == AuditVerdicts(links: [IdentityLink(id: "p1", linkTo: "n_x")]))
+		#expect(decodeVerdicts(["links": [["id": "p1", "linkTo": "n_x", "rewrite": true]]]) == AuditVerdicts(links: [IdentityLink(id: "p1", linkTo: "n_x", rewrite: true)]))
 		#expect(notesSourceId(path: "/a/notes.md") != notesSourceId(path: "/b/notes.md"))
 		#expect(notesSourceId(path: "/a/notes.md").hasPrefix("src_") && notesSourceId(path: "/a/notes.md").count == 16)
 	}

@@ -78,13 +78,17 @@ public struct GraphNode: Sendable, Hashable, Codable {
 	public var aliases: [String]
 	public var createdAt: String
 	public var provenance: [ProvenancePoint]
-	public init(id: String, name: String, statement: String, aliases: [String], createdAt: String, provenance: [ProvenancePoint]) {
+	/// A link line that replaces the node's name and statement (the auditor's
+	/// rewrite verdict); absent on every other line.
+	public var revises: Bool?
+	public init(id: String, name: String, statement: String, aliases: [String], createdAt: String, provenance: [ProvenancePoint], revises: Bool? = nil) {
 		self.id = id
 		self.name = name
 		self.statement = statement
 		self.aliases = aliases
 		self.createdAt = createdAt
 		self.provenance = provenance
+		self.revises = revises
 	}
 }
 
@@ -154,9 +158,12 @@ public struct SessionFindings: Sendable, Hashable, Codable {
 public struct IdentityLink: Sendable, Hashable, Codable {
 	public var id: String
 	public var linkTo: String
-	public init(id: String, linkTo: String) {
+	/// The finding states the node's claim better: its name and statement replace the node's.
+	public var rewrite: Bool
+	public init(id: String, linkTo: String, rewrite: Bool = false) {
 		self.id = id
 		self.linkTo = linkTo
+		self.rewrite = rewrite
 	}
 }
 
