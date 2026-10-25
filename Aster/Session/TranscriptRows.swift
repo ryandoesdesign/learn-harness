@@ -118,6 +118,13 @@ func transcriptRows(native: [Message], view: [ViewMessage], streaming: Bool = fa
 					rows.append(TranscriptRow(id: id, kind: .planBlock(block)))
 				}
 			case .tool(let name) where ANSWERED_TOOLS.contains(name):
+				// The question's `message` is the reply he reads before it: prose, as any reply.
+				if let message = (part.input?["message"] ?? part.rawInput?["message"])?.stringValue, !message.jsTrimmed.isEmpty {
+					// The display repairs the question's own fields get (a double-escaped `\n`, math).
+					for (bi, block) in MarkdownCache.blocks(repairMathForDisplay(restoreLiteralNewlines(message))).enumerated() {
+						rows.append(TranscriptRow(id: "\(id)/m/b\(bi)", kind: .textBlock(block, anchor: nil)))
+					}
+				}
 				// Answered questions are records; open ones are cards where they were asked.
 				if part.state == .outputAvailable, let output = part.output, let answer = QuestionAnswerData(json: output) {
 					rows.append(TranscriptRow(id: id, kind: .answered(answer, input: part.input)))

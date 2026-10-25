@@ -137,6 +137,20 @@ private func hasLine(_ md: String?, _ line: String) -> Bool {
 		#expect(md == "# My session\n\n### Learner · u1\n\ngo\n\n### Teacher · a1\n\nFirst.")
 	}
 
+	@Test func aQuestionsMessageRendersAsTheTeachersReply() {
+		let call = Message(id: "a1", timestamp: 1, body: .assistant(AssistantBody(content: [
+			.toolUse(id: "q1", name: "quiz", input: ["message": "  Joins pair matching rows.  ", "question": "Which rows survive?"]),
+		], model: "claude-opus-5-5", stopReason: "tool_use")))
+		#expect(sessionMarkdown([call]) == "### Teacher · a1\n\nJoins pair matching rows.")
+	}
+
+	@Test func aDoubleEscapedMessageGetsItsNewlinesBack() {
+		let call = Message(id: "a1", timestamp: 1, body: .assistant(AssistantBody(content: [
+			.toolUse(id: "q1", name: "quiz", input: ["message": "Three steps:\\n\\n1. Sharpen.\\n2. Status.", "question": "Q?"]),
+		], model: "claude-opus-5-5", stopReason: "tool_use")))
+		#expect(sessionMarkdown([call]) == "### Teacher · a1\n\nThree steps:\n\n1. Sharpen.\n2. Status.")
+	}
+
 	@Test func noTitleNoHeaderAnchorsDefaultOn() {
 		#expect(sessionMarkdown([user("u1", "go")]) == "### Learner · u1\n\ngo")
 	}

@@ -37,7 +37,7 @@ public func quizMechanics(_ enabled: [String: Bool]?) -> QuizMechanics {
 /// research and pdf (every phase), the graph map (M7, gated), probe_done.
 public func proberTools(_ ctx: TeachingContext, enabled: [String: Bool]?, background: BackgroundWiring? = nil, graph: GraphToolDeps? = nil) -> [any AgentTool] {
 	let quizzing: any AgentTool = quizMechanics(enabled) == .free ? QuestionTool.recall : QuestionTool.probe
-	var tools: [any AgentTool] = [QuestionTool.ask]
+	var tools: [any AgentTool] = [QuestionTool.ask(ctx)]
 	if let background { tools += fileTools(background.files) + [DispatchTool.research(background), DispatchTool.pdf(background)] }
 	// M7: the persistent map, only while graphToolsEnabled (the caller gates).
 	if let graph { tools += proberGraphTools(graph) }
@@ -49,7 +49,7 @@ public func proberTools(_ ctx: TeachingContext, enabled: [String: Bool]?, backgr
 /// the file tools, plan_init, then the four job dispatch tools.
 public func teacherTools(_ ctx: TeachingContext, enabled: [String: Bool]?, background: BackgroundWiring? = nil) -> [any AgentTool] {
 	let quizzing: any AgentTool = quizMechanics(enabled) == .free ? QuestionTool.explain(ctx) : QuestionTool.quiz(ctx)
-	var tools: [any AgentTool] = [QuestionTool.ask]
+	var tools: [any AgentTool] = [QuestionTool.ask(ctx)]
 	if let background { tools += fileTools(background.files) }
 	tools.append(PlanInitTool(ctx: ctx))
 	if let background { tools += [DispatchTool.research(background), DispatchTool.demo(background), DispatchTool.visual(background), DispatchTool.pdf(background)] }
@@ -101,7 +101,9 @@ public struct QuestionTool: AgentTool {
 		case .explain:
 			problems = explainInputProblems(correctAnswer: v["correctAnswer"]?.stringValue ?? "")
 		}
-		if let ctx = nodeIdCtx, let problem = await nodeIdProblem(ctx, v["nodeId"]?.stringValue ?? "") { problems.append(problem) }
+		// ask_user_question's nodeId is optional: checked only when sent.
+		if let ctx = nodeIdCtx, kind != .ask || v["nodeId"] != nil,
+		   let problem = await nodeIdProblem(ctx, v["nodeId"]?.stringValue ?? "") { problems.append(problem) }
 		if !problems.isEmpty { return .invalidInput(tool: name, problems: problems) }
 		return .questionPosed
 	}
@@ -110,14 +112,18 @@ public struct QuestionTool: AgentTool {
 		QuizOptionInput(label: o["label"]?.stringValue ?? "", value: o["value"]?.stringValue, description: o["description"]?.stringValue)
 	}
 
-	public static let ask = QuestionTool(
+	/// One definition for the prober and the teacher (the handoff keeps shared
+	/// tools byte-identical); an optional nodeId is checked against the live map.
+	public static func ask(_ ctx: TeachingContext) -> QuestionTool {
+		QuestionTool(
 		name: "ask_user_question",
 		description:
 			"Ask the learner a single question and pause until they answer. NOT graded — there is no correct answer. " +
 			"Use when requirements are ambiguous, preferences are needed, a decision would materially affect the lesson, " +
 			"or you need an open-ended response. ONE question per turn: call a single ask_user_question, then end your " +
 			"turn — his answer determines the next.",
-		schema: askInputSchema, kind: .ask, nodeIdCtx: nil)
+		schema: askInputSchema, kind: .ask, nodeIdCtx: ctx)
+	}
 
 	public static let probe = QuestionTool(
 		name: "probe", description: quizDescription(name: "probe", nodeId: false, types: false),

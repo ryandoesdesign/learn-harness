@@ -9,6 +9,10 @@
 				"correctAnswer"
 			],
 			"properties": {
+				"message": {
+					"type": "string",
+					"description": "Your reply to him, shown as your normal message above the question: feedback on his last answer, the teaching or working that leads into it, anything he reads before answering. Write it here, not as text before the call: text before a tool call can be hidden from him."
+				},
 				"question": {
 					"type": "string",
 					"description": "The single question to ask. ONE question per turn: ask, then end your turn — the answer determines the next."
@@ -33,6 +37,14 @@
 				"question"
 			],
 			"properties": {
+				"message": {
+					"type": "string",
+					"description": "Your reply to him, shown as your normal message above the question: feedback on his last answer, the teaching or working that leads into it, anything he reads before answering. Write it here, not as text before the call: text before a tool call can be hidden from him."
+				},
+				"nodeId": {
+					"type": "string",
+					"description": "Optional plan-tree node id this question works on — an exercise or open question on that step. Must EXACTLY match one of this session's plan_init node slugs (validated at call time; a mismatched id, or one sent before there's a plan, is rejected back to you). Tag it so the map follows the lesson; leave it out for questions off the map (preferences, logistics)."
+				},
 				"question": {
 					"type": "string",
 					"description": "The single question to ask the learner. ONE question per turn: ask, then end your turn — the answer determines the next question."

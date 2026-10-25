@@ -66,6 +66,16 @@ import Testing
 		#expect(dockQuestion(tool: "quiz", toolCallId: "c3", input: ["question": "Q?"]) == nil, "malformed")
 	}
 
+	/// The skill a card names is its own tag's node — an untagged question
+	/// names none, even when the map has a current node (it can lag).
+	@Test func theCardNamesOnlyItsOwnNode() {
+		let plan = PlanTree(nodes: [PlanNode(id: "axes", title: "Choosing axes"), PlanNode(id: "worlds", title: "Building worlds")], edges: [], version: 1)
+		#expect(questionSkill(input: ["question": "Write one world.", "nodeId": "worlds"], plan: plan) == "Building worlds")
+		#expect(questionSkill(input: ["question": "Write one world."], plan: plan) == nil, "untagged: no guess")
+		#expect(questionSkill(input: ["question": "Q", "nodeId": "ghost"], plan: plan) == nil, "not on the plan")
+		#expect(questionSkill(input: ["question": "Q", "nodeId": "worlds"], plan: nil) == nil)
+	}
+
 	/// The reported bug: keys typed in the "Other…" field walked/toggled the
 	/// option rows. The field keeps its keys; Return submits.
 	@Test func theOtherFieldKeepsItsKeys() {

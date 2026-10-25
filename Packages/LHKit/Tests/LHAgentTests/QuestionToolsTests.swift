@@ -75,7 +75,18 @@ private func run(_ tool: any AgentTool, _ args: JSONValue) async throws -> ToolO
 		probe["options"] = .string(#"[{"label":"A","value":"a"},{"label":"B","value":"b"}]"#)
 		#expect(try await !run(QuestionTool.probe, probe).isError)
 		let ask: JSONValue = ["question": "Which?", "options": .string(#"[{"label":"X"},{"label":"Y"}]"#)]
-		#expect(try await !run(QuestionTool.ask, ask).isError)
+		#expect(try await !run(QuestionTool.ask(ctx(tree: nil)), ask).isError)
+	}
+
+	@Test func anAsksNodeIdIsOptionalButCheckedWhenSent() async throws {
+		var ask: JSONValue = ["question": "Write one full world.", "nodeId": "n3"]
+		#expect(try await !run(QuestionTool.ask(ctx(tree: tree)), ask).isError, "a node of the map")
+		ask["nodeId"] = "n99"
+		let wrong = try await run(QuestionTool.ask(ctx(tree: tree)), ask)
+		#expect(wrong.isError && wrong.content.first?.raw["text"]?.stringValue?.contains("n99") == true)
+		ask["nodeId"] = "n3"
+		#expect(try await run(QuestionTool.ask(ctx(tree: nil)), ask).isError, "no plan yet")
+		#expect(try await !run(QuestionTool.ask(ctx(tree: nil)), ["question": "Which pace suits you?"]).isError, "untagged needs no plan")
 	}
 	@Test func explainValidatesNodeIdAndTheCommitment() async throws {
 		let ok: JSONValue = ["type": "check", "nodeId": "n1", "question": "Why?", "correctAnswer": "Because of X, which implies Y."]

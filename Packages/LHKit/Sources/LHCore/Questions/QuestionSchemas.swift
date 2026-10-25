@@ -22,6 +22,14 @@ private let detailsSchema = JSONSchema.string(description:
 	"'1 H/H – because…'\"). Never teaching: cards, reference lists, definitions, recaps and explanations go in " +
 	"your reply's visible text, above the question.").optional()
 
+/// The reply he reads before the question, verbatim (Claude Opus 5.5 returns
+/// longer text written before a tool call as a thinking block he never sees).
+/// First in every question tool.
+private let messageProperty = JSONSchema.Property("message", .string(description:
+	"Your reply to him, shown as your normal message above the question: feedback on his last answer, the " +
+	"teaching or working that leads into it, anything he reads before answering. Write it here, not as text " +
+	"before the call: text before a tool call can be hidden from him.").optional())
+
 private let nodeIdSchema = JSONSchema.string(description:
 	"REQUIRED plan-tree node id this question is about — must EXACTLY match one of this session's " +
 	"plan_init node slugs (validated at call time; a mismatched id is rejected back to you). " +
@@ -30,9 +38,10 @@ private let nodeIdSchema = JSONSchema.string(description:
 	"one node for as many turns as the understanding needs — one reasoning step at a time, never rush forward. " +
 	"For off-map checks use ask_user_question.")
 
-/// The SHARED quiz authoring fields — everything except the teach pair. The
-/// explanation sits immediately BEFORE correctAnswer (owner, 2026-09-25).
-public let quizInputBase = JSONSchema.object(properties: [
+/// The SHARED quiz authoring fields — everything except the message and the
+/// teach pair. The explanation sits immediately BEFORE correctAnswer (owner,
+/// 2026-09-25).
+private let quizFields: [JSONSchema.Property] = [
 	.init("question", .string(description:
 		"The single quiz question to ask. ONE question per turn: ask, then end your turn — the answer determines the next question.")),
 	.init("options", .array(.object(properties: quizOptionProperties), minItems: 2, description:
@@ -53,7 +62,10 @@ public let quizInputBase = JSONSchema.object(properties: [
 		"Always pass the value, not a position number — this is self-checking and prevents miscounting. " +
 		"A value that matches no option fails validation and the call is returned to you to fix.")),
 	.init("details", detailsSchema),
-])
+]
+
+/// The probe-side quiz fields: the message, then the shared fields.
+public let quizInputBase = JSONSchema.object(properties: [messageProperty] + quizFields)
 
 /// The teaching-cycle role, shared VERBATIM by both teach quizzing tools.
 /// Bare words, never quoted (the quote-copy wobble).
@@ -63,12 +75,13 @@ private let predictCheckType = JSONSchema.union([.literal("predict"), .literal("
 	"collapsed); check = posed AFTER the step's teaching is complete (arrives collapsed behind the Check your " +
 	"understanding reveal). ONE question per turn either way.")
 
-/// The TEACH-side quiz: the required pair leads (glm-5.3 dropped trailing
-/// required fields), then the shared base.
+/// The TEACH-side quiz: the message, then the required pair (glm-5.3 dropped
+/// trailing required fields), then the shared fields.
 public let quizInputObject = JSONSchema.object(properties: [
+	messageProperty,
 	.init("type", predictCheckType),
 	.init("nodeId", nodeIdSchema),
-] + quizInputBase.properties)
+] + quizFields)
 
 /// The TEACHER's quiz declaration.
 public let quizInputSchema = quizInputObject
@@ -84,7 +97,7 @@ public let quizDisplayInputSchema = JSONSchema.object(properties: quizInputBase.
 
 /// The explain tool (free-recall quizzing): ONE committed answer, reasoning
 /// included, committed before the learner sees the question.
-public let explainInputBase = JSONSchema.object(properties: [
+private let explainFields: [JSONSchema.Property] = [
 	.init("question", .string(description:
 		"The single question to ask. ONE question per turn: ask, then end your turn — the answer determines the next.")),
 	.init("correctAnswer", .string(description:
@@ -93,21 +106,33 @@ public let explainInputBase = JSONSchema.object(properties: [
 		"text — never revise the commitment after seeing his words, and never mark a wrong answer right to be kind. " +
 		"It is shown to him on submit; your next reply grades the nuance of what he wrote.")),
 	.init("details", detailsSchema),
-])
+]
+
+public let explainInputBase = JSONSchema.object(properties: [messageProperty] + explainFields)
 
 /// The TEACH-side explain: the role + position pair leads, as for quiz.
 public let explainInputObject = JSONSchema.object(properties: [
+	messageProperty,
 	.init("type", predictCheckType),
 	.init("nodeId", nodeIdSchema),
-] + explainInputBase.properties)
+] + explainFields)
 
 /// The DISPLAY parse for persisted explain calls (the quiz display pattern).
 public let explainDisplayInputSchema = JSONSchema.object(properties: explainInputBase.properties + [
 	.init("type", JSONSchema.string().optional()),
 ])
 
+/// ask_user_question's optional plan tag: the map follows tagged asks too.
+private let askNodeIdSchema = JSONSchema.string(description:
+	"Optional plan-tree node id this question works on — an exercise or open question on that step. Must EXACTLY " +
+	"match one of this session's plan_init node slugs (validated at call time; a mismatched id, or one sent before " +
+	"there's a plan, is rejected back to you). Tag it so the map follows the lesson; leave it out for questions off " +
+	"the map (preferences, logistics).").optional()
+
 /// ask_user_question: no `mode` — inferred from whether options are present.
 public let askInputSchema = JSONSchema.object(properties: [
+	messageProperty,
+	.init("nodeId", askNodeIdSchema),
 	.init("question", .string(description:
 		"The single question to ask the learner. ONE question per turn: ask, then end your turn — the answer determines the next question.")),
 	.init("details", detailsSchema),

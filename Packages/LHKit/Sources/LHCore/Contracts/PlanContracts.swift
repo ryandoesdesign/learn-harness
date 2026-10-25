@@ -60,14 +60,15 @@ public func derivedNodeStatus(_ statuses: DerivedPlanStatuses, _ nodeId: String)
 }
 
 /// Position from CALLS, never from results (contracts/plan.ts
-/// derivePlanStatusesLh): quiz/explain calls tagged with a node id of the
-/// current tree, consecutive duplicates collapsed.
+/// derivePlanStatusesLh): quiz/explain/ask_user_question calls tagged with a
+/// node id of the current tree, consecutive duplicates collapsed.
 public func derivePlanStatuses(_ tree: PlanTree, _ messages: [Message]) -> DerivedPlanStatuses {
 	let ids = Set(tree.nodes.map(\.id))
 	var runs: [String] = []
 	for m in messages {
 		guard let a = m.assistant else { continue }
-		for call in a.toolUses where call.name == "quiz" || call.name == "explain" {
+		// A tagged ask_user_question (an exercise on a step) moves the map as checks do.
+		for call in a.toolUses where call.name == "quiz" || call.name == "explain" || call.name == "ask_user_question" {
 			guard let nodeId = call.input["nodeId"]?.stringValue, ids.contains(nodeId) else { continue }
 			if runs.last != nodeId { runs.append(nodeId) }
 		}

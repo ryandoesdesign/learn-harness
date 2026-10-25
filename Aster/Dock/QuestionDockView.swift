@@ -31,14 +31,9 @@ struct QuestionDockView: View {
 
 	enum Field: Hashable { case rows, other, learner }
 
-	/// The skill this question tests: its nodeId's title in the plan, else
-	/// the plan's current node (the last one a check or explain tested).
-	private var skill: String? {
-		guard let plan = session.plan else { return nil }
-		let id = input["nodeId"]?.stringValue.flatMap { id in plan.nodes.contains { $0.id == id } ? id : nil }
-			?? derivePlanStatuses(plan, session.record?.messages ?? []).current
-		return id.flatMap { id in plan.nodes.first { $0.id == id }?.title }
-	}
+	/// The skill this question tests: its own nodeId's title (an untagged
+	/// question names none — the map's node may already be behind).
+	private var skill: String? { questionSkill(input: input, plan: session.plan) }
 
 	var body: some View {
 		Group { card }
@@ -249,7 +244,7 @@ struct QuestionDockView: View {
 	private func learnerField(_ qd: QuestionData) -> some View {
 		let textMode = qd.mode == .text
 		VStack(alignment: .leading, spacing: 4) {
-			Eyebrow(asking ? "Your question" : textMode ? "Your answer" : "Your thinking")
+			// No label: the placeholder says what it's for, as in the composer.
 			ZStack(alignment: .topLeading) {
 				// The asked question is its own text: switching back restores the answer or thinking.
 				let binding = asking ? $askText : textMode ? $text : $thinking
@@ -272,7 +267,12 @@ struct QuestionDockView: View {
 						return .handled
 					}
 			}
-			.font(Theme.small)
+			.font(Theme.prose)
+			// The composer's box; the editor's own 5pt text inset makes up its 12pt padding.
+			.padding(.horizontal, 7)
+			.padding(.vertical, 10)
+			.background(RoundedRectangle(cornerRadius: 8).fill(Theme.card))
+			.overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.border))
 			// Text answers have no rows: asking is a link under the box.
 			if textMode {
 				Button(asking ? "Answer instead" : "Ask about it instead") {

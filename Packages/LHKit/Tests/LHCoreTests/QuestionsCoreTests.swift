@@ -49,8 +49,8 @@ private func quizData(kind: QuestionKind = .quiz, mode: QuestionMode = .singleSe
 			let keys = schema.properties.map(\.name)
 			#expect(keys.firstIndex(of: "explanation")! < keys.firstIndex(of: "correctAnswer")!)
 			#expect(keys == (schema == quizInputSchema
-				? ["type", "nodeId", "question", "options", "multiSelect", "explanation", "correctAnswer", "details"]
-				: ["question", "options", "multiSelect", "explanation", "correctAnswer", "details"]))
+				? ["message", "type", "nodeId", "question", "options", "multiSelect", "explanation", "correctAnswer", "details"]
+				: ["message", "question", "options", "multiSelect", "explanation", "correctAnswer", "details"]))
 		}
 	}
 }
@@ -476,11 +476,11 @@ private func quizData(kind: QuestionKind = .quiz, mode: QuestionMode = .singleSe
 
 @Suite struct QuestionsExplainContractTests {
 	@Test func hasOneAuthoringField() {
-		#expect(explainInputBase.properties.map(\.name) == ["question", "correctAnswer", "details"])
+		#expect(explainInputBase.properties.map(\.name) == ["message", "question", "correctAnswer", "details"])
 	}
 
-	@Test func theTeachObjectLeadsWithTheRequiredPair() {
-		#expect(explainInputObject.properties.map(\.name) == ["type", "nodeId"] + explainInputBase.properties.map(\.name))
+	@Test func theTeachObjectLeadsWithTheMessageThenTheRequiredPair() {
+		#expect(explainInputObject.properties.map(\.name) == ["message", "type", "nodeId"] + explainInputBase.properties.map(\.name).dropFirst())
 	}
 
 	@Test func anEmptyCommitmentIsTheOneAuthoringProblem() {

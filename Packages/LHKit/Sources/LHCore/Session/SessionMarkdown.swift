@@ -186,6 +186,11 @@ public func messageMarkdown(_ message: Message, _ mid: String, anchors: Bool = t
 		for text in textOf(u.content) { parts.append("### Learner\(anchor)\n\n\(text.jsTrimmed)") }
 	case .assistant(let a):
 		for text in textOf(a.content) { parts.append("### Teacher\(anchor)\n\n\(text.jsTrimmed)") }
+		// A question's `message` is the reply he read before it.
+		for call in a.toolUses where QUESTION_TOOLS.contains(call.name) {
+			// A double-escaped `\n` is healed as on screen.
+			if let message = trimmedString(call.input["message"]) { parts.append("### Teacher\(anchor)\n\n\(restoreLiteralNewlines(message))") }
+		}
 	case .toolResult(let r):
 		if r.isError { return nil } // retry context, not learning evidence
 		let (heading, body) = toolResultBody(r, ctx)

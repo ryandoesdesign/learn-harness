@@ -46,6 +46,17 @@ private func quiz(_ id: String, _ pieces: [ScriptedSSE.Piece]) -> ScriptedTransp
 		#expect(danglingQuestionOf([user("u0", "x")] + out.newMessages)?.toolCallId == "q1")
 	}
 
+	@Test func aQuestionCarryingItsMessagePasses() async throws {
+		// Opus 5.5 returns longer text before a call as a thinking block; the reply rides in `message`.
+		let t = ScriptedTransport([.sse(ScriptedSSE.message([
+			.thinking("plan", signature: "S1"), .thinking("Good — now the card.", signature: "S2"),
+			.toolUse(id: "q1", name: "quiz", json: #"{"message":"Here's the card.","question":"Why?"}"#),
+		], stopReason: "tool_use"))])
+		let out = await vettedLoop(t).run(history: [user("u0", "teach me")]) { _ in }
+		#expect(t.requests.count == 1)
+		#expect(danglingQuestionOf([user("u0", "x")] + out.newMessages)?.toolCallId == "q1")
+	}
+
 	@Test func oneThinkingBlockWithoutTextPasses() async throws {
 		let t = ScriptedTransport([quiz("q1", [.thinking("what do they know?", signature: "S1")])])
 		let out = await vettedLoop(t).run(history: [user("u0", "teach me")]) { _ in }

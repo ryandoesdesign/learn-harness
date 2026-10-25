@@ -122,6 +122,14 @@ private func quizCall(_ nodeId: String?, answered correct: Bool? = nil, tool nam
 		#expect(again.visited.isEmpty, "one correct answer on a does not finish it")
 	}
 
+	@Test func aTaggedAskMovesTheMapAnUntaggedOneDoesNot() {
+		let st = derivePlanStatuses(tree, quizCall("a", answered: true) + quizCall("b", tool: "ask_user_question"))
+		#expect(st.current == "b", "an exercise on b is the position")
+		#expect(st.visited == ["a"])
+		#expect(derivePlanStatuses(tree, quizCall("a") + quizCall(nil, tool: "ask_user_question")).current == "a")
+		#expect(derivePlanStatuses(tree, quizCall("c", tool: "probe")).current == nil, "only quiz, explain and ask carry a tag")
+	}
+
 	@Test func revisitsKeepBoth() {
 		let st = derivePlanStatuses(tree, quizCall("a", answered: true) + quizCall("b", answered: true) + quizCall("a"))
 		#expect(st.current == "a")

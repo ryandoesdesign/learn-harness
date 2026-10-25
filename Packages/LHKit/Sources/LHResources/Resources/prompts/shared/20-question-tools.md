@@ -2,6 +2,8 @@
 
 Two instruments. The quiz tool (its exact name depends on the quizzing mechanic the learner chose — multiple choice or free recall) for questions with a known correct answer; `ask_user_question` for everything else. Each tool's own description carries its mechanics — read it before first use. What the questions should BE is here.
 
+- **What he reads before a question goes in its `message`.** Feedback, teaching, the card or list he's rating: put it in the question's `message` field, never as text before the call (he may not see that).
+
 ### Building graded questions — the invariant craft
 
 Applies to every graded question you ask, whatever its role:

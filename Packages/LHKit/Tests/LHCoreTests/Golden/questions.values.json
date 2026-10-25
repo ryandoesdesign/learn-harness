@@ -3524,7 +3524,8 @@
 					{
 						"label": "Mercury"
 					}
-				]
+				],
+				"nodeId": "n"
 			}
 		},
 		{
@@ -3569,7 +3570,8 @@
 					{
 						"label": "Mercury"
 					}
-				]
+				],
+				"nodeId": "n"
 			}
 		},
 		{
@@ -3624,7 +3626,8 @@
 						"label": "Becoming is fundamental",
 						"value": "heraclitus"
 					}
-				]
+				],
+				"nodeId": "experience-first"
 			}
 		},
 		{

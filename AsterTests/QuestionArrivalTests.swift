@@ -36,6 +36,27 @@ import Testing
 		#expect(!s.waitsForReveal(tool: "ask_user_question", toolCallId: "q1", input: ["question": "x"]), "a probe-phase question shows open")
 	}
 
+	@Test func aQuestionsMessageIsProseJustBeforeItsCard() throws {
+		let s = try sessionWithQuestion(viewAtBottom: true)
+		// Double-escaped, as Opus sometimes sends it: the two paragraphs still split.
+		let input: JSONValue = ["message": "Good pick.\\n\\nNow the remaining forces.", "question": "Second?", "options": [["label": "A"], ["label": "B"]]]
+		try ChatRepository(s.database).append([
+			newAnswerResult(toolCallId: "q1", toolName: "ask_user_question", answer: dismissedAnswer(.ask, questionText: "Which join keeps every left row?"), now: 2),
+			Message(id: "a2", timestamp: 3, body: .assistant(AssistantBody(content: [.toolUse(id: "q2", name: "ask_user_question", input: input)], model: "claude-opus-5-5", stopReason: "tool_use"))),
+		], to: s.chatId)
+		s.load()
+		let tail = s.rows.suffix(3)
+		let kinds = tail.map { row -> String in
+			switch row.kind {
+			case .textBlock: "prose"
+			case .pendingQuestion(_, let id, _): "card \(id)"
+			default: "other"
+			}
+		}
+		#expect(kinds == ["prose", "prose", "card q2"])
+		#expect(tail.first.map { s.takesNotes($0.id) } == true, "its paragraphs take notes")
+	}
+
 	@Test func siblingsEachGetARowAndNoneShowWhileRunning() throws {
 		let s = try sessionWithQuestion(viewAtBottom: true)
 		let input: JSONValue = ["question": "Second?", "options": [["label": "A"], ["label": "B"]]]

@@ -35,6 +35,15 @@ public func dockQuestion(tool: String, toolCallId: String, input: JSONValue, now
 /// The dock's header label (question-dock.tsx): the tool's own name for the
 /// probe phase, the role for teach quizzes — then the skill it tests (the
 /// plan node's title), when it names one: "Check · Joins".
+/// The plan node a question names in its label: the title of its own
+/// `nodeId` when that node is on the plan, else nothing (never the map's
+/// current node — an untagged exercise can be on a step the map hasn't
+/// reached).
+public func questionSkill(input: JSONValue, plan: PlanTree?) -> String? {
+	guard let id = input["nodeId"]?.stringValue else { return nil }
+	return plan?.nodes.first { $0.id == id }?.title
+}
+
 public func dockLabel(tool: String, question: QuestionData, skill: String? = nil) -> String {
 	let kind: String
 	if tool == "probe" {

@@ -507,7 +507,7 @@ let questionStopper: @Sendable (Message, [(ToolUse, ToolOutput)]) -> Bool = { as
 }
 
 /// The hidden-reply rejection's result text (your wording).
-let HIDDEN_REPLY_TEXT = "Your reply had no visible text; the learner can't see thinking. Write it out, then ask again."
+let HIDDEN_REPLY_TEXT = "Your reply had no visible text; the learner can't see thinking. Put it in the question's `message`, then ask again."
 
 /// A question whose reply went into thinking: no visible text and two or
 /// more thinking blocks (the model wrote the learner's explanation into a
@@ -518,7 +518,9 @@ let hiddenReplyVetter: @Sendable (Message, [Message]) -> [String: ToolOutput] = 
 	guard let a = assistant.assistant else { return [:] }
 	let questions = a.toolUses.filter { QUESTION_TOOLS.contains($0.name) }
 	guard !questions.isEmpty else { return [:] }
+	// A question's `message` is the reply he reads (text before a call can come back as thinking).
 	let visible = a.content.contains { $0.type == "text" && !($0.raw["text"]?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+		|| questions.contains { !($0.input["message"]?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 	guard !visible, a.content.filter({ $0.type == "thinking" }).count >= 2 else { return [:] }
 	let rejectedBefore = earlier.contains { m in
 		guard let r = m.toolResult, r.isError else { return false }
