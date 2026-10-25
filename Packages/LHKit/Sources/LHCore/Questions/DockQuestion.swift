@@ -33,15 +33,23 @@ public func dockQuestion(tool: String, toolCallId: String, input: JSONValue, now
 }
 
 /// The dock's header label (question-dock.tsx): the tool's own name for the
-/// probe phase, the role for teach quizzes.
-public func dockLabel(tool: String, question: QuestionData) -> String {
-	if tool == "probe" { return "Probe" }
-	if tool == "recall" { return "Recall" }
-	switch question.kind {
-	case .quiz: return question.questionType == .predict ? "Prediction" : "Check"
-	case .explain: return "Explain"
-	case .ask: return "Question"
+/// probe phase, the role for teach quizzes — then the skill it tests (the
+/// plan node's title), when it names one: "Check · Joins".
+public func dockLabel(tool: String, question: QuestionData, skill: String? = nil) -> String {
+	let kind: String
+	if tool == "probe" {
+		kind = "Probe"
+	} else if tool == "recall" {
+		kind = "Recall"
+	} else {
+		switch question.kind {
+		case .quiz: kind = question.questionType == .predict ? "Prediction" : "Check"
+		case .explain: kind = "Explain"
+		case .ask: kind = "Question"
+		}
 	}
+	guard let skill = skill?.trimmingCharacters(in: .whitespacesAndNewlines), !skill.isEmpty else { return kind }
+	return "\(kind) · \(skill)"
 }
 
 extension ISO8601DateFormatter {

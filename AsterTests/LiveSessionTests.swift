@@ -64,6 +64,11 @@ import Testing
 		let explain = try #require(dockQuestion(tool: "recall", toolCallId: "c2", input: ["question": "Why?", "correctAnswer": "Because."]))
 		#expect(explain.mode == .text && explain.committedAnswer == "Because.")
 		#expect(dockLabel(tool: "recall", question: explain) == "Recall")
+		// The skill it tests follows the kind; none (or blank) leaves the kind.
+		#expect(dockLabel(tool: "quiz", question: q1, skill: "Joins") == "Prediction · Joins")
+		#expect(dockLabel(tool: "recall", question: explain, skill: "Indexes") == "Recall · Indexes")
+		#expect(dockLabel(tool: "quiz", question: q1, skill: nil) == "Prediction")
+		#expect(dockLabel(tool: "quiz", question: q1, skill: "  ") == "Prediction")
 		#expect(dockQuestion(tool: "quiz", toolCallId: "c3", input: ["question": "Q?"]) == nil, "malformed")
 	}
 

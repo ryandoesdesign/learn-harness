@@ -25,9 +25,18 @@ struct QuestionDockView: View {
 
 	enum Field: Hashable { case rows, other, learner }
 
+	/// The skill this question tests: its nodeId's title in the plan, else
+	/// the plan's current node (the last one a check or explain tested).
+	private var skill: String? {
+		guard let plan = session.plan else { return nil }
+		let id = input["nodeId"]?.stringValue.flatMap { id in plan.nodes.contains { $0.id == id } ? id : nil }
+			?? derivePlanStatuses(plan, session.record?.messages ?? []).current
+		return id.flatMap { id in plan.nodes.first { $0.id == id }?.title }
+	}
+
 	var body: some View {
 		if let qd = dockQuestion(tool: tool, toolCallId: toolCallId, input: input) {
-			let label = dockLabel(tool: tool, question: qd)
+			let label = dockLabel(tool: tool, question: qd, skill: skill)
 			if !session.dockExpanded || !session.revealed {
 				DockBar(reveal: session.requiresReveal && !session.revealed, label: label, question: qd.question) { session.expandDock() }
 			} else {
@@ -51,6 +60,7 @@ struct QuestionDockView: View {
 		return VStack(alignment: .leading, spacing: 10) {
 			HStack {
 				Eyebrow(label + (qd.mode == .multiSelect ? " · select all that apply" : ""))
+					.lineLimit(1)
 				Spacer()
 				Button { session.dockExpanded = false } label: { Image(systemName: "chevron.down") }
 					.buttonStyle(.borderless)

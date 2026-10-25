@@ -6,8 +6,7 @@ import SwiftUI
 
 /// The pinned dock (docs/native-macos-m5.md: pinned below the transcript,
 /// folds on demand, never on scroll): queued steers, the reading-thinking
-/// field, then the question dock or the composer. Plan marginalia sits to
-/// its right when a question waits and the window is wide enough.
+/// field, then the question dock or the composer.
 struct DockView: View {
 	@Bindable var session: SessionModel
 	@Environment(\.openSettings) private var openSettings
@@ -56,11 +55,6 @@ struct DockView: View {
 		.padding(.horizontal, 16)
 		.padding(.bottom, 10)
 		.frame(maxWidth: .infinity)
-		.overlay(alignment: .bottomTrailing) {
-			if session.pending != nil, session.plan != nil, session.dockExpanded {
-				PlanMarginalia(session: session)
-			}
-		}
 	}
 }
 
@@ -176,7 +170,7 @@ struct DockBar: View {
 					HStack(spacing: 2) { Text("Open"); Image(systemName: "chevron.right") }
 						.font(Theme.uiMedium).foregroundStyle(Color.accentColor)
 				} else {
-					Eyebrow(label)
+					Eyebrow(label).lineLimit(1)
 					Text(teaserText(question)).font(Theme.small).foregroundStyle(Theme.muted).lineLimit(1)
 					Spacer(minLength: 8)
 					HStack(spacing: 2) { Text("Answer"); Image(systemName: "arrow.down") }.font(Theme.uiMedium)
@@ -241,36 +235,6 @@ struct ReadingThinkingField: View {
 		.padding(.horizontal, 12)
 		.padding(.vertical, 8)
 		.background(RoundedRectangle(cornerRadius: 12).fill(Theme.card.opacity(0.6)))
-	}
-}
-
-/// plan-window.tsx PlanMarginalia: the plan beside the dock while a
-/// question waits (wide windows only); a click opens the plan popup.
-struct PlanMarginalia: View {
-	var session: SessionModel
-	var body: some View {
-		GeometryReader { geo in
-			let flank = (geo.size.width - DockView.width) / 2 - 16
-			if flank >= 220, let tree = session.plan {
-				let layout = planLayout(tree.nodes.map { PlanLayoutNode(id: $0.id, title: $0.title) }, tree.edges)
-				let statuses = derivePlanStatuses(tree, session.record?.messages ?? [])
-				let w = layout.width + 2 * PLAN_GRAPH_PAD
-				let h = layout.height + 2 * PLAN_GRAPH_PAD
-				let scale = min((flank - 16) / w, 160 / h, 1)
-				Button {
-					session.overlays.openPlan()
-				} label: {
-					PlanCanvas(layout: layout, status: { derivedNodeStatus(statuses, $0) }, current: statuses.current, zoom: scale)
-						.frame(width: w * scale, height: h * scale)
-				}
-				.buttonStyle(.plain)
-				.help("Open the plan")
-				.frame(width: flank, height: geo.size.height, alignment: .bottomLeading)
-				.offset(x: geo.size.width - flank - 4)
-			}
-		}
-		.frame(height: 170)
-		.allowsHitTesting(true)
 	}
 }
 
