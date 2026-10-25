@@ -222,6 +222,54 @@ func answer(_ text: String = "What does SQL stand for?") -> QuestionAnswerData {
 		#expect(last["content"]?.arrayValue?.compactMap { $0["tool_use_id"]?.stringValue } == ["c1", "c2"], "results adjacent, in call order")
 	}
 
+	@Test func askingAboutAQuestionRepliesThenReposesIt() async throws {
+		let h = try Harness([
+			.sse(ScriptedSSE.message([.text("Let's see."), tool("c1", "probe", probeInput)], stopReason: "tool_use")),
+			.sse(ScriptedSSE.message([.text("SQL is a language for databases.")])),
+			.sse(ScriptedSSE.message([.text("Right.")])),
+		])
+		let ev = await h.service.events()
+		try await h.service.send(h.chatId, .text("go"))
+		try await settles(ev, h.chatId)
+		let ev2 = await h.service.events()
+		#expect(try await h.service.send(h.chatId, .discuss(toolCallId: "c1", text: "What's SQL for?")) == .started)
+		try await settles(ev2, h.chatId)
+		var r = try h.record
+		#expect(r.messages.map(\.role) == [.user, .assistant, .toolResult, .user, .assistant, .assistant])
+		#expect(danglingQuestionOf(r.messages)?.toolCallId == "rp1_c1", "the question is open again")
+		let sent = try #require(h.request(1)["messages"]?.arrayValue?.last?["content"]?.arrayValue)
+		#expect(sent.first?["type"]?.stringValue == "tool_result" && sent.last?["text"]?.stringValue == "What's SQL for?")
+
+		// The answer goes to the re-posed call. On the wire the reply and the re-pose are adjacent
+		// assistant messages (the API combines them into one turn, as for the practice dismissal's conclude).
+		let ev3 = await h.service.events()
+		#expect(try await h.service.send(h.chatId, .answer(toolCallId: "rp1_c1", answer: answer())) == .started)
+		try await settles(ev3, h.chatId)
+		let msgs = try #require(h.request(2)["messages"]?.arrayValue)
+		#expect(msgs.map { $0["role"]?.stringValue ?? "" } == ["user", "assistant", "user", "assistant", "assistant", "user"])
+		#expect(msgs[3]["content"]?.arrayValue?.map { $0["type"]?.stringValue ?? "" } == ["text"])
+		#expect(msgs[4]["content"]?.arrayValue?.map { $0["id"]?.stringValue ?? "" } == ["rp1_c1"])
+		#expect(msgs[5]["content"]?.arrayValue?.first?["tool_use_id"]?.stringValue == "rp1_c1")
+		r = try h.record
+		#expect(danglingQuestionOf(r.messages) == nil)
+	}
+
+	@Test func anAbortedReplyStillReposesTheQuestion() async throws {
+		let h = try Harness([
+			.sse(ScriptedSSE.message([tool("c1", "probe", probeInput)], stopReason: "tool_use")),
+			.sseThenHang(ScriptedSSE.message([.text("A long partial reply")]), afterLines: 12),
+		])
+		let ev = await h.service.events()
+		try await h.service.send(h.chatId, .text("go"))
+		try await settles(ev, h.chatId)
+		let ev2 = await h.service.events()
+		try await h.service.send(h.chatId, .discuss(toolCallId: "c1", text: "Hm?"))
+		try await Task.sleep(for: .milliseconds(100))
+		await h.service.abort(h.chatId)
+		try await settles(ev2, h.chatId)
+		#expect(danglingQuestionOf(try h.record.messages)?.toolCallId == "rp1_c1")
+	}
+
 	@Test func probeDoneHandsOffToTheTeacher() async throws {
 		let assessment: JSONValue = ["assessment": ["strands": [["strand": "SQL basics", "assessment": "Knows SELECT."]], "summary": "Ready."]]
 		let h = try Harness([

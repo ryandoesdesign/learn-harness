@@ -360,6 +360,11 @@ public actor TurnService {
 		{
 			try? repo.append(appends, to: chatId)
 		}
+		// A question set aside to ask about it comes back once the teacher has replied.
+		if let record = (try? repo.get(chatId)) ?? nil {
+			let reposed = reposeAppends(record.messages)
+			if !reposed.isEmpty { try? repo.append(reposed, to: chatId) }
+		}
 		// Steers the loop never drained (a question stop, an abort) leave the
 		// engine's queue and go back to pending — the outbox re-hands them.
 		_ = await coordinator.engine(for: chatId).steering.drain()

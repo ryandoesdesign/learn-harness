@@ -273,6 +273,8 @@ public struct QuestionAnswerData: Sendable, Hashable {
 	public var committed: String?
 	public var explanation: String?
 	public var dismissed: Bool?
+	/// Set aside to ask about it (Discuss.swift): not an answer, never graded.
+	public var discussed: Bool?
 	public var answeredAt: String
 
 	public init(kind: QuestionKind, questionText: String, dontKnow: Bool, answers: [OptionAnswer], answeredAt: String) {
@@ -314,6 +316,7 @@ public struct QuestionAnswerData: Sendable, Hashable {
 		committed = json["committed"]?.stringValue
 		explanation = json["explanation"]?.stringValue
 		dismissed = json["dismissed"]?.boolValue
+		discussed = json["discussed"]?.boolValue
 	}
 
 	/// The record JSON, keyed in the TS construction order.
@@ -329,6 +332,7 @@ public struct QuestionAnswerData: Sendable, Hashable {
 		if let note { o["note"] = .string(note) }
 		if let readingThinking { o["readingThinking"] = .string(readingThinking) }
 		if let dismissed { o["dismissed"] = .bool(dismissed) }
+		if let discussed { o["discussed"] = .bool(discussed) }
 		o["answeredAt"] = .string(answeredAt)
 		if let other { o["other"] = .string(other) }
 		if let text { o["text"] = .string(text) }
@@ -616,6 +620,13 @@ public func dismissedAnswer(_ kind: QuestionKind, questionText: String, now: Int
 	return ad
 }
 
+/// The set-aside record (Discuss.swift): the model sees `{kind, discussed: true, note}`.
+public func discussedAnswer(_ kind: QuestionKind, questionText: String, now: Int = MessageID.nowMillis()) -> QuestionAnswerData {
+	var ad = QuestionAnswerData(kind: kind, questionText: questionText, dontKnow: false, answers: [], answeredAt: isoTimestamp(now))
+	ad.discussed = true
+	return ad
+}
+
 /// The MODEL-VISIBLE answer (tool-result diet, 2026-10-02): only what the
 /// learner added — selection or words, verdict, confidence, the two thinking
 /// channels. Everything the model authored already rides the call. Reads any
@@ -625,6 +636,11 @@ public func compactAnswerForModel(_ ad: JSONValue) -> JSONObject {
 	out["kind"] = ad["kind"]
 	if ad["dismissed"]?.isTruthy == true {
 		out["dismissed"] = true
+		return out
+	}
+	if ad["discussed"]?.isTruthy == true {
+		out["discussed"] = true
+		out["note"] = .string(DISCUSSED_NOTE)
 		return out
 	}
 	let dontKnow = ad["dontKnow"]?.isTruthy == true

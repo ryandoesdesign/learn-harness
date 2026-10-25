@@ -14,7 +14,7 @@ public func dockQuestion(tool: String, toolCallId: String, input: JSONValue, now
 	switch kind {
 	case .quiz:
 		guard let quiz = parseQuizInput(input), let options = try? normalizeOptions(quiz.options) else { return nil }
-		let ordered = options.isEmpty ? options : shuffleOptions(options, rand: seededRandom(toolCallId))
+		let ordered = options.isEmpty ? options : shuffleOptions(options, rand: seededRandom(reposeOrigin(toolCallId)))
 		var q = QuestionData(id: toolCallId, kind: .quiz, questionType: normalizeQuizType(input["type"]), question: quiz.question,
 			context: quiz.details, mode: quiz.multiSelect == true ? .multiSelect : .singleSelect, options: ordered, createdAt: createdAt)
 		q.correctIndices = resolveCorrect(quiz.correctAnswer, options: ordered).indices

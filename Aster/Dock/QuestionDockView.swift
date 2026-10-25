@@ -35,6 +35,19 @@ struct QuestionDockView: View {
 	}
 
 	var body: some View {
+		Group { card }
+			// A card set aside to ask about it comes back as it was left.
+			.onAppear {
+				guard let d = session.cardDrafts.removeValue(forKey: reposeOrigin(toolCallId)) else { return }
+				(sel, thinking, other, text, confIdx) = (d.sel, d.thinking, d.other, d.text, d.confIdx)
+			}
+			.onDisappear {
+				guard session.discussedOrigin == reposeOrigin(toolCallId) else { return }
+				session.cardDrafts[reposeOrigin(toolCallId)] = QuestionCardDraft(sel: sel, thinking: thinking, other: other, text: text, confIdx: confIdx)
+			}
+	}
+
+	@ViewBuilder private var card: some View {
 		if let qd = dockQuestion(tool: tool, toolCallId: toolCallId, input: input) {
 			let label = dockLabel(tool: tool, question: qd, skill: skill)
 			if !session.dockExpanded || !session.revealed {
@@ -315,4 +328,13 @@ struct HuggingScroll<Content: View>: View {
 		}
 		.frame(height: min(height ?? maxHeight, maxHeight))
 	}
+}
+
+/// A question card's unsent state (SessionModel.cardDrafts).
+struct QuestionCardDraft {
+	var sel: DockSelection
+	var thinking: String
+	var other: String
+	var text: String
+	var confIdx: Int
 }

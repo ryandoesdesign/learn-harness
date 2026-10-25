@@ -61,6 +61,11 @@ final class SessionModel {
 	var revealed = true
 	var readingThinking = ""
 	var lastPendingId: String?
+	/// The question set aside to ask about it (its origin call id): its re-posed copy arrives open.
+	var discussedOrigin: String?
+	/// What the learner had started in a question card, by origin call id — a set-aside card leaves
+	/// the dock while the teacher replies and gets it back when it's re-posed.
+	var cardDrafts: [String: QuestionCardDraft] = [:]
 	// Practice (M8): the dock's thinking draft and fold.
 	var practiceThinking = ""
 	var problemDockExpanded = true

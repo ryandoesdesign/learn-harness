@@ -42,7 +42,9 @@ struct DockView: View {
 					ReadingThinkingField(text: $session.readingThinking, onOpenCheck: { session.expandDock() }, checkOpen: session.revealed && session.dockExpanded)
 				}
 				QuestionDockView(session: session, tool: p.tool, toolCallId: p.toolCallId, input: p.input)
-					.id(p.toolCallId)
+					.id(reposeOrigin(p.toolCallId))
+				// Asking about the question instead of answering it (it stays open).
+				ComposerView(session: session)
 			} else if let problem = session.activeProblem {
 				// Practice (M8): the problem replaces the composer while it's active.
 				PracticeDockView(session: session, problem: problem)
@@ -71,7 +73,7 @@ struct ComposerView: View {
 	var body: some View {
 		let action = enterAction(busy: session.busy, canSend: session.canSend, nextProblem: session.nextReady)
 		HStack(alignment: .bottom, spacing: 8) {
-			TextField("", text: $session.draft, prompt: Text(session.compacting ? "Compacting session…" : session.nextReady ? "Ask anything, or press Enter for the next one." : "Ask, answer, or steer the lesson…"), axis: .vertical)
+			TextField("", text: $session.draft, prompt: Text(session.compacting ? "Compacting session…" : session.pending != nil ? "Ask about the question…" : session.nextReady ? "Ask anything, or press Enter for the next one." : "Ask, answer, or steer the lesson…"), axis: .vertical)
 				.textFieldStyle(.plain)
 				.focused($focused)
 				.dictationTarget("composer", .composer, text: $session.draft)
@@ -110,7 +112,8 @@ struct ComposerView: View {
 		}
 		.background(RoundedRectangle(cornerRadius: 8).fill(Theme.card))
 		.overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Theme.border))
-		.onAppear { focused = true }
+		// An open question keeps the focus; the composer under it is for asking about it.
+		.onAppear { if session.pending == nil { focused = true } }
 	}
 
 	private func send() {

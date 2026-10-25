@@ -37,4 +37,24 @@ import Testing
 		let s = try sessionWithQuestion(viewAtBottom: true)
 		#expect(s.dockExpanded)
 	}
+
+	@Test func withAQuestionOpenTheComposerAsksAboutIt() throws {
+		let s = try sessionWithQuestion(viewAtBottom: true)
+		s.draft = "What's a left row?"
+		#expect(s.pending != nil && s.canSend, "the composer sends while the question is open")
+	}
+
+	@Test func aReposedQuestionArrivesOpenEvenWhileReadingAbove() throws {
+		let s = try sessionWithQuestion(viewAtBottom: false)
+		let record = try #require(s.record)
+		var appends = try inputAppends(record.messages, kind: nil, .discuss(toolCallId: "q1", text: "What's a left row?"), now: 2)
+		appends.append(Message(id: "a2", timestamp: 3, body: .assistant(AssistantBody(content: [.text("The table named first.")], model: "claude-opus-5-5", stopReason: "stop"))))
+		appends += reposeAppends(record.messages + appends, now: 4)
+		try ChatRepository(s.database).append(appends, to: s.chatId)
+		s.discussedOrigin = "q1"
+		s.load()
+		#expect(s.pending?.toolCallId == "rp1_q1")
+		#expect(s.dockExpanded && s.revealed, "it picks up where you left it")
+		#expect(s.discussedOrigin == nil)
+	}
 }

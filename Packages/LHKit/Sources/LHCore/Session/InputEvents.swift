@@ -9,6 +9,8 @@ import Foundation
 public enum ChatInput: Sendable, Hashable {
 	case text(String)
 	case answer(toolCallId: String, answer: QuestionAnswerData)
+	/// A message about the open question instead of an answer (Discuss.swift).
+	case discuss(toolCallId: String, text: String)
 	case `continue`
 	/// Practice (M8): the learner's thinking on the active problem.
 	case thinking(problemCallId: String, text: String)
@@ -40,6 +42,8 @@ public func inputAppends(_ messages: [Message], kind: ChatKind?, _ input: ChatIn
 			throw ChatInputError("answer input targets no pending question call")
 		}
 		return [newAnswerResult(toolCallId: toolCallId, toolName: pending.tool, answer: answer, now: now)]
+	case .discuss(let toolCallId, let text):
+		return try discussAppends(messages, toolCallId: toolCallId, text: text, now: now)
 	case .continue:
 		return dismissalConclusion(messages, now: now)
 	case .thinking(let problemCallId, let text):

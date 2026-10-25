@@ -325,8 +325,8 @@ struct AnsweredCard: View {
 	@Environment(SessionModel.self) private var session
 
 	var body: some View {
-		if answer.dismissed == true {
-			(Text(answer.questionText).fontWeight(.medium) + Text(" — skipped"))
+		if answer.dismissed == true || answer.discussed == true {
+			(Text(answer.questionText).fontWeight(.medium) + Text(answer.discussed == true ? " — asked about it" : " — skipped"))
 				.font(Theme.small)
 				.foregroundStyle(Theme.muted)
 				.card()

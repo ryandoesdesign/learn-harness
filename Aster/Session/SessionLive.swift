@@ -37,8 +37,8 @@ extension SessionModel {
 		return hasPosedProblem(record.messages)
 	}
 
-	/// TS canSend: text present, no pending question, not compacting.
-	var canSend: Bool { !draft.jsTrimmed.isEmpty && pending == nil && !compacting }
+	/// TS canSend: text present, not compacting. With a question open, the text asks about it.
+	var canSend: Bool { !draft.jsTrimmed.isEmpty && !compacting }
 
 	// MARK: Open / follow
 
@@ -107,12 +107,33 @@ extension SessionModel {
 
 	// MARK: Actions
 
-	/// The composer's send: a steer while busy, otherwise a turn.
+	/// The composer's send: a steer while busy, a message about the open
+	/// question when one is open, otherwise a turn.
 	func sendDraft() {
 		let text = draft
 		guard !text.jsTrimmed.isEmpty, service != nil else { return }
 		draft = ""
-		sendText(text)
+		if let p = pending { discuss(text, toolCallId: p.toolCallId) } else { sendText(text) }
+	}
+
+	/// Ask about the open question instead of answering it: it is set aside,
+	/// the teacher replies, and it comes back open (Discuss.swift).
+	private func discuss(_ text: String, toolCallId: String) {
+		guard let service else { return }
+		errorText = nil
+		needsKey = false
+		discussedOrigin = reposeOrigin(toolCallId)
+		status = .submitted
+		Task {
+			do {
+				try await service.send(chatId, .discuss(toolCallId: toolCallId, text: text))
+				follow()
+			} catch {
+				status = .idle
+				discussedOrigin = nil
+				refused(error, draft: text)
+			}
+		}
 	}
 
 	/// Send `text` as the learner (the composer, the demo chip's "Send to
@@ -280,7 +301,15 @@ extension SessionModel {
 		// turn actually runs (or the sibling arrives).
 		if id == nil, status == .submitted { return }
 		lastPendingId = id
-		guard id != nil else { return }
+		guard let id else { return }
+		// A re-posed question picks up where the learner left it: open, reading thinking kept.
+		if reposeOrigin(id) == discussedOrigin {
+			discussedOrigin = nil
+			dockExpanded = true
+			revealed = true
+			return
+		}
+		discussedOrigin = nil
 		// The view's real position (your rule): reading content that grew past
 		// the window means not at the bottom, even while following is sticky.
 		let arrival = questionArrival(atBottom: viewAtBottom)

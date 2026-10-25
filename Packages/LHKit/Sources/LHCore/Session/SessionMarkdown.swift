@@ -117,6 +117,8 @@ private func toolResultBody(_ result: ToolResultBody, _ ctx: MarkdownContext?) -
 		var body = ["**Q:** \(question)"]
 		if out?["dismissed"]?.boolValue == true {
 			body.append("The learner skipped this check.")
+		} else if out?["discussed"]?.boolValue == true {
+			body.append("The learner asked about this check instead of answering it.")
 		} else if out?["dontKnow"]?.boolValue == true {
 			body.append("The learner did not know.")
 		} else if out?["correct"]?.boolValue == true {
@@ -162,6 +164,8 @@ private func toolResultBody(_ result: ToolResultBody, _ ctx: MarkdownContext?) -
 			body.append("The learner chose: \(chosen.joined(separator: ", "))")
 		} else if out?["dismissed"]?.boolValue == true {
 			body.append("The learner skipped this question.")
+		} else if out?["discussed"]?.boolValue == true {
+			body.append("The learner asked about this question instead of answering it.")
 		}
 		if let note = nonEmptyString(out?["note"]) { body.append("*(his thinking: \(note))*") }
 		return ("Question", body)
